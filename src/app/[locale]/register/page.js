@@ -4,12 +4,12 @@ import * as React from "react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import { useTranslations } from "next-intl";
+import { Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/auth-layout";
 import { FormField } from "@/components/form-field";
 import { PrimaryButton } from "@/components/primary-button";
-import { GoogleButton } from "@/components/google-button";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -32,8 +32,10 @@ export default function RegisterPage() {
   const [name, setName] = React.useState("");
   const [identifier, setIdentifier] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
   const [avatar, setAvatar] = React.useState("male");
   const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [googleLoading, setGoogleLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
@@ -45,6 +47,7 @@ export default function RegisterPage() {
     if (!identifier.trim()) next.identifier = method === "email" ? "ইমেইল লিখুন।" : "ফোন নম্বর লিখুন।";
     const pwIssue = passwordIssue(password);
     if (pwIssue) next.password = pwIssue;
+    if (password !== confirmPassword) next.confirmPassword = "পাসওয়ার্ড মিলছে না।";
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -87,34 +90,6 @@ export default function RegisterPage() {
     }
   }
 
-  const googleLogin = useGoogleLogin({
-    flow: "auth-code",
-    onSuccess: async (codeResponse) => {
-      setGoogleLoading(true);
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/google`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: codeResponse.code }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          setFormError(data?.message || "Google দিয়ে সাইনআপ ব্যর্থ হয়েছে।");
-          return;
-        }
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          window.location.href = "/";
-        }
-      } catch {
-        setFormError("Google সাইনআপে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
-      } finally {
-        setGoogleLoading(false);
-      }
-    },
-    onError: () => setFormError("Google সাইনআপ বাতিল হয়েছে।"),
-  });
-
   return (
     <AuthLayout
       eyebrow={tAuth("registerEyebrow")}
@@ -152,7 +127,7 @@ export default function RegisterPage() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
+      <form onSubmit={handleSubmit} className="space-y-3" noValidate>
         {/* Avatar Selector Inline */}
         <div className="flex items-center justify-between rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-2 dark:border-white/5 dark:bg-white/5">
           <label className="text-[13px] font-medium text-stone-700 dark:text-rose-100/80">
@@ -164,18 +139,19 @@ export default function RegisterPage() {
                 type="button"
                 key={key}
                 onClick={() => setAvatar(key)}
-                className={`rounded-full p-0.5 transition cursor-pointer ${
+                className={`relative rounded-full p-0.5 transition cursor-pointer bg-white dark:bg-white/10 ${
                   avatar === key
-                    ? "ring-2 ring-rose-500 scale-105"
-                    : "opacity-60 hover:opacity-100"
+                    ? "ring-2 ring-rose-500 scale-105 opacity-100"
+                    : "opacity-80 hover:opacity-100 ring-1 ring-stone-200 dark:ring-white/20"
                 }`}
               >
                 <Image
                   src={src}
                   alt={key}
-                  width={40}
-                  height={40}
-                  className="rounded-full"
+                  width={38}
+                  height={38}
+                  unoptimized
+                  className="rounded-full object-cover"
                 />
               </button>
             ))}
@@ -216,10 +192,33 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
-              className="text-[12px] font-medium text-stone-400 hover:text-rose-500 cursor-pointer"
+              className="text-stone-400 hover:text-rose-500 cursor-pointer p-1 transition-colors flex items-center justify-center"
               tabIndex={-1}
+              aria-label={showPassword ? tAuth("hide") : tAuth("show")}
             >
-              {showPassword ? tAuth("hide") : tAuth("show")}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          }
+        />
+
+        <FormField
+          id="confirmPassword"
+          label={tAuth("confirmPasswordLabel")}
+          type={showConfirmPassword ? "text" : "password"}
+          placeholder={tAuth("confirmPasswordPlaceholder")}
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          error={errors.confirmPassword}
+          autoComplete="new-password"
+          rightSlot={
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((s) => !s)}
+              className="text-stone-400 hover:text-rose-500 cursor-pointer p-1 transition-colors flex items-center justify-center"
+              tabIndex={-1}
+              aria-label={showConfirmPassword ? tAuth("hide") : tAuth("show")}
+            >
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           }
         />
@@ -239,13 +238,44 @@ export default function RegisterPage() {
         </p>
       </form>
 
-      <div className="my-4 flex items-center gap-3">
+      <div className="my-3 flex items-center gap-3">
         <div className="h-px flex-1 bg-stone-200 dark:bg-white/10" />
         <span className="text-[12px] text-stone-400 dark:text-rose-100/40">{tAuth("or")}</span>
         <div className="h-px flex-1 bg-stone-200 dark:bg-white/10" />
       </div>
 
-      <GoogleButton onClick={() => googleLogin()} label={tAuth("signUpGoogle")} loading={googleLoading} />
+      <div className="flex justify-center w-full">
+        <GoogleLogin
+          onSuccess={async (credentialResponse) => {
+            setGoogleLoading(true);
+            try {
+              const res = await fetch(`${API_BASE}/api/auth/google`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: credentialResponse.credential }),
+              });
+              const data = await res.json();
+              if (!res.ok) {
+                setFormError(data?.message || "Google সাইনআপ ব্যর্থ হয়েছে।");
+                return;
+              }
+              if (data.token) {
+                localStorage.setItem("token", data.token);
+                window.location.href = "/";
+              }
+            } catch {
+              setFormError("Google সাইনআপে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+            } finally {
+              setGoogleLoading(false);
+            }
+          }}
+          onError={() => setFormError("Google সাইনআপ বাতিল হয়েছে।")}
+          theme="outline"
+          size="large"
+          width="100%"
+          text="signup_with"
+        />
+      </div>
     </AuthLayout>
   );
 }

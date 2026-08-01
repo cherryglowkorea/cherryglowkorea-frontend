@@ -17,15 +17,16 @@ export default function BestSoldProducts() {
   const { addToCart } = useCart();
   const router = useRouter();
 
-  const API = `${process.env.NEXT_PUBLIC_API_URL}/products/best?limit=5`;
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const API = `${API_BASE}/products/best?limit=5`;
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(API);
-        setProducts(res.data.data || []);
-      } catch (err) {
-        console.error("Best products error:", err);
+        setProducts(res.data?.data || res.data || []);
+      } catch {
+        setProducts([]);
       } finally {
         setLoading(false);
       }

@@ -13,7 +13,7 @@ export function AuthLayout({
   image = "https://res.cloudinary.com/dau8sazoh/image/upload/v1785587008/pexels-ron-lach-8154394_fxsjue.jpg",
 }) {
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-[#FFFBFA] via-[#FFF5F7] to-[#FFF0F3] font-sans text-stone-800 dark:from-[#1C1417] dark:via-[#22181C] dark:to-[#170F12] dark:text-rose-50 transition-colors">
+    <div className="relative flex min-h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-[#FFFBFA] via-[#FFF5F7] to-[#FFF0F3] font-sans text-stone-800 dark:from-[#1C1417] dark:via-[#22181C] dark:to-[#170F12] dark:text-rose-50 transition-colors">
       {/* Left — image & brand panel */}
       <div className="relative hidden w-[42%] shrink-0 overflow-hidden bg-[#2A1620] lg:flex lg:flex-col lg:justify-between">
         {/* Background Image */}

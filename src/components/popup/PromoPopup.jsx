@@ -27,9 +27,10 @@ export default function PromoPopup() {
           setBanner(data);
           setOpen(true); // show modal every visit
         }
-      } catch (err) {
-        console.error("Banner fetch failed:", err);
+      } catch {
+        // Silently ignore 404/network errors when no active promo banner exists
       }
+
     };
 
     fetchBanner();

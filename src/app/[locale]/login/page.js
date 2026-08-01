@@ -3,12 +3,12 @@
 import * as React from "react";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
-import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import { useTranslations } from "next-intl";
+import { Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/auth-layout";
 import { FormField } from "@/components/form-field";
 import { PrimaryButton } from "@/components/primary-button";
-import { GoogleButton } from "@/components/google-button";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -59,34 +59,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   }
-
-  const googleLogin = useGoogleLogin({
-    flow: "auth-code",
-    onSuccess: async (codeResponse) => {
-      setGoogleLoading(true);
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/google`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: codeResponse.code }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          setFormError(data?.message || "Google লগইন ব্যর্থ হয়েছে।");
-          return;
-        }
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          window.location.href = "/";
-        }
-      } catch {
-        setFormError("Google লগইনে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
-      } finally {
-        setGoogleLoading(false);
-      }
-    },
-    onError: () => setFormError("Google লগইন বাতিল হয়েছে।"),
-  });
 
   return (
     <AuthLayout
@@ -148,10 +120,11 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
-              className="text-[12px] font-medium text-stone-400 hover:text-rose-500 cursor-pointer"
+              className="text-stone-400 hover:text-rose-500 cursor-pointer p-1 transition-colors flex items-center justify-center"
               tabIndex={-1}
+              aria-label={showPassword ? tAuth("hide") : tAuth("show")}
             >
-              {showPassword ? tAuth("hide") : tAuth("show")}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           }
         />
@@ -179,7 +152,38 @@ export default function LoginPage() {
         <div className="h-px flex-1 bg-stone-200 dark:bg-white/10" />
       </div>
 
-      <GoogleButton onClick={() => googleLogin()} label={tAuth("continueGoogle")} loading={googleLoading} />
+      <div className="flex justify-center w-full">
+        <GoogleLogin
+          onSuccess={async (credentialResponse) => {
+            setGoogleLoading(true);
+            try {
+              const res = await fetch(`${API_BASE}/api/auth/google`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: credentialResponse.credential }),
+              });
+              const data = await res.json();
+              if (!res.ok) {
+                setFormError(data?.message || "Google লগইন ব্যর্থ হয়েছে।");
+                return;
+              }
+              if (data.token) {
+                localStorage.setItem("token", data.token);
+                window.location.href = "/";
+              }
+            } catch {
+              setFormError("Google লগইনে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+            } finally {
+              setGoogleLoading(false);
+            }
+          }}
+          onError={() => setFormError("Google লগইন বাতিল হয়েছে।")}
+          theme="outline"
+          size="large"
+          width="100%"
+          text="continue_with"
+        />
+      </div>
     </AuthLayout>
   );
 }

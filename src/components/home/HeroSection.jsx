@@ -9,30 +9,32 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion";
-import Link from "next/link";
-
-const slides = [
-  {
-    id: 1,
-    title: "Glow Naturally",
-    description: "Clean beauty products crafted to enhance your natural glow.",
-    image: "/hero-1.jpg",
-    primary: "Shop Now",
-    secondary: "Explore",
-  },
-  {
-    id: 2,
-    title: "Beauty That Cares",
-    description: "Dermatologically tested skincare made for every skin type.",
-    image: "/hero-2.jpg",
-    primary: "View Products",
-    secondary: "Learn More",
-  },
-];
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 export default function HeroSection() {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const tHome = useTranslations("home");
+
+  const slides = [
+    {
+      id: 1,
+      title: tHome("slide1Title"),
+      description: tHome("slide1Desc"),
+      image: "/hero-1.jpg",
+      primary: tHome("shopNow"),
+      secondary: tHome("explore"),
+    },
+    {
+      id: 2,
+      title: tHome("slide2Title"),
+      description: tHome("slide2Desc"),
+      image: "/hero-2.jpg",
+      primary: tHome("viewProducts"),
+      secondary: tHome("learnMore"),
+    },
+  ];
 
   // Auto slide
   useEffect(() => {
@@ -79,11 +81,9 @@ export default function HeroSection() {
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40" />
 
-          {/* <SnowParticles/> */}
-
           {/* Content */}
           <div className="relative z-10 flex h-full items-center">
-            <div className="mx-auto max-w-7xl px-4">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <motion.div
                 key={slide.title}
                 initial={{ opacity: 0, y: 20 }}
@@ -91,23 +91,27 @@ export default function HeroSection() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="max-w-xl text-white"
               >
-                <h1 className="text-4xl md:text-5xl font-bold">
+                <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight drop-shadow-md">
                   {slide.title}
                 </h1>
 
-                <p className="mt-4 text-lg opacity-90">{slide.description}</p>
+                <p className="mt-4 text-lg opacity-90 leading-relaxed drop-shadow">
+                  {slide.description}
+                </p>
 
                 <div className="mt-8 flex gap-4">
                   <Button
                     size="lg"
-                    className="md:text-lg bg-pink-400 hover:bg-pink-500 text-white"
+                    asChild
+                    className="md:text-lg bg-rose-500 hover:bg-rose-600 text-white font-semibold shadow-lg"
                   >
                     <Link href="/products">{slide.primary}</Link>
                   </Button>
                   <Button
                     size="lg"
                     variant="outline"
-                    className="md:text-lg bg-white/30 text-pink-500 border-pink/30 hover:bg-pink/20"
+                    asChild
+                    className="md:text-lg bg-white/30 text-white border-white/40 hover:bg-white/40 backdrop-blur-sm"
                   >
                     <Link href="/about">{slide.secondary}</Link>
                   </Button>
@@ -121,14 +125,14 @@ export default function HeroSection() {
       {/* Arrows */}
       <button
         onClick={() => paginate(-1)}
-        className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white hover:bg-black/60"
+        className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white hover:bg-black/60 transition cursor-pointer"
       >
         ‹
       </button>
 
       <button
         onClick={() => paginate(1)}
-        className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white hover:bg-black/60"
+        className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white hover:bg-black/60 transition cursor-pointer"
       >
         ›
       </button>
@@ -139,7 +143,7 @@ export default function HeroSection() {
           <button
             key={i}
             onClick={() => setIndex(i)}
-            className={`h-2.5 w-2.5 rounded-full transition ${
+            className={`h-2.5 w-2.5 rounded-full transition cursor-pointer ${
               i === index ? "bg-white" : "bg-white/40"
             }`}
           />
