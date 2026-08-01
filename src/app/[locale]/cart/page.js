@@ -22,8 +22,8 @@ export default function CartPage() {
   // ✅ Subtotal
   const subtotal = useMemo(() => {
     return cart.reduce((sum, item) => {
-      if (!item.selectedVariant) return sum;
-      return sum + item.selectedVariant.price * item.quantity;
+      const price = item.selectedVariant?.price || item.price || 0;
+      return sum + price * item.quantity;
     }, 0);
   }, [cart]);
 
@@ -50,7 +50,7 @@ export default function CartPage() {
       return;
     }
 
-    const hasMissingVariant = cart.some((item) => !item.selectedVariant);
+    const hasMissingVariant = cart.some((item) => item.type !== "combo" && !item.selectedVariant);
 
     if (hasMissingVariant) {
       toast.error("Please select at least one variant");
@@ -62,7 +62,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="max-w-[1536px] mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold mb-6">My Cart</h1>
 
       {cart.length === 0 ? (
@@ -113,27 +113,50 @@ export default function CartPage() {
                   </h3>
 
                   {/* 🔥 VARIANT SELECTION (RADIO) */}
-                  <div className="mt-2 space-y-1">
-                    {item.variants?.map((v, i) => (
-                      <label
-                        key={i}
-                        className="flex items-center gap-2 text-sm cursor-pointer"
-                      >
-                        <input
-                          type="radio"
-                          checked={
-                            item.selectedVariant?.weight === v.weight &&
-                            item.selectedVariant?.unit === v.unit
-                          }
-                          onChange={() => selectVariant(item.productId, v)}
-                        />
-                        {v.weight} {v.unit} — ৳ {v.price}
-                      </label>
-                    ))}
-                  </div>
+                  {item.type === "combo" ? (
+                    <div className="mt-1 space-y-1 bg-rose-50/20 p-2.5 rounded-lg border border-rose-100/50 max-w-sm">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 block">🎁 Bundle Includes:</span>
+                      <ul className="text-xs text-stone-500 dark:text-stone-400 space-y-0.5">
+                        {item.comboProducts?.map((cp, idx) => (
+                          <li key={idx} className="list-inside list-disc">
+                            {cp.product?.name || "Product"} <span className="font-semibold text-rose-500">x{cp.quantity}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <>
+                      {item.variants && item.variants.length > 1 ? (
+                        <div className="mt-2 space-y-1">
+                          {item.variants.map((v, i) => (
+                            <label
+                              key={i}
+                              className="flex items-center gap-2 text-sm cursor-pointer"
+                            >
+                              <input
+                                type="radio"
+                                checked={
+                                  item.selectedVariant?.weight === v.weight &&
+                                  item.selectedVariant?.unit === v.unit
+                                }
+                                onChange={() => selectVariant(item.productId, v)}
+                              />
+                              {v.weight} {v.unit} — ৳ {v.price}
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        item.selectedVariant && (
+                          <p className="text-xs text-stone-500 mt-1">
+                            Size: {item.selectedVariant.weight} {item.selectedVariant.unit}
+                          </p>
+                        )
+                      )}
+                    </>
+                  )}
 
                   {/* ❗ Warning if not selected */}
-                  {!item.selectedVariant && (
+                  {!item.selectedVariant && item.type !== "combo" && (
                     <p className="text-xs text-red-500 mt-1">
                       Please select a variant
                     </p>

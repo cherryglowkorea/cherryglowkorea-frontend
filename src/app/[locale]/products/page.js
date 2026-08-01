@@ -36,6 +36,7 @@ export default function ProductsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sortOption, setSortOption] = useState("default"); // default, price-asc, price-desc
+  const [typeFilter, setTypeFilter] = useState("all"); // all, single, combo
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const { data: dbCategories } = useGetCategoriesQuery();
@@ -137,6 +138,14 @@ export default function ProductsPage() {
       );
     }
 
+    // Product Type Filter
+    if (typeFilter !== "all") {
+      result = result.filter(p => {
+        const prodType = p.type || "single";
+        return prodType === typeFilter;
+      });
+    }
+
     // Sorting
     if (sortOption === "price-asc") {
       result.sort((a, b) => getProductPrice(a) - getProductPrice(b));
@@ -145,7 +154,7 @@ export default function ProductsPage() {
     }
 
     return result;
-  }, [allProducts, category, debouncedSearch, sortOption]);
+  }, [allProducts, category, debouncedSearch, sortOption, typeFilter]);
 
   return (
     <div className="bg-[#FFFBFA] dark:bg-[#1C1417] min-h-screen font-sans text-stone-800 dark:text-rose-50 transition-colors">
@@ -231,6 +240,24 @@ export default function ProductsPage() {
                     <option value="default" className="dark:bg-[#23181C]">Default (Newest)</option>
                     <option value="price-asc" className="dark:bg-[#23181C]">Price: Lowest to Highest</option>
                     <option value="price-desc" className="dark:bg-[#23181C]">Price: Highest to Lowest</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Product Type Block */}
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-rose-500 mb-3">
+                  Product Type
+                </h3>
+                <div className="relative">
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                    className="w-full bg-stone-50 dark:bg-white/5 border border-stone-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-stone-800 dark:text-white focus:outline-none focus:border-rose-400"
+                  >
+                    <option value="all" className="dark:bg-[#23181C]">All Products</option>
+                    <option value="single" className="dark:bg-[#23181C]">Single Product</option>
+                    <option value="combo" className="dark:bg-[#23181C]">Combo Product (Bundle)</option>
                   </select>
                 </div>
               </div>

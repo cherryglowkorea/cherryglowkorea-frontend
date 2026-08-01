@@ -1,6 +1,16 @@
 export function getPriceInfo(product) {
   if (!product) return { original: 0, final: 0 };
 
+  if (product.type === "combo") {
+    const original = product.price || 0;
+    const final = product.salePrice || 0;
+    return {
+      original,
+      final,
+      hasDiscount: original > final,
+    };
+  }
+
   const {
     basePrice = 0,
     discountType,

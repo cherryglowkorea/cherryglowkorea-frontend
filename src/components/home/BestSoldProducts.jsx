@@ -57,7 +57,7 @@ export default function BestSoldProducts() {
 
   return (
     <section className="py-20 bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4">
+      <div className="mx-auto max-w-[1536px] px-4">
         {/* Header */}
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold">Best Sellers</h2>

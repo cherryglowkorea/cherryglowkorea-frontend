@@ -100,6 +100,24 @@ export default function ProductManagement() {
       toast.error(err?.response?.data?.message || "Delete failed");
     }
   };
+  /* ---------------- Duplicate ---------------- */
+
+  const duplicateCombo = async (id) => {
+    try {
+      const token = await getToken();
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/combos/duplicate/${id}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      toast.success("Combo product duplicated successfully");
+      fetchProducts();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Duplication failed");
+    }
+  };
+
   /* ---------------- UI ---------------- */
 
   return (
@@ -136,6 +154,7 @@ export default function ProductManagement() {
         loading={loading}
         onEdit={(p) => router.push(`/admin/edit/${p.id}`)}
         onDelete={(id) => deleteProduct(id)}
+        onDuplicate={(id) => duplicateCombo(id)}
       />
 
       {/* Desktop */}
@@ -144,6 +163,7 @@ export default function ProductManagement() {
         loading={loading}
         onEdit={(p) => router.push(`/admin/edit/${p.id}`)}
         onDelete={(id) => deleteProduct(id)}
+        onDuplicate={(id) => duplicateCombo(id)}
       />
     </div>
   );

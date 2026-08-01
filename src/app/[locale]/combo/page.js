@@ -15,14 +15,11 @@ export default function ComboPage() {
   const [products, setProducts] = useState([]);
   const [combo, setCombo] = useState([]);
   const [open, setOpen] = useState(false);
-//   const [user, setUser] = useState(null);
 
   const router = useRouter();
   const API = `${process.env.NEXT_PUBLIC_API_URL}/products/allProduct/public`;
 
   const { user } = useAuth();
-
-    
 
   // 🔥 Load combo
   useEffect(() => {
@@ -32,8 +29,12 @@ export default function ComboPage() {
 
   // 🔥 Fetch products
   useEffect(() => {
-    axios.get(API).then((res) => setProducts(res.data || []));
-  }, []);
+    axios.get(API).then((res) => {
+      const data = res.data || [];
+      // Only single products can be added to custom combo builder
+      setProducts(data.filter(p => p.type !== "combo"));
+    });
+  }, [API]);
 
   // 🔥 Sync listener (when ComboList updates localStorage)
   useEffect(() => {
@@ -103,24 +104,89 @@ export default function ComboPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 space-y-10 relative">
-      <h1 className="text-3xl font-bold text-center">Make Your Own Combo</h1>
+    <div className="max-w-[1536px] mx-auto px-4 py-12 space-y-8 relative min-h-screen">
+      {/* Header Info Block */}
+      <div className="text-center space-y-3 max-w-2xl mx-auto">
+        <span className="text-xs font-bold uppercase tracking-widest text-pink-500 bg-pink-50 dark:bg-pink-950/20 px-3 py-1 rounded-full border border-pink-100 dark:border-white/5">
+          ✨ Custom Skincare Creator
+        </span>
+        <h1 className="text-3xl md:text-4xl font-serif font-bold text-stone-900 dark:text-white">
+          Make Your Own Combo
+        </h1>
+        <p className="text-sm text-stone-500 dark:text-rose-100/50">
+          Pick products across our categories to construct your personalized package. 
+          Save <strong className="text-pink-500">5%</strong> on orders over ৳4,000, and <strong className="text-pink-500">10%</strong> on orders over ৳8,000!
+        </p>
+      </div>
 
-      <ComboSelected
-        combo={combo}
-        removeFromCombo={removeFromCombo}
-        updateVariant={updateVariant}
-      />
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-6">
+        {/* Catalog List Column */}
+        <div className="lg:col-span-8 space-y-6">
+          <ComboList products={products} />
+        </div>
 
-      <ComboList products={products} />
+        {/* Selected Items Sticky Sidebar Column */}
+        <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-6 bg-stone-50/50 dark:bg-stone-950/25 p-5 rounded-3xl border border-rose-100/40 dark:border-white/5">
+          <ComboSelected
+            combo={combo}
+            removeFromCombo={removeFromCombo}
+            updateVariant={updateVariant}
+          />
 
-      {/* 🔥 FLOATING SUMMARY */}
-      <FloatingSummary
-        subtotal={subtotal}
-        discount={discount}
-        total={total}
-        handleCheckout={handleCheckout}
-      />
+          {/* Desktop Inline Summary */}
+          {combo.length > 0 && (
+            <div className="hidden lg:block border-t border-rose-100/40 dark:border-white/5 pt-5 space-y-4">
+              <h3 className="font-serif font-bold text-stone-800 dark:text-rose-50 text-sm uppercase tracking-wider">
+                Package Summary
+              </h3>
+
+              <div className="space-y-2.5">
+                <div className="flex justify-between text-xs text-stone-600 dark:text-rose-100/70">
+                  <span>Package Subtotal</span>
+                  <span className="font-semibold text-stone-850 dark:text-rose-100">৳{subtotal}</span>
+                </div>
+
+                {discount > 0 && (
+                  <div className="flex justify-between text-xs text-emerald-500 font-semibold bg-emerald-50/50 dark:bg-emerald-950/20 p-2 rounded-lg border border-emerald-100 dark:border-white/5">
+                    <span>Combo Discount ({discountRate * 100}%)</span>
+                    <span>-৳{discount.toFixed(0)}</span>
+                  </div>
+                )}
+
+                <div className="border-t border-rose-100/40 dark:border-white/5 my-2" />
+
+                <div className="flex justify-between text-sm font-bold text-stone-850 dark:text-rose-50">
+                  <span>Total Payable</span>
+                  <span className="text-base text-pink-600 dark:text-pink-400 font-extrabold">৳{total.toFixed(0)}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={handleCheckout}
+                className="
+                  w-full
+                  bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600
+                  text-white py-3 rounded-xl font-bold uppercase text-xs tracking-wider shadow-sm hover:shadow
+                  transition duration-300 cursor-pointer
+                "
+              >
+                Checkout Custom Package
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 🔥 FLOATING SUMMARY (Only visible on mobile and tablet) */}
+      <div className="lg:hidden">
+        <FloatingSummary
+          subtotal={subtotal}
+          discount={discount}
+          total={total}
+          handleCheckout={handleCheckout}
+        />
+      </div>
 
       <CheckoutModal open={open} onClose={() => setOpen(false)} />
     </div>

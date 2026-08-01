@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Copy } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ export default function ProductMobileCard({
   loading,
   onEdit,
   onDelete,
+  onDuplicate,
 }) {
   return (
     <div className="grid gap-4 sm:hidden">
@@ -69,10 +70,27 @@ export default function ProductMobileCard({
                     Best
                   </span>
                 )}
+                {p.type === "combo" && (
+                  <span className="text-xs px-2 py-1 rounded bg-rose-100 text-rose-600">
+                    Combo
+                  </span>
+                )}
               </div>
 
               {/* Actions */}
               <div className="flex gap-2 pt-2">
+                {p.type === "combo" && (
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => onDuplicate && onDuplicate(p.id)}
+                    title="Duplicate Combo"
+                    className="cursor-pointer border-pink-200 text-pink-500 hover:bg-pink-50 hover:text-pink-600"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                )}
+
                 <Button
                   size="icon"
                   variant="secondary"
@@ -85,7 +103,7 @@ export default function ProductMobileCard({
                 <Button
                   size="icon"
                   variant="destructive"
-                  onClick={() => onDelete(p._id)}
+                  onClick={() => onDelete(p.id || p._id)}
                   className="cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4" />

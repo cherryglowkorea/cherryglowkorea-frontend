@@ -65,14 +65,24 @@ export default function ProductCard({ product, onAddToCart, index }) {
 
   const CardContent = (
     <div className="flex h-full flex-col rounded-xl bg-white p-4 shadow-sm transition hover:shadow-md">
-      {/* Discount badge */}
-      {hasDiscount && (
-        <span className="self-end text-xs font-bold text-pink-500 bg-gray-100 px-2 py-1 rounded-full">
-          {discountType === "percentage"
-            ? `${discountValue}% OFF`
-            : `৳${discountValue} OFF`}
-        </span>
-      )}
+      {/* Badges container */}
+      <div className="flex justify-between items-center mb-2">
+        {product.type === "combo" ? (
+          <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+            🔥 Combo Deal
+          </span>
+        ) : (
+          <span></span>
+        )}
+        
+        {hasDiscount && (
+          <span className="text-xs font-bold text-pink-500 bg-gray-100 px-2 py-1 rounded-full">
+            {discountType === "percentage"
+              ? `${discountValue}% OFF`
+              : `৳${discountValue} OFF`}
+          </span>
+        )}
+      </div>
 
       {/* Image */}
       <div className="relative w-full h-48 mb-4">

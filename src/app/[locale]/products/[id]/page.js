@@ -22,17 +22,25 @@ export default function ProductDetailsPage() {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [adding, setAdding] = useState(false);
 
-  /* ---------------- Fetch ---------------- */
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+  /* ---------------- Fetch Product Details & Combo Populated Data ---------------- */
   useEffect(() => {
     if (!id) return;
 
     const fetchProduct = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/products/singleProduct/${id}`,
+          `${API_BASE}/products/singleProduct/${id}`,
         );
+        const p = res.data;
+        setProduct(p);
 
-        setProduct(res.data);
+        // If it's a combo, load the populated version
+        if (p.type === "combo") {
+          const comboRes = await axios.get(`${API_BASE}/combos/${id}`);
+          setProduct(comboRes.data);
+        }
       } catch (err) {
         console.error(err);
         toast.error("Failed to load product");
@@ -42,12 +50,11 @@ export default function ProductDetailsPage() {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [id, API_BASE]);
 
   /* ---------------- Images ---------------- */
   const imageList = useMemo(() => {
     if (!product) return [];
-
     return product.images?.map((i) => i?.url).filter(Boolean) || [];
   }, [product]);
 
@@ -67,43 +74,43 @@ export default function ProductDetailsPage() {
 
   /* ---------------- Price ---------------- */
   const finalPrice = useMemo(() => {
-    if (!product || !selectedVariant) return 0;
+    if (!product) return 0;
+    if (product.type === "combo") return product.salePrice || 0;
+    if (!selectedVariant) return 0;
 
     const base = selectedVariant.price;
-
     if (product.discountType === "percentage") {
       return Math.round(base - (base * product.discountValue) / 100);
     }
-
     if (product.discountType === "fixed") {
       return Math.max(0, base - product.discountValue);
     }
-
     return base;
   }, [product, selectedVariant]);
 
-  const originalPrice = selectedVariant?.price || 0;
+  const originalPrice = product?.type === "combo" ? (product.price || 0) : (selectedVariant?.price || 0);
 
   /* ---------------- Stock ---------------- */
-  const stock = selectedVariant?.stock || 0;
+  const stock = product?.type === "combo" ? (product.stock || 0) : (selectedVariant?.stock || 0);
 
   /* ---------------- Add To Cart ---------------- */
   const handleAddToCart = () => {
-    if (!product || !selectedVariant) {
+    if (!product) return;
+    if (product.type !== "combo" && !selectedVariant) {
       return toast.error("Select a variant");
     }
 
     setAdding(true);
 
-     const productForCart = {
-       _id: product?._id,
-       name: product?.name,
-       image: product?.images[0]?.url || "/placeholder.jpg",
-       variants: product?.variants || [],
-     };
+    const productForCart = {
+      _id: product._id,
+      name: product.name,
+      image: product.thumbnail || product.images?.[0]?.url || FALLBACK_IMAGE,
+      variants: product.variants || [],
+      price: product.type === "combo" ? product.salePrice : undefined
+    };
 
     addToCart(productForCart);
-
     setTimeout(() => setAdding(false), 400);
   };
 
@@ -115,11 +122,11 @@ export default function ProductDetailsPage() {
   const { name, brand, category, description, useCase } = product;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-[1536px] mx-auto px-6 py-12">
       <div className="grid md:grid-cols-2 gap-12">
         {/* IMAGES */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div className="relative w-full h-[420px] rounded-2xl bg-white shadow-md overflow-hidden">
+          <div className="relative w-full h-[420px] rounded-2xl bg-white shadow-md overflow-hidden border">
             <Image
               src={selectedImage || FALLBACK_IMAGE}
               alt={name}
@@ -132,7 +139,7 @@ export default function ProductDetailsPage() {
 
           {imageList.length > 1 && (
             <div className="flex gap-3 mt-4 flex-wrap">
-              {imageList.map((img, i) => (
+              {imageList.map((img) => (
                 <button
                   key={img}
                   onClick={() => setSelectedImage(img)}
@@ -167,16 +174,15 @@ export default function ProductDetailsPage() {
               ৳ {finalPrice}
             </span>
 
-            {product.discountType !== "none" && (
+            {originalPrice > finalPrice && (
               <>
                 <span className="line-through text-gray-400">
                   ৳ {originalPrice}
                 </span>
 
-                <span className="text-green-600 text-sm">
-                  {product.discountType === "percentage"
-                    ? `${product.discountValue}% OFF`
-                    : `৳${product.discountValue} OFF`}
+                <span className="text-green-600 text-sm font-semibold">
+                  ৳{originalPrice - finalPrice} SAVINGS (
+                  {Math.round(((originalPrice - finalPrice) / originalPrice) * 100)}% OFF)
                 </span>
               </>
             )}
@@ -188,14 +194,62 @@ export default function ProductDetailsPage() {
               stock > 0 ? "text-green-600" : "text-red-500"
             }`}
           >
-            {stock > 0 ? "In Stock" : "Out of Stock"}
+            {stock > 0 ? `In Stock (${stock} available)` : "Out of Stock"}
           </p>
 
-          {/* Variants */}
-          {product.variants?.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-2">Select Option</h3>
+          {/* Estimated Delivery & Info */}
+          <div className="text-xs text-stone-500 space-y-1 bg-stone-50 dark:bg-white/5 p-3 rounded-xl border">
+            <p>🚚 <strong>Estimated Delivery:</strong> 1-2 Days (Dhaka), 2-3 Days (Outside Dhaka)</p>
+            <p>🛡️ <strong>Guarantee:</strong> 100% Authentic Korean Product Guarantee</p>
+          </div>
 
+          {/* What's Included (Combo specific) */}
+          {product.type === "combo" && product.comboProducts && product.comboProducts.length > 0 && (
+            <div className="space-y-4 border border-rose-100 dark:border-white/5 p-5 rounded-2xl bg-rose-50/10 dark:bg-white/5">
+              <h3 className="font-serif font-bold text-stone-800 dark:text-white text-sm uppercase tracking-wider">
+                What's Included in this Combo:
+              </h3>
+              <div className="space-y-3">
+                {product.comboProducts.map((item, idx) => {
+                  const pInfo = item.product || {};
+                  return (
+                    <div key={idx} className="flex gap-3 items-center bg-white dark:bg-stone-800 p-2.5 rounded-xl border border-stone-100 dark:border-white/5 shadow-sm">
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-stone-50 border">
+                        <Image
+                          src={pInfo.thumbnail || "/placeholder.png"}
+                          alt={pInfo.name || "Product"}
+                          fill
+                          className="object-contain"
+                          sizes="50px"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-stone-800 dark:text-rose-100 text-xs truncate">
+                          {pInfo.name}
+                        </p>
+                        <p className="text-[10px] text-stone-500 dark:text-rose-100/40">
+                          {pInfo.brand}
+                        </p>
+                      </div>
+                      <div className="text-right whitespace-nowrap">
+                        <span className="text-[10px] bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 px-2 py-0.5 rounded-full font-bold">
+                          Qty: {item.quantity}
+                        </span>
+                        <p className="text-[10px] font-semibold text-stone-700 dark:text-stone-300 mt-1">
+                          ৳{pInfo.salePrice || pInfo.price || 0} each
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Variants (Only for Single Products) */}
+          {product.type !== "combo" && product.variants?.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-2 text-sm">Select Option</h3>
               <div className="flex flex-wrap gap-2">
                 {product.variants.map((v) => {
                   const isSelected =
@@ -222,15 +276,15 @@ export default function ProductDetailsPage() {
 
           {/* Description */}
           <div>
-            <h3 className="font-semibold mb-1">Description</h3>
-            <p className="text-gray-600 whitespace-pre-line">{description}</p>
+            <h3 className="font-semibold mb-1 text-sm">Description</h3>
+            <p className="text-gray-600 dark:text-rose-100/80 text-sm whitespace-pre-line">{description}</p>
           </div>
 
           {/* Use Case */}
           {useCase && (
             <div>
-              <h3 className="font-semibold mb-1">Use Case</h3>
-              <p className="text-gray-600 whitespace-pre-line">{useCase}</p>
+              <h3 className="font-semibold mb-1 text-sm">Use Case</h3>
+              <p className="text-gray-600 dark:text-rose-100/80 text-sm whitespace-pre-line">{useCase}</p>
             </div>
           )}
 
@@ -238,7 +292,7 @@ export default function ProductDetailsPage() {
           <Button
             onClick={handleAddToCart}
             disabled={stock === 0 || adding}
-            className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full py-3"
+            className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full py-3 font-semibold transition"
           >
             {adding ? "Adding..." : "Add to Cart"}
           </Button>
@@ -250,19 +304,16 @@ export default function ProductDetailsPage() {
 
 function ProductSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 animate-pulse">
-      {" "}
+    <div className="max-w-[1536px] mx-auto px-6 py-12 animate-pulse">
       <div className="grid md:grid-cols-2 gap-10">
-        {" "}
-        <div className="h-[420px] bg-gray-200 rounded-2xl" />{" "}
+        <div className="h-[420px] bg-gray-200 rounded-2xl" />
         <div className="space-y-4">
-          {" "}
-          <div className="h-4 w-24 bg-gray-200 rounded" />{" "}
-          <div className="h-8 w-3/4 bg-gray-200 rounded" />{" "}
-          <div className="h-6 w-32 bg-gray-200 rounded" />{" "}
-          <div className="h-24 bg-gray-200 rounded" />{" "}
-        </div>{" "}
-      </div>{" "}
+          <div className="h-4 w-24 bg-gray-200 rounded" />
+          <div className="h-8 w-3/4 bg-gray-200 rounded" />
+          <div className="h-6 w-32 bg-gray-200 rounded" />
+          <div className="h-24 bg-gray-200 rounded" />
+        </div>
+      </div>
     </div>
   );
 }

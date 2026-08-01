@@ -9,6 +9,7 @@ import HeroSection from "@/components/home/HeroSection";
 import HighlightsSection from "@/components/home/HighlightSection";
 import Newsletter from "@/components/home/Newsletter";
 import Testimonials from "@/components/home/Testimonials";
+import FeaturedComboDeals from "@/components/home/FeaturedComboDeals";
 import { useEffect, useState } from "react";
 
 
@@ -21,6 +22,7 @@ return (
     <CategoriesSection />
     <BenefitsSection />
     <BestSoldProducts />
+    <FeaturedComboDeals />
     <Testimonials />
     <Newsletter />
 </main>

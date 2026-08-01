@@ -46,8 +46,10 @@ export function CartProvider({ children }) {
           name: product.name,
           image: product.image || null,
           variants: product.variants,
-          selectedVariant: null, // 🔥 important
+          selectedVariant: product.variants && product.variants.length === 1 ? product.variants[0] : null,
           quantity: 1,
+          type: product.type || "single",
+          comboProducts: product.comboProducts || []
         },
       ];
     });
