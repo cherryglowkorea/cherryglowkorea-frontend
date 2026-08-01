@@ -1,0 +1,50 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "combo": "Combo",
+    "about": "About Us",
+    "contact": "Contact",
+    "login": "Sign In",
+    "register": "Sign Up",
+    "logout": "Log Out",
+    "dashboard": "Dashboard"
+  },
+  "home": {
+    "heroTitle": "Beauty That Cares",
+    "heroSubtitle": "Dermatologically tested K-Beauty skincare made for every skin type.",
+    "viewProducts": "View Products",
+    "makeCombo": "Make Combo"
+  },
+  "auth": {
+    "loginEyebrow": "Welcome Back",
+    "welcomeBack": "Sign in to your account",
+    "welcomeSubtitle": "Good to see you again at Cherry Glow Korea.",
+    "registerEyebrow": "Join Us",
+    "createAccount": "Create a new account",
+    "createSubtitle": "In just a few seconds — no OTP required.",
+    "loginBtn": "Sign In",
+    "registerBtn": "Create Account",
+    "emailTab": "With Email",
+    "phoneTab": "With Phone",
+    "avatarLabel": "Select Avatar",
+    "nameLabel": "Your Name",
+    "namePlaceholder": "e.g. Shipon",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "you@example.com",
+    "phoneLabel": "Phone Number",
+    "phonePlaceholder": "01XXXXXXXXX",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "••••••••",
+    "registerPasswordPlaceholder": "Min 6 chars with at least 1 number",
+    "show": "Show",
+    "hide": "Hide",
+    "forgotPassword": "Forgot password?",
+    "or": "OR",
+    "continueGoogle": "Continue with Google",
+    "signUpGoogle": "Sign up with Google",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "termsAgree": "By creating an account, you agree to our Terms & Privacy Policy."
+  }
+}

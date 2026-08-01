@@ -9,8 +9,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import ProductTable from "../../../components/products/ProductTable";
-import ProductMobileCard from "../../../components/products/ProductMobileCard";
+import ProductTable from "@/components/products/ProductTable";
+import ProductMobileCard from "@/components/products/ProductMobileCard";
+
 
 export default function ProductManagement() {
   const [products, setProducts] = useState([]);

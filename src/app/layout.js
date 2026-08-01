@@ -1,34 +1,24 @@
-import Navbar from "@/components/layout/Navbar";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import Footer from "@/components/layout/Footer";
-import Messenger from "@/components/shared/Messenger";
-import { AuthProvider } from "@/context/AuthContext";
-import { CartProvider } from "@/context/CartContext";
-import { Toaster } from "sonner";
-import PromoPopup from "@/components/popup/PromoPopup";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata = {
-  title: "Cherry Glow",
-  description: "Beauty products store",
+  title: "Cherry Glow Korea",
+  description: "Beauty & skincare products store",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
-        <Providers>
-          <AuthProvider>
-            <CartProvider>
-              <Navbar />
-              <PromoPopup />
-              {children}
-              <Toaster richColors position="top-right" />
-              <Messenger />
-            </CartProvider>
-            <Footer />
-          </AuthProvider>
-        </Providers>
+    <html
+      lang="bn"
+      suppressHydrationWarning
+      className={`${inter.variable} ${playfair.variable}`}
+    >
+      <body suppressHydrationWarning className="font-sans antialiased">
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

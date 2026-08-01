@@ -1,0 +1,50 @@
+{
+  "nav": {
+    "home": "হোম",
+    "products": "পণ্যসমূহ",
+    "combo": "কম্বো",
+    "about": "আমাদের সম্পর্কে",
+    "contact": "যোগাযোগ",
+    "login": "লগইন করুন",
+    "register": "রেজিস্টার করুন",
+    "logout": "লগআউট",
+    "dashboard": "ড্যাশবোর্ড"
+  },
+  "home": {
+    "heroTitle": "Beauty That Cares",
+    "heroSubtitle": "প্রতিটি ত্বকের জন্য ডার্মাটোলজিক্যালি পরীক্ষিত কে-বিউটি স্কিনকেয়ার।",
+    "viewProducts": "পণ্য দেখুন",
+    "makeCombo": "কম্বো তৈরি করুন"
+  },
+  "auth": {
+    "loginEyebrow": "স্বাগতম",
+    "welcomeBack": "আপনার অ্যাকাউন্টে লগইন করুন",
+    "welcomeSubtitle": "Cherry Glow Korea-তে আবার আপনাকে দেখে ভালো লাগছে।",
+    "registerEyebrow": "যোগ দিন",
+    "createAccount": "নতুন অ্যাকাউন্ট তৈরি করুন",
+    "createSubtitle": "মাত্র কয়েক সেকেন্ডে — কোনো OTP লাগবে না।",
+    "loginBtn": "লগইন করুন",
+    "registerBtn": "অ্যাকাউন্ট তৈরি করুন",
+    "emailTab": "ইমেইল দিয়ে",
+    "phoneTab": "ফোন নম্বর দিয়ে",
+    "avatarLabel": "অবতার নির্বাচন করুন",
+    "nameLabel": "আপনার নাম",
+    "namePlaceholder": "যেমন: শিপন",
+    "emailLabel": "ইমেইল",
+    "emailPlaceholder": "you@example.com",
+    "phoneLabel": "ফোন নম্বর",
+    "phonePlaceholder": "01XXXXXXXXX",
+    "passwordLabel": "পাসওয়ার্ড",
+    "passwordPlaceholder": "••••••••",
+    "registerPasswordPlaceholder": "কমপক্ষে ৬ অক্ষর, ১টি সংখ্যাসহ",
+    "show": "দেখুন",
+    "hide": "লুকান",
+    "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
+    "or": "অথবা",
+    "continueGoogle": "Google দিয়ে চালিয়ে যান",
+    "signUpGoogle": "Google দিয়ে সাইনআপ করুন",
+    "noAccount": "অ্যাকাউন্ট নেই?",
+    "haveAccount": "আগে থেকেই অ্যাকাউন্ট আছে?",
+    "termsAgree": "অ্যাকাউন্ট তৈরি করলে আপনি আমাদের শর্তাবলী ও প্রাইভেসি পলিসি মেনে নিচ্ছেন।"
+  }
+}
