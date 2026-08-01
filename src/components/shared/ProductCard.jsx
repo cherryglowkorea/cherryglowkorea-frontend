@@ -15,7 +15,7 @@ export default function ProductCard({ product }) {
   const { name, images, variants, _id } = product;
 
   // ✅ Safe image fallback
-  const image = images?.[0]?.url || "/placeholder.png";
+  const image = product.image || product.thumbnail || images?.[0]?.url || "/placeholder.png";
 
   // ✅ Price
   const { original, final, hasDiscount } = getPriceInfo(product);
@@ -31,7 +31,7 @@ export default function ProductCard({ product }) {
     const productForCart = {
       _id,
       name,
-      image: images?.[0]?.url || "/placeholder.png",
+      image,
       variants,
     };
     addToCart(productForCart);

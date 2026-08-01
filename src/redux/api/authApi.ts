@@ -14,7 +14,7 @@ import {
   AddPhonePayload,
 } from "../../types/auth.types";
 
-const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const getBaseUrl = () => process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export const authApi = createApi({
   reducerPath: "authApi",

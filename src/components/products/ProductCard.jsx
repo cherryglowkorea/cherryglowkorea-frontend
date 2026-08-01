@@ -56,10 +56,10 @@ export default function ProductCard({ product, onAddToCart, index }) {
   };
   // console.log(product)
 
-  const optimizedImage = image.replace(
-    "/upload/",
-    "/upload/w_600,f_auto,q_auto:good/",
-  );
+  const optimizedImage =
+    image && typeof image === "string" && image.includes("/upload/")
+      ? image.replace("/upload/", "/upload/w_600,f_auto,q_auto:good/")
+      : image || "/placeholder.png";
 
   /* ---------------- UI ---------------- */
 

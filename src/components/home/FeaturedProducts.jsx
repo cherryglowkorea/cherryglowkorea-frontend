@@ -9,7 +9,8 @@ export default function FeaturedProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const API = `${process.env.NEXT_PUBLIC_API_URL}/products/featured`;
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const API = `${API_BASE}/products/featured`;
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {

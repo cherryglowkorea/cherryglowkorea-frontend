@@ -11,7 +11,8 @@ export default function PromoPopup() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const API = `${process.env.NEXT_PUBLIC_API_URL}/banners/promo-banner`;
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const API = `${API_BASE}/banners/promo-banner`;
 
   useEffect(() => {
     const fetchBanner = async () => {
