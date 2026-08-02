@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
-import { BookmarkPlus } from "lucide-react";
+import { useWishlist } from "@/context/WishlistContext";
+import { Heart, ShoppingBag } from "lucide-react";
 import { getPriceInfo } from "@/lib/price";
 
 export default function ProductCard({ product }) {
   const router = useRouter();
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(product._id || product.id);
 
   const { name, images, variants, _id } = product;
 
@@ -26,8 +29,6 @@ export default function ProductCard({ product }) {
   const inStock = totalStock > 0;
 
   const handleAddToCart = () => {
-
-    // ✅ Minimal optimized cart object
     const productForCart = {
       _id,
       name,
@@ -57,6 +58,20 @@ export default function ProductCard({ product }) {
 
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+
+        {/* Wishlist Love Heart Button */}
+        <button
+          onClick={(e) => toggleWishlist(product, e)}
+          title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+          aria-label="Wishlist"
+          className={`absolute top-3 right-3 z-10 w-9 h-9 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-md hover:scale-110 active:scale-95 cursor-pointer ${
+            isWishlisted
+              ? "bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-900/50 text-rose-500"
+              : "bg-white/90 dark:bg-[#1e1215]/90 border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-rose-100 hover:text-rose-500 hover:border-rose-300"
+          }`}
+        >
+          <Heart className={`w-4.5 h-4.5 transition ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
+        </button>
 
         {/* Discount Badge */}
         {hasDiscount && (
@@ -113,7 +128,7 @@ export default function ProductCard({ product }) {
             disabled={!inStock}
             className="shrink-0 bg-pink-500 hover:bg-pink-600 text-white cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            <BookmarkPlus className="h-4 w-4" />
+            <ShoppingBag className="h-4 w-4" />
           </Button>
         </div>
       </div>

@@ -80,27 +80,26 @@ function ComboItem({ p, router, removeFromCombo, updateVariant }) {
             </h3>
             <button
               onClick={() => removeFromCombo(p._id)}
-              className="text-stone-400 hover:text-red-500 p-0.5 hover:bg-red-50 dark:hover:bg-red-950/20 rounded transition shrink-0 cursor-pointer"
+              className="text-red-500 hover:text-red-600 p-2 bg-red-50 hover:bg-red-100/85 dark:bg-red-950/20 dark:hover:bg-red-950/40 rounded-xl transition duration-300 shrink-0 cursor-pointer flex items-center justify-center"
               title="Remove product"
             >
-              <Trash2 size={13} />
+              <Trash2 size={15} />
             </button>
           </div>
           
-          <div className="flex justify-between items-center mt-1">
-            {/* Elegant single-line dropdown selector */}
+          <div className="flex justify-between items-center mt-1.5">
             <select
-              value={p.selectedVariant ? `${p.selectedVariant.weight}-${p.selectedVariant.unit}` : ""}
+              value={p.selectedVariant ? p.variants?.findIndex(v => v.size === p.selectedVariant.size) : 0}
               onChange={(e) => {
-                const [w, u] = e.target.value.split("-");
-                const found = p.variants?.find(v => String(v.weight) === w && v.unit === u);
+                const idx = parseInt(e.target.value);
+                const found = p.variants?.[idx];
                 if (found) updateVariant(p._id, found);
               }}
-              className="text-[10px] bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-white/10 rounded-md px-1.5 py-0.5 text-stone-700 dark:text-rose-100/80 outline-none max-w-[120px] truncate"
+              className="text-xs bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-white/10 rounded-lg px-2.5 py-1 text-stone-700 dark:text-rose-100/80 outline-none max-w-[125px] truncate cursor-pointer font-medium"
             >
-              {p.variants?.map((v) => (
-                <option key={`${v.weight}-${v.unit}`} value={`${v.weight}-${v.unit}`}>
-                  {v.weight}{v.unit}
+              {p.variants?.map((v, idx) => (
+                <option key={idx} value={idx}>
+                  {v.size || v.weight}
                 </option>
               ))}
             </select>

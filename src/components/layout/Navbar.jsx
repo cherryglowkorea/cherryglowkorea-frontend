@@ -24,11 +24,13 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Menu, LogOut, LayoutDashboard, User as UserIcon } from "lucide-react";
+import { Menu, LogOut, LayoutDashboard, User as UserIcon, Heart } from "lucide-react";
 import Cart from "./Cart";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { wishlistCount } = useWishlist();
   const router = useRouter();
   const pathname = usePathname();
   const tNav = useTranslations("nav");
@@ -36,7 +38,6 @@ export default function Navbar() {
   const navLinks = [
     { name: tNav("home"), href: "/" },
     { name: tNav("products"), href: "/products" },
-    { name: tNav("combo"), href: "/combo" },
     { name: tNav("about"), href: "/about" },
     { name: tNav("contact"), href: "/contact" },
   ];
@@ -96,6 +97,20 @@ export default function Navbar() {
         <div className="flex items-center gap-3 sm:gap-4">
           {/* Language Switcher */}
           <LanguageSwitcher />
+
+          {/* Wishlist Button */}
+          <Link
+            href="/wishlist"
+            title="Wishlist"
+            className="relative p-2 rounded-full hover:bg-rose-50 dark:hover:bg-white/5 text-stone-700 dark:text-rose-100 transition duration-300 flex items-center justify-center"
+          >
+            <Heart className="w-5 h-5 hover:text-rose-500 transition" />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center shadow-2xs">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
 
           {/* Cart */}
           <Cart />

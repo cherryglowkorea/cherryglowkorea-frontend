@@ -3,32 +3,48 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Plus, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useCart } from "@/context/CartContext";
 
 export default function ComboList({ products }) {
   const router = useRouter();
+  const { addToCart } = useCart();
 
-  const getCombo = () => {
-    if (typeof window === "undefined") return [];
-    const stored = localStorage.getItem("combo");
-    return stored ? JSON.parse(stored) : [];
-  };
+  const [combo, setCombo] = useState([]);
+
+  // Sync state with localStorage & comboUpdated events
+  useEffect(() => {
+    const sync = () => {
+      const stored = localStorage.getItem("combo");
+      setCombo(stored ? JSON.parse(stored) : []);
+    };
+    sync();
+
+    window.addEventListener("storage", sync);
+    window.addEventListener("comboUpdated", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("comboUpdated", sync);
+    };
+  }, []);
 
   const addToCombo = (product) => {
-    const combo = getCombo();
-
-    if (combo.find((p) => p._id === product._id)) return;
+    if (combo.find((p) => (p._id || p.productId) === product._id)) return;
 
     // Default select the first variant if available
     const defaultVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
     const updated = [...combo, { ...product, selectedVariant: defaultVariant }];
 
     localStorage.setItem("combo", JSON.stringify(updated));
+    setCombo(updated);
     window.dispatchEvent(new Event("comboUpdated"));
+
+    // Sync to global CartContext so top Navbar cart badge count updates live!
+    addToCart({ ...product, selectedVariant: defaultVariant });
   };
 
   const isSelected = (id) => {
-    return getCombo().some((p) => p._id === id);
+    return combo.some((p) => (p._id || p.productId) === id);
   };
 
   const grouped = products.reduce((acc, p) => {
@@ -86,9 +102,9 @@ function ComboProductCard({ p, selected, addToCombo, router }) {
   return (
     <div
       className={`
-        flex items-center gap-4 p-3.5 border rounded-2xl bg-white dark:bg-[#23181C] 
-        transition-all duration-300 hover:shadow-sm hover:border-pink-200/60
-        ${selected ? "border-pink-300 ring-2 ring-pink-100/50 bg-pink-50/10 dark:bg-pink-950/5" : "border-rose-100/60 dark:border-white/5"}
+        flex items-center gap-4 p-3.5 border rounded-2xl bg-white dark:bg-[#1e1215] 
+        transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(244,63,94,0.08)]
+        ${selected ? "border-pink-400 dark:border-pink-500/40 ring-2 ring-pink-100/40 dark:ring-transparent bg-pink-50/15 dark:bg-pink-950/10" : "border-stone-200/50 dark:border-white/10 hover:border-pink-300/60"}
       `}
     >
       {/* Thumbnail Image */}
@@ -127,7 +143,7 @@ function ComboProductCard({ p, selected, addToCombo, router }) {
         onClick={() => addToCombo(p)}
         disabled={selected}
         className={`
-          flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer shrink-0
+          flex items-center justify-center gap-1.5 px-4.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 min-w-[85px]
           ${selected 
             ? "bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-450 dark:border-emerald-900" 
             : "bg-pink-500 hover:bg-pink-600 text-white shadow-xs"

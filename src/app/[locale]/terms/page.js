@@ -1,128 +1,147 @@
+import Link from "next/link";
+import { FileText, Lock, Truck, HelpCircle, ChevronRight, CheckCircle2 } from "lucide-react";
+
 export const metadata = {
-  title: "Terms & Conditions | Cherry Glow",
-  description:
-    "Read the terms and conditions governing the use of the Cherry Glow website and services.",
+  title: "Terms & Conditions | Cherry Glow Korea",
+  description: "Read the official terms and conditions governing purchases and usage on Cherry Glow Korea.",
 };
 
 export default function TermsAndConditionsPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-16">
-      <h1 className="mb-6 text-3xl font-bold">Terms & Conditions</h1>
+    <main className="relative min-h-screen bg-stone-50/50 dark:bg-[#160d10] text-stone-800 dark:text-rose-100 overflow-hidden">
+      {/* Ambient Background Blur Glows */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-10 right-10 w-96 h-96 bg-pink-300/15 dark:bg-rose-900/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-10 w-80 h-80 bg-rose-200/15 dark:bg-pink-900/10 rounded-full blur-3xl" />
+      </div>
 
-      <p className="mb-8 text-muted-foreground">
-        Welcome to <strong>Cherry Glow</strong>. By accessing or using our
-        website, you agree to be bound by the following Terms & Conditions.
-        Please read them carefully before using our services.
-      </p>
+      <div className="relative z-10">
+        {/* Hero Header */}
+        <section className="border-b border-rose-100/60 dark:border-white/5 bg-gradient-to-b from-rose-50/80 via-white to-stone-50/50 dark:from-[#211418] dark:via-[#1a0f13] dark:to-[#160d10] py-12 md:py-16 text-center">
+          <div className="max-w-4xl mx-auto px-4 space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-300 bg-rose-100/70 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/40 shadow-2xs">
+              <FileText className="w-3.5 h-3.5" /> Customer Agreement
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-serif font-extrabold text-stone-900 dark:text-white">
+              Terms & Conditions
+            </h1>
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-rose-100/70 max-w-xl mx-auto">
+              Last Updated: August 2026. The terms governing your orders and use of Cherry Glow Korea.
+            </p>
+          </div>
+        </section>
 
-      {/* Section 1 */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">1. Use of Website</h2>
-        <p className="text-muted-foreground">
-          By using this website, you confirm that you are at least 18 years old
-          or accessing the site under the supervision of a legal guardian. You
-          agree to use the website only for lawful purposes and in a manner that
-          does not violate any applicable laws or regulations.
-        </p>
-      </section>
+        {/* 2-Column Amazon Style Layout */}
+        <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+          <div className="grid lg:grid-cols-12 gap-8">
 
-      {/* Section 2 */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">
-          2. Products & Information
-        </h2>
-        <p className="text-muted-foreground">
-          We strive to display accurate product descriptions, pricing, and
-          images. However, Cherry Glow does not guarantee that all product
-          information is error-free, complete, or current. Product colors may
-          vary slightly due to screen settings.
-        </p>
-      </section>
+            {/* Left Sidebar Index */}
+            <aside className="lg:col-span-3 space-y-4">
+              <div className="bg-white dark:bg-[#1e1215] p-4 rounded-2xl border border-stone-200/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-2 sticky top-24">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-rose-500 px-2">
+                  Legal Directory
+                </h3>
+                <div className="space-y-1 text-xs font-medium">
+                  <Link
+                    href="/terms"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold shadow-2xs"
+                  >
+                    <span className="flex items-center gap-2">
+                      <FileText className="w-3.5 h-3.5" /> Terms & Conditions
+                    </span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
 
-      {/* Section 3 */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">3. Orders & Payments</h2>
-        <ul className="list-disc space-y-2 pl-6 text-muted-foreground">
-          <li>All orders are subject to availability and confirmation.</li>
-          <li>Prices may change without prior notice.</li>
-          <li>
-            Cherry Glow reserves the right to cancel or refuse any order at our
-            discretion.
-          </li>
-        </ul>
-      </section>
+                  <Link
+                    href="/privacy-policy"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl text-stone-600 dark:text-rose-100/70 hover:bg-rose-50 dark:hover:bg-white/5 transition"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Lock className="w-3.5 h-3.5" /> Privacy Policy
+                    </span>
+                  </Link>
 
-      {/* Section 4 */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">4. Shipping & Returns</h2>
-        <p className="text-muted-foreground">
-          Shipping times, costs, and return eligibility are governed by our
-          <strong> Shipping & Returns Policy</strong>. Please review that page
-          for detailed information before placing an order.
-        </p>
-      </section>
+                  <Link
+                    href="/shipping"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl text-stone-600 dark:text-rose-100/70 hover:bg-rose-50 dark:hover:bg-white/5 transition"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Truck className="w-3.5 h-3.5" /> Shipping & Returns
+                    </span>
+                  </Link>
 
-      {/* Section 5 */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">5. Intellectual Property</h2>
-        <p className="text-muted-foreground">
-          All content on this website, including logos, text, images, graphics,
-          and designs, is the property of Cherry Glow and is protected by
-          intellectual property laws. Unauthorized use or reproduction is
-          strictly prohibited.
-        </p>
-      </section>
+                  <Link
+                    href="/faq"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl text-stone-600 dark:text-rose-100/70 hover:bg-rose-50 dark:hover:bg-white/5 transition"
+                  >
+                    <span className="flex items-center gap-2">
+                      <HelpCircle className="w-3.5 h-3.5" /> Help & FAQ
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </aside>
 
-      {/* Section 6 */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">6. User Conduct</h2>
-        <ul className="list-disc space-y-2 pl-6 text-muted-foreground">
-          <li>Do not misuse or attempt to harm the website</li>
-          <li>Do not submit false or misleading information</li>
-          <li>Do not engage in fraudulent or abusive behavior</li>
-        </ul>
-      </section>
+            {/* Right Main Policy Content */}
+            <main className="lg:col-span-9 space-y-6">
+              <div className="p-6 sm:p-10 rounded-3xl bg-white dark:bg-[#1e1215] border border-stone-200/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-8">
+                
+                {/* Intro Callout */}
+                <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border-l-4 border-rose-500 space-y-1">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-300">
+                    Agreement Overview
+                  </h3>
+                  <p className="text-xs text-stone-600 dark:text-rose-100/80 leading-relaxed">
+                    By placing an order or browsing Cherry Glow Korea, you agree to comply with these terms. We ensure transparent pricing, authentic South Korean skincare formulations, and nationwide delivery across Bangladesh.
+                  </p>
+                </div>
 
-      {/* Section 7 */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">
-          7. Limitation of Liability
-        </h2>
-        <p className="text-muted-foreground">
-          Cherry Glow shall not be liable for any indirect, incidental, or
-          consequential damages arising from the use of our website or products,
-          to the maximum extent permitted by law.
-        </p>
-      </section>
+                {/* Section 1 */}
+                <section className="space-y-3">
+                  <h2 className="text-lg font-serif font-bold text-stone-900 dark:text-white flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-rose-100 dark:bg-rose-950/50 text-rose-500 text-xs flex items-center justify-center font-bold">1</span>
+                    Product Authenticity & Accuracy
+                  </h2>
+                  <p className="text-xs sm:text-sm text-stone-600 dark:text-rose-100/70 leading-relaxed">
+                    All products sold on Cherry Glow Korea are 100% authentic, imported directly from South Korea. We strive for exact product descriptions, images, and pricing. Prices are listed in Bangladeshi Taka (৳).
+                  </p>
+                </section>
 
-      {/* Section 8 */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">8. Third-Party Services</h2>
-        <p className="text-muted-foreground">
-          Our website may contain links to third-party services such as WhatsApp
-          or Facebook Messenger. Cherry Glow is not responsible for the content,
-          policies, or practices of these third parties.
-        </p>
-      </section>
+                {/* Section 2 */}
+                <section className="space-y-3 pt-4 border-t border-stone-100 dark:border-white/5">
+                  <h2 className="text-lg font-serif font-bold text-stone-900 dark:text-white flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-rose-100 dark:bg-rose-950/50 text-rose-500 text-xs flex items-center justify-center font-bold">2</span>
+                    Orders & Payment Terms
+                  </h2>
+                  <ul className="space-y-2 text-xs text-stone-600 dark:text-rose-100/80 pl-4">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-pink-500 shrink-0 mt-0.5" />
+                      <span><strong>Cash on Delivery:</strong> Available nationwide across all 64 districts in Bangladesh.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-pink-500 shrink-0 mt-0.5" />
+                      <span><strong>Digital Payments:</strong> bKash, Nagad, Visa, and Mastercard transactions are processed securely.</span>
+                    </li>
+                  </ul>
+                </section>
 
-      {/* Section 9 */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">9. Changes to Terms</h2>
-        <p className="text-muted-foreground">
-          Cherry Glow reserves the right to modify these Terms & Conditions at
-          any time. Continued use of the website after changes indicates your
-          acceptance of the updated terms.
-        </p>
-      </section>
+                {/* Section 3 */}
+                <section className="space-y-3 pt-4 border-t border-stone-100 dark:border-white/5">
+                  <h2 className="text-lg font-serif font-bold text-stone-900 dark:text-white flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-rose-100 dark:bg-rose-950/50 text-rose-500 text-xs flex items-center justify-center font-bold">3</span>
+                    Return & Replacement Guarantee
+                  </h2>
+                  <p className="text-xs sm:text-sm text-stone-600 dark:text-rose-100/70 leading-relaxed">
+                    Customers enjoy a 7-day return and exchange policy for damaged, wrong, or defective items upon delivery. See our <Link href="/shipping" className="text-rose-500 font-bold hover:underline">Shipping & Return Policy</Link> for detailed eligibility.
+                  </p>
+                </section>
 
-      {/* Section 10 */}
-      <section>
-        <h2 className="mb-3 text-xl font-semibold">10. Contact Information</h2>
-        <p className="text-muted-foreground">
-          If you have any questions regarding these Terms & Conditions, please
-          contact us through our website or messaging platforms.
-        </p>
-      </section>
+              </div>
+            </main>
+
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

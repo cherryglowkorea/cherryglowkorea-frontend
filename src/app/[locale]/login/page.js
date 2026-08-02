@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Link } from "@/i18n/navigation";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslations } from "next-intl";
 import { Eye, EyeOff } from "lucide-react";
@@ -14,6 +14,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const tAuth = useTranslations("auth");
   const [method, setMethod] = React.useState("email");
   const [identifier, setIdentifier] = React.useState("");
@@ -51,7 +52,8 @@ export default function LoginPage() {
 
       if (data.token) {
         localStorage.setItem("token", data.token);
-        window.location.href = "/";
+        const redirectTarget = searchParams.get("redirect") || "/";
+        window.location.href = redirectTarget;
       }
     } catch {
       setFormError("সার্ভারে সংযোগ করা যায়নি। ইন্টারনেট চেক করুন।");

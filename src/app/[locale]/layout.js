@@ -2,11 +2,12 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
-import Navbar from "@/components/layout/Navbar";
+import ClientNavbar from "@/components/layout/ClientNavbar";
 import Footer from "@/components/layout/Footer";
 import Messenger from "@/components/shared/Messenger";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import { Toaster } from "sonner";
 import PromoPopup from "@/components/popup/PromoPopup";
 
@@ -26,14 +27,16 @@ export default async function LocaleLayout({ children, params }) {
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <AuthProvider>
-        <CartProvider>
-          <Navbar />
-          <PromoPopup />
-          {children}
-          <Toaster richColors position="top-right" />
-          <Messenger />
-        </CartProvider>
-        <Footer />
+        <WishlistProvider>
+          <CartProvider>
+            <ClientNavbar />
+            <PromoPopup />
+            {children}
+            <Toaster richColors position="top-right" />
+            <Messenger />
+          </CartProvider>
+          <Footer />
+        </WishlistProvider>
       </AuthProvider>
     </NextIntlClientProvider>
   );

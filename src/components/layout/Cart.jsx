@@ -1,15 +1,32 @@
 "use client";
 
-import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useRouter } from "@/i18n/navigation";
+import { toast } from "sonner";
 
 export default function Cart() {
-  const { totalItems } = useCart();
+  const { totalItems, setIsLoginModalOpen } = useCart();
+  const router = useRouter();
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) {
+      toast.error("Please log in to view your shopping cart.");
+      if (setIsLoginModalOpen) {
+        setIsLoginModalOpen(true);
+      } else {
+        router.push("/login?redirect=/cart");
+      }
+    } else {
+      router.push("/cart");
+    }
+  };
 
   return (
-    <Link
-      href="/cart"
+    <button
+      onClick={handleClick}
       aria-label="Shopping Cart"
       className="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-rose-200/60 bg-white/70 text-rose-500 shadow-sm backdrop-blur transition-all hover:bg-rose-50 dark:border-white/10 dark:bg-white/5 dark:text-rose-300 dark:hover:bg-white/10 cursor-pointer"
     >
@@ -20,6 +37,7 @@ export default function Cart() {
           {totalItems}
         </span>
       )}
-    </Link>
+    </button>
   );
 }
+

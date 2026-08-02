@@ -7,24 +7,22 @@ import CategoriesSection from "@/components/home/CategoriesSection";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
 import HeroSection from "@/components/home/HeroSection";
 import HighlightsSection from "@/components/home/HighlightSection";
-import Newsletter from "@/components/home/Newsletter";
 import Testimonials from "@/components/home/Testimonials";
 import FeaturedComboDeals from "@/components/home/FeaturedComboDeals";
 import { useEffect, useState } from "react";
 
 
 export default function Page() {
-return (
-<main style={{ padding: 24, fontFamily: 'Arial' }}>
-    <HeroSection />
-    <HighlightsSection />
-    <FeaturedProducts />
-    <CategoriesSection />
-    <BenefitsSection />
-    <BestSoldProducts />
-    <FeaturedComboDeals />
-    <Testimonials />
-    <Newsletter />
-</main>
-);
+  return (
+    <main className="space-y-12 sm:space-y-16 pb-12 font-sans">
+      <HeroSection />
+      <HighlightsSection />
+      <CategoriesSection />
+      <FeaturedProducts />
+      <FeaturedComboDeals />
+      <BestSoldProducts />
+      <BenefitsSection />
+      <Testimonials />
+    </main>
+  );
 }

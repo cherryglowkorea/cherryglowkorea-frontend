@@ -1,13 +1,12 @@
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import ProfileCard from "@/components/about/ProfileCard";
 import Link from "next/link";
+import ProfileCard from "@/components/about/ProfileCard";
+import { Sparkles, ShieldCheck, Heart, Leaf, Award, ArrowRight, CheckCircle2 } from "lucide-react";
 
-const metadata = {
-  title: "About Us - Cherry Glow",
+export const metadata = {
+  title: "About Us - Cherry Glow Korea",
   description:
-    "Learn more about Cherry Glow, our story, mission, and the values that drive us to create clean beauty products.",
+    "Learn more about Cherry Glow Korea, our story, mission, and our passion for bringing authentic Korean skincare to you.",
 };
 
 const teamMembers = [
@@ -21,7 +20,7 @@ const teamMembers = [
   },
   {
     name: "Abdullah Al Fahad",
-    post: "Product Manager & quality control",
+    post: "Product Manager & Quality Control",
     imgSrc: "https://i.ibb.co/fdmgkwkD/fahad.jpg",
     desc: "Manages product development while ensuring all products meet quality standards before delivery.",
     facebook: "https://www.facebook.com/megla.meglaaksh.5",
@@ -52,174 +51,210 @@ const teamMembers = [
     instagram: null,
   },
 ];
+
+const pillars = [
+  {
+    icon: ShieldCheck,
+    title: "100% Authentic Korean",
+    desc: "Directly sourced from trusted top skincare labs in South Korea.",
+  },
+  {
+    icon: Leaf,
+    title: "Clean & Cruelty-Free",
+    desc: "Formulated without harsh chemicals, parabens, or animal testing.",
+  },
+  {
+    icon: Sparkles,
+    title: "Dermatologically Tested",
+    desc: "Rigorously evaluated to ensure safety and performance for sensitive skin.",
+  },
+  {
+    icon: Heart,
+    title: "Made for All Skin Types",
+    desc: "Designed to hydrate, restore, and unlock your skin's natural glow.",
+  },
+];
+
 export default function AboutPage() {
   return (
-    <main className="flex flex-col">
-      {/* 1. Hero Section */}
-      <section className="relative bg-gradient-to-r from-pink-50 to-rose-100 py-20">
-        <div className="mx-auto max-w-7xl px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            About Cherry Glow
-          </h1>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Clean beauty inspired by nature, crafted with science, and made to
-            glow with confidence.
-          </p>
-        </div>
-      </section>
+    <main className="relative min-h-screen bg-stone-50/50 dark:bg-[#160d10] text-stone-800 dark:text-rose-100 overflow-hidden">
+      {/* Background Ambient Blur Glows */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-10 right-10 w-96 h-96 bg-pink-300/15 dark:bg-rose-900/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-10 w-80 h-80 bg-rose-200/15 dark:bg-pink-900/10 rounded-full blur-3xl" />
+      </div>
 
-      {/* 2. Our Story */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <h2 className="text-3xl font-semibold">Our Story</h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-              Cherry Glow was born from a simple belief: skincare should be
-              effective, gentle, and honest. We started our journey with a
-              mission to create products that enhance natural beauty without
-              compromising skin health.
-            </p>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-              Every formula is thoughtfully developed, combining modern skincare
-              science with carefully selected ingredients.
+      <div className="relative z-10">
+        {/* 1. Hero Banner */}
+        <section className="border-b border-rose-100/60 dark:border-white/5 bg-gradient-to-b from-rose-50/80 via-white to-stone-50/50 dark:from-[#211418] dark:via-[#1a0f13] dark:to-[#160d10] py-16 md:py-24 text-center">
+          <div className="max-w-4xl mx-auto px-4">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-300 bg-rose-100/70 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/40 mb-4 shadow-2xs">
+              <Sparkles className="w-3.5 h-3.5" /> Authentic Korean Skincare
+            </span>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-extrabold text-stone-900 dark:text-white tracking-tight leading-tight">
+              About <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">Cherry Glow</span>
+            </h1>
+            <p className="mt-4 text-sm sm:text-base text-stone-600 dark:text-rose-100/70 max-w-2xl mx-auto leading-relaxed">
+              Clean beauty inspired by Korean skincare traditions, crafted with science, and dedicated to restoring your natural confidence and radiance.
             </p>
           </div>
+        </section>
 
-          <Image
-            src="/logo.png"
-            alt="Our Story"
-            width={500}
-            height={400}
-            className="rounded-2xl object-cover"
-          />
-        </div>
-      </section>
-      {/* our team */}
-      <section className="py-10">
-        <h3 className="text-3xl font-semibold text-center mb-10">Our Team</h3>
-        {/* Team Members Grid */}
-        <div className="mx-auto max-w-7xl px-4 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {teamMembers.map((member) => (
-            <ProfileCard key={member.name} member={member} />
-          ))}
-        </div>
-      </section>
+        <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-20">
 
-      {/* 3. Mission & Vision */}
-      <section className="bg-muted py-20">
-        <div className="mx-auto max-w-7xl px-4 grid md:grid-cols-2 gap-8">
-          <Card>
-            <CardContent className="p-8">
-              <h3 className="text-2xl font-semibold">Our Mission</h3>
-              <p className="mt-4 text-muted-foreground">
-                To empower confidence through clean, effective, and affordable
-                skincare solutions for every skin type.
+          {/* 2. Our Story Section */}
+          <section className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-500">
+                <Award className="w-4 h-4" /> Our Philosophy & Beginnings
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900 dark:text-white">
+                Empowering Confidence Through Honest Skincare
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-rose-100/80 leading-relaxed">
+                Cherry Glow was born from a simple passion: skincare should be effective, gentle, and transparent. We started our journey to bridge the gap between premium South Korean skincare innovations and beauty enthusiasts seeking genuine skin health.
               </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-8">
-              <h3 className="text-2xl font-semibold">Our Vision</h3>
-              <p className="mt-4 text-muted-foreground">
-                To become a trusted beauty brand that prioritizes transparency,
-                sustainability, and skin-first innovation.
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-rose-100/80 leading-relaxed">
+                Every product in our collection is carefully curated and tested. We focus on gentle botanicals, active repair ingredients, and non-comedogenic formulations that nurture your skin barrier day after day.
               </p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
 
-      {/* 4. Why Choose Us */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4">
-          <h2 className="text-3xl font-semibold text-center">
-            Why Choose Cherry Glow
-          </h2>
+              <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex items-center gap-3 p-3.5 bg-white dark:bg-[#1e1215] border border-stone-200/60 dark:border-white/10 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:border-pink-500/50 hover:shadow-[0_4px_16px_rgba(244,63,94,0.08)] transition-all duration-300 group cursor-pointer">
+                  <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-pink-500 flex items-center justify-center shrink-0 border border-pink-100 dark:border-pink-900/30 group-hover:bg-pink-500 group-hover:text-white transition">
+                    <CheckCircle2 className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-stone-900 dark:text-white group-hover:text-pink-600 transition">Direct From Korea</h4>
+                    <p className="text-[11px] text-stone-500 dark:text-rose-100/60 font-medium">100% Sourced from KR Labs</p>
+                  </div>
+                </div>
 
-          <div className="mt-12 grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              "Dermatologically Tested",
-              "Cruelty-Free",
-              "Clean Ingredients",
-              "Made for All Skin Types",
-            ].map((item) => (
-              <Card key={item}>
-                <CardContent className="p-6 text-center">
-                  <p className="font-medium">{item}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+                <div className="flex items-center gap-3 p-3.5 bg-white dark:bg-[#1e1215] border border-stone-200/60 dark:border-white/10 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:border-rose-500/50 hover:shadow-[0_4px_16px_rgba(244,63,94,0.08)] transition-all duration-300 group cursor-pointer">
+                  <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100 dark:border-rose-900/30 group-hover:bg-rose-500 group-hover:text-white transition">
+                    <ShieldCheck className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-stone-900 dark:text-white group-hover:text-rose-600 transition">Safe & Certified</h4>
+                    <p className="text-[11px] text-stone-500 dark:text-rose-100/60 font-medium">Dermatologically Approved</p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-      {/* 5. Ingredients & Ethics */}
-      <section className="bg-muted py-20">
-        <div className="mx-auto max-w-7xl px-4 grid md:grid-cols-2 gap-10 items-center">
-          <Image
-            src="/logo.png"
-            alt="Ingredients"
-            width={500}
-            height={400}
-            className="rounded-2xl object-cover"
-          />
+            {/* Right Column: High Quality Skincare Brand Showcase */}
+            <div className="relative w-full">
+              <div className="relative w-full h-[380px] sm:h-[440px] rounded-3xl overflow-hidden border border-stone-200/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] group">
+                <Image
+                  src="https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1200&auto=format&fit=crop"
+                  alt="Cherry Glow Korean Skincare Essence"
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 600px"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+            </div>
+          </section>
 
-          <div>
-            <h2 className="text-3xl font-semibold">
-              Ingredients You Can Trust
+          {/* 3. Why Choose Cherry Glow (Pillars) */}
+          <section className="space-y-8">
+            <div className="text-center max-w-xl mx-auto space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900 dark:text-white">
+                Why Choose Cherry Glow
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-100/60">
+                Four core promises that guide every product we offer.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {pillars.map((pillar, idx) => {
+                const IconComponent = pillar.icon;
+                return (
+                  <div
+                    key={idx}
+                    className="p-6 rounded-2xl bg-white dark:bg-[#1e1215] border border-stone-200/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center space-y-3"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-500 flex items-center justify-center border border-rose-100 dark:border-rose-900/30">
+                      <IconComponent className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-sm font-bold text-stone-900 dark:text-white font-serif">
+                      {pillar.title}
+                    </h3>
+                    <p className="text-xs text-stone-500 dark:text-rose-100/60 leading-relaxed">
+                      {pillar.desc}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* 4. Mission & Vision */}
+          <section className="grid md:grid-cols-2 gap-8">
+            <div className="p-8 rounded-3xl bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-md space-y-4">
+              <span className="px-3 py-1 bg-white/20 rounded-full text-[11px] font-extrabold uppercase tracking-wider text-white">
+                Our Mission
+              </span>
+              <h3 className="text-xl sm:text-2xl font-serif font-bold">
+                Empower Authentic Radiance
+              </h3>
+              <p className="text-xs sm:text-sm text-rose-50 leading-relaxed">
+                To empower confidence through clean, effective, and accessible skincare solutions for every skin tone and type across Bangladesh and beyond.
+              </p>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-white dark:bg-[#1e1215] border border-stone-200/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-4">
+              <span className="px-3 py-1 bg-rose-50 dark:bg-rose-950/50 rounded-full text-[11px] font-extrabold uppercase tracking-wider text-rose-500 border border-rose-100 dark:border-rose-900/30">
+                Our Vision
+              </span>
+              <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 dark:text-white">
+                Trusted Beauty Leadership
+              </h3>
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-rose-100/70 leading-relaxed">
+                To become the most trusted skincare destination prioritizing product transparency, skin-first innovation, and exceptional customer care.
+              </p>
+            </div>
+          </section>
+
+          {/* 5. Team Section */}
+          <section className="space-y-10">
+            <div className="text-center max-w-xl mx-auto space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900 dark:text-white">
+                Meet Our Team
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-100/60">
+                The passionate minds behind Cherry Glow Korea.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {teamMembers.map((member) => (
+                <ProfileCard key={member.name} member={member} />
+              ))}
+            </div>
+          </section>
+
+          {/* 6. CTA Banner */}
+          <section className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-rose-50 to-pink-50 dark:from-[#211418] dark:to-[#1a0f13] border border-rose-200/60 dark:border-white/10 text-center space-y-6 shadow-sm">
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900 dark:text-white max-w-xl mx-auto">
+              Ready to Discover Your Natural Glow?
             </h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-              We use carefully sourced ingredients, avoiding harsh chemicals,
-              parabens, and unnecessary additives. Our products are cruelty-free
-              and responsibly manufactured.
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-rose-100/70 max-w-md mx-auto">
+              Explore our collection of authentic Korean skincare items, combo deals, and daily essentials.
             </p>
-          </div>
+            <div className="pt-2">
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition cursor-pointer"
+              >
+                Shop Collection <ArrowRight size={16} />
+              </Link>
+            </div>
+          </section>
+
         </div>
-      </section>
-
-      {/* 6. Brand Values */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 text-center">
-          <h2 className="text-3xl font-semibold">Our Core Values</h2>
-
-          <div className="mt-10 grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {[
-              "Transparency",
-              "Sustainability",
-              "Innovation",
-              "Inclusivity",
-              "Quality",
-              "Customer First",
-            ].map((value) => (
-              <Card key={value}>
-                <CardContent className="p-6">
-                  <p className="font-medium">{value}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 7. Call To Action */}
-      <section className="bg-gradient-to-r from-rose-500 to-pink-500 py-20 text-white">
-        <div className="mx-auto max-w-7xl px-4 text-center">
-          <h2 className="text-3xl font-semibold">
-            Ready to Glow With Confidence?
-          </h2>
-          <p className="mt-4 opacity-90">
-            Discover products crafted to bring out your natural beauty.
-          </p>
-
-          <Button
-            size="lg"
-            className="mt-6 bg-white text-rose-600 hover:bg-white/90 cursor-pointer"
-          >
-            <Link href="/products">Shop Now</Link>
-          </Button>
-        </div>
-      </section>
+      </div>
     </main>
   );
 }
