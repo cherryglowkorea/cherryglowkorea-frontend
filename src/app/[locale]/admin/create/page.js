@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,9 @@ const DEFAULT_CONCERNS = ["Acne & Blemishes", "Dark Spots & Pigmentation", "Anti
 
 export default function CreateProductPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params?.locale || "en";
+  const isBn = locale === "bn";
 
   const [submitting, setSubmitting] = useState(false);
   const [uploadingIdx, setUploadingIdx] = useState(null); // Index of image field currently uploading
@@ -364,7 +367,7 @@ export default function CreateProductPage() {
         <div className="lg:col-span-2 space-y-6">
 
           {/* CARD 1: PRODUCT IDENTITY */}
-          <div className="p-6 rounded-3xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] shadow-xs space-y-4">
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
             <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
               <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
                 <Tag className="h-4 w-4" />
@@ -412,90 +415,148 @@ export default function CreateProductPage() {
             </div>
           </div>
 
-          {/* CARD 2: MEDIA & GALLERY (Grid Visual Display) */}
-          <div className="p-6 rounded-3xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] shadow-xs space-y-4">
+          {/* CARD 2: MEDIA & GALLERY (Shopify-Grade Upload Zone & Gallery List) */}
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
                 <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
                   <ImageIcon className="h-4 w-4" />
                 </div>
-                <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Media & Gallery</h2>
+                <div>
+                  <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Media & Gallery</h2>
+                  <p className="text-[11px] text-stone-500 font-normal">Add high-resolution product photos & thumbnail images</p>
+                </div>
               </div>
-              <span className="text-[11px] font-semibold text-stone-400">Upload to Cloudinary</span>
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40">
+                Cloudinary Storage
+              </span>
             </div>
 
-            {/* Visual Image Grid Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              {images.map((img, idx) => (
-                <div
-                  key={idx}
-                  className="relative group rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50 dark:bg-slate-900/50 p-2.5 flex flex-col justify-between space-y-2 aspect-square overflow-hidden"
+            {/* Top Dropzone / Upload Banner */}
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-rose-200 dark:border-rose-900/60 hover:border-rose-400 bg-rose-50/20 dark:bg-rose-950/20 rounded-2xl cursor-pointer transition-all text-center space-y-2 group">
+              <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform">
+                {uploadingIdx !== null ? (
+                  <Loader2 className="h-7 w-7 animate-spin text-rose-500" />
+                ) : (
+                  <Upload className="h-7 w-7 text-rose-500" />
+                )}
+              </div>
+
+              <div>
+                <p className="text-xs font-extrabold text-stone-900 dark:text-white">
+                  {uploadingIdx !== null ? "Uploading Image to Cloudinary..." : "Click or Drag & Drop Product Photos"}
+                </p>
+                <p className="text-[11px] text-stone-500 dark:text-slate-400 mt-0.5">
+                  Upload directly from your local computer (PNG, JPG, WEBP - Max 10MB)
+                </p>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-500 text-white font-bold text-xs group-hover:bg-rose-600 transition-colors">
+                <Upload className="h-3.5 w-3.5" />
+                <span>Upload File from Device</span>
+              </div>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const targetIdx = images.findIndex((url) => !url) >= 0 ? images.findIndex((url) => !url) : images.length;
+                  handleFileUpload(e, targetIdx);
+                }}
+                disabled={uploadingIdx !== null}
+                className="hidden"
+              />
+            </label>
+
+            {/* List of Image Cards */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between text-xs font-bold text-stone-700 dark:text-slate-300">
+                <span>Product Images ({images.filter(Boolean).length})</span>
+                <button
+                  type="button"
+                  onClick={addImageField}
+                  className="text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 text-[11px]"
                 >
-                  {/* Image Preview or Placeholder */}
-                  {img ? (
-                    <div className="relative w-full h-full rounded-xl overflow-hidden bg-white">
-                      <Image src={img} alt={`Media #${idx + 1}`} fill sizes="120px" className="object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeImageField(idx)}
-                        className="absolute top-1 right-1 bg-black/70 hover:bg-rose-600 text-white p-1 rounded-full opacity-90 transition-opacity"
-                        title="Remove"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                      {idx === 0 && (
-                        <span className="absolute bottom-1 left-1 bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">
-                          MAIN
-                        </span>
+                  <Plus className="h-3.5 w-3.5" /> Add URL Field
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {images.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200/80 dark:border-slate-800 space-y-2.5 transition-all hover:border-stone-300"
+                  >
+                    {/* Header line: Card Badge & Remove */}
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5 font-extrabold text-[10px] text-stone-600 dark:text-slate-300">
+                        {idx === 0 ? (
+                          <span className="px-2 py-0.5 rounded-md bg-rose-500 text-white font-black">
+                            ★ MAIN THUMBNAIL
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-md bg-stone-200 dark:bg-slate-800 text-stone-700 dark:text-slate-300">
+                            GALLERY IMAGE #{idx + 1}
+                          </span>
+                        )}
+                      </span>
+
+                      {images.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeImageField(idx)}
+                          className="text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-950 p-1 rounded-lg transition-colors"
+                          title="Remove Image"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       )}
                     </div>
-                  ) : (
-                    <label className="w-full h-full rounded-xl border-2 border-dashed border-stone-300 dark:border-slate-700 hover:border-rose-400 dark:hover:border-rose-500 flex flex-col items-center justify-center p-2 text-center cursor-pointer transition-all bg-white/50 dark:bg-slate-900/40">
-                      {uploadingIdx === idx ? (
-                        <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
-                      ) : (
-                        <>
-                          <Upload className="h-5 w-5 text-stone-400 dark:text-slate-500 mb-1" />
-                          <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
-                            {idx === 0 ? "Upload Main" : "Upload Image"}
-                          </span>
-                        </>
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e, idx)}
-                        disabled={uploadingIdx !== null}
-                        className="hidden"
+
+                    {/* Image Preview Box */}
+                    {img ? (
+                      <div className="relative h-32 w-full rounded-xl overflow-hidden border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs">
+                        <Image src={img} alt={`Media #${idx + 1}`} fill sizes="250px" className="object-cover" />
+                      </div>
+                    ) : (
+                      <div className="h-20 w-full rounded-xl border border-dashed border-stone-200 dark:border-slate-800 bg-white/60 dark:bg-slate-950/40 flex items-center justify-center text-stone-400 text-[11px] font-medium">
+                        No image uploaded yet
+                      </div>
+                    )}
+
+                    {/* URL Input & Upload Row */}
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder={idx === 0 ? "Main image URL (https://...)" : "Gallery image URL"}
+                        value={img}
+                        onChange={(e) => updateImageField(idx, e.target.value)}
+                        className="bg-white dark:bg-slate-900 border-stone-200 dark:border-slate-800 text-xs rounded-xl flex-1"
                       />
-                    </label>
-                  )}
 
-                  {/* URL Input Box */}
-                  <Input
-                    placeholder="Or paste URL..."
-                    value={img}
-                    onChange={(e) => updateImageField(idx, e.target.value)}
-                    className="bg-white dark:bg-slate-900 border-stone-200 dark:border-slate-800 text-[10px] h-7 px-2 rounded-lg"
-                  />
-                </div>
-              ))}
-
-              {/* Add New Image Tile */}
-              <button
-                type="button"
-                onClick={addImageField}
-                className="rounded-2xl border-2 border-dashed border-stone-200 dark:border-slate-800 hover:border-rose-400 flex flex-col items-center justify-center aspect-square text-stone-400 hover:text-rose-500 transition-colors cursor-pointer"
-              >
-                <Plus className="h-6 w-6" />
-                <span className="text-[10px] font-bold mt-1">Add Image Field</span>
-              </button>
+                      <label className="p-2 rounded-xl bg-stone-200/80 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-stone-700 dark:text-slate-300 transition-colors cursor-pointer shrink-0" title="Upload from Device">
+                        {uploadingIdx === idx ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
+                        ) : (
+                          <Upload className="h-4 w-4" />
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, idx)}
+                          disabled={uploadingIdx !== null}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* CARD 3: VARIANTS OR COMBO DEALS */}
           {form.type === "single" ? (
-            <div className="p-6 rounded-3xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] shadow-xs space-y-4">
+            <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
               <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
                 <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
                   <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
@@ -576,7 +637,7 @@ export default function CreateProductPage() {
             </div>
           ) : (
             /* COMBO BUNDLE SELECTOR */
-            <div className="p-6 rounded-3xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] shadow-xs space-y-4">
+            <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
               <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
                 <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
                   <Gift className="h-4 w-4" />
@@ -663,7 +724,7 @@ export default function CreateProductPage() {
           )}
 
           {/* CARD 4: DESCRIPTIONS & INGREDIENTS */}
-          <div className="p-6 rounded-3xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] shadow-xs space-y-4">
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
                 <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
@@ -689,11 +750,15 @@ export default function CreateProductPage() {
             <div className="space-y-4 text-xs">
               <div>
                 <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block flex items-center justify-between">
-                  <span>Short Summary (সংক্ষিপ্ত বিবরণ)</span>
-                  <span className="text-[10px] font-normal text-stone-400">Supports multiline text in Bangla, Korean & English</span>
+                  <span>{isBn ? "সংক্ষিপ্ত বিবরণ (Short Summary)" : "Short Summary"}</span>
+                  <span className="text-[10px] font-normal text-stone-400">Supports Bangla, Korean & English</span>
                 </label>
                 <Textarea
-                  placeholder="যেমন: এই সানস্ক্রিনটি ত্বককে ক্ষতিকারক রোদ থেকে রক্ষা করে এবং গভীর আর্দ্রতা যোগায়... / 이 자외선 차단제는 피부를 보호합니다..."
+                  placeholder={
+                    isBn
+                      ? "যেমন: এই সানস্ক্রিনটি ত্বককে ক্ষতিকারক রোদ থেকে রক্ষা করে এবং গভীর আর্দ্রতা যোগায়..."
+                      : "e.g. Protects skin against harmful UV rays while deeply hydrating with Birch Juice..."
+                  }
                   value={form.shortDescription}
                   onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
                   className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl leading-relaxed"
@@ -703,11 +768,15 @@ export default function CreateProductPage() {
 
               <div>
                 <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block flex items-center justify-between">
-                  <span>Full Description (বিস্তারিত বিবরণ)</span>
+                  <span>{isBn ? "বিস্তারিত বিবরণ (Full Description)" : "Full Description"}</span>
                   <span className="text-[10px] font-normal text-stone-400">Full UTF-8 HTML & Multiline Support</span>
                 </label>
                 <Textarea
-                  placeholder="বিস্তারিত প্রোডাক্ট বিবরণ, ব্যবহারবিধি এবং উপকারিতা বাংলায়, কোরিয়ানে বা ইংরেজিতে লিখুন..."
+                  placeholder={
+                    isBn
+                      ? "বিস্তারিত প্রোডাক্ট বিবরণ, ব্যবহারবিধি এবং উপকারিতা লিখুন..."
+                      : "Enter complete formula description, clinical skin benefits, texture details, and fragrance notes..."
+                  }
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl leading-relaxed font-sans"
@@ -716,9 +785,15 @@ export default function CreateProductPage() {
               </div>
 
               <div>
-                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Key Ingredients (মূল উপাদানসমূহ - Comma separated)</label>
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
+                  {isBn ? "মূল উপাদানসমূহ (Key Ingredients - Comma separated)" : "Key Ingredients (Comma separated)"}
+                </label>
                 <Input
-                  placeholder="e.g. Centella Asiatica 10%, Niacinamide 5%, রাইস এক্সট্রাক্ট, 병풀 추출물"
+                  placeholder={
+                    isBn
+                      ? "যেমন: সেন্টেলা এশিয়াটিকা ১০%, নায়াসিনামাইড ৫%, রাইস এক্সট্রাক্ট"
+                      : "e.g. Centella Asiatica 10%, Niacinamide 5%, Rice Extract, Squalane"
+                  }
                   value={form.ingredientsText}
                   onChange={(e) => setForm({ ...form, ingredientsText: e.target.value })}
                   className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl"
@@ -726,9 +801,15 @@ export default function CreateProductPage() {
               </div>
 
               <div>
-                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">How to Use Instructions (ব্যবহারবিধি)</label>
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
+                  {isBn ? "ব্যবহারবিধি (How to Use Instructions)" : "How to Use Instructions"}
+                </label>
                 <Textarea
-                  placeholder="যেমন: সকালে স্কিনকেয়ারের শেষ ধাপে উপযুক্ত পরিমাণে নিয়ে মুখে ভালোভাবে লাগিয়ে নিন..."
+                  placeholder={
+                    isBn
+                      ? "যেমন: সকালে স্কিনকেয়ারের শেষ ধাপে উপযুক্ত পরিমাণে নিয়ে মুখে ভালোভাবে লাগিয়ে নিন..."
+                      : "e.g. Apply appropriate amount evenly on face as the last step of morning skincare routine..."
+                  }
                   value={form.howToUse}
                   onChange={(e) => setForm({ ...form, howToUse: e.target.value })}
                   className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl leading-relaxed"
@@ -745,7 +826,7 @@ export default function CreateProductPage() {
         <div className="space-y-6">
 
           {/* SIDEBAR CARD 1: TYPE SELECTOR */}
-          <div className="p-6 rounded-3xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] shadow-xs space-y-4">
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
               Product Structure Type
             </h2>
@@ -784,7 +865,7 @@ export default function CreateProductPage() {
           </div>
 
           {/* SIDEBAR CARD 2: CATEGORY & BRAND */}
-          <div className="p-6 rounded-3xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] shadow-xs space-y-4 text-xs">
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 text-xs">
             <h2 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
               Product Organization
             </h2>
@@ -834,7 +915,7 @@ export default function CreateProductPage() {
           </div>
 
           {/* SIDEBAR CARD 3: TARGET SKIN TYPES & CONCERNS */}
-          <div className="p-6 rounded-3xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] shadow-xs space-y-4 text-xs">
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 text-xs">
             <h2 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
               <Heart className="h-3.5 w-3.5" /> Skin Filters
             </h2>
@@ -883,7 +964,7 @@ export default function CreateProductPage() {
           </div>
 
           {/* SIDEBAR CARD 4: PROMOTIONAL BADGES */}
-          <div className="p-6 rounded-3xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] shadow-xs space-y-3 text-xs">
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-3 text-xs">
             <h2 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5" /> Badges & Visibility
             </h2>

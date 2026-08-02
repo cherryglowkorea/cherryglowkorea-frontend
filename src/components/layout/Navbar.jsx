@@ -107,11 +107,11 @@ export default function Navbar() {
           <Link
             href="/wishlist"
             title="Wishlist"
-            className="relative p-2 rounded-full hover:bg-rose-50 dark:hover:bg-white/5 text-stone-700 dark:text-rose-100 transition duration-300 flex items-center justify-center"
+            className="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-rose-200/60 bg-white/70 text-rose-500 shadow-sm backdrop-blur transition-all hover:bg-rose-50 dark:border-white/10 dark:bg-white/5 dark:text-rose-300 dark:hover:bg-white/10 cursor-pointer"
           >
-            <Heart className="w-5 h-5 hover:text-rose-500 transition" />
+            <Heart size={19} className="transition-transform group-hover:scale-110 text-rose-500 dark:text-rose-300" />
             {wishlistCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center shadow-2xs">
+              <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-1 text-[11px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-[#1C1417]">
                 {wishlistCount}
               </span>
             )}
