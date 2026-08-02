@@ -36,7 +36,7 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans">
+    <div className="flex min-h-screen bg-stone-50 dark:bg-[#0E0709] text-stone-900 dark:text-slate-100 font-sans transition-colors">
       {/* Sidebar Navigation */}
       <Sidebar />
 
@@ -46,7 +46,9 @@ export default function AdminLayout({ children }) {
         <Topbar />
 
         {/* Dashboard Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-slate-900/50">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-stone-100/70 dark:bg-[#140A0D] text-stone-900 dark:text-slate-100 transition-colors">
+          {children}
+        </main>
       </div>
     </div>
   );

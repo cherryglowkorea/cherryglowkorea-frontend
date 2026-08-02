@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import {
   Facebook,
@@ -21,9 +21,15 @@ import {
 import { toast } from "sonner";
 
 export default function Footer() {
+  const pathname = usePathname();
   const tFooter = useTranslations("footer");
   const tNav = useTranslations("nav");
   const [email, setEmail] = useState("");
+
+  // Do not render public Footer on Admin pages
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   const handleSubscribe = (e) => {
     e.preventDefault();

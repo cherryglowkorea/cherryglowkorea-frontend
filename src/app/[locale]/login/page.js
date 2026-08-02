@@ -52,7 +52,8 @@ export default function LoginPage() {
 
       if (data.token) {
         localStorage.setItem("token", data.token);
-        const redirectTarget = searchParams.get("redirect") || "/";
+        const userRole = data.user?.role;
+        const redirectTarget = searchParams.get("redirect") || (userRole === "admin" || userRole === "super_admin" ? "/admin" : "/");
         window.location.href = redirectTarget;
       }
     } catch {

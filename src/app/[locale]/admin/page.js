@@ -8,7 +8,6 @@ import {
   Users,
   AlertTriangle,
   ArrowUpRight,
-  Layers,
   Sparkles,
   Clock,
   CheckCircle2,
@@ -16,13 +15,67 @@ import {
   Truck,
   DollarSign,
   RefreshCw,
+  Gift,
+  Layers,
+  ArrowDownRight,
+  ShieldAlert,
+  BarChart3,
+  PieChart as PieChartIcon,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
+
+// Custom Tooltip Component for Recharts (Adapts to Light & Dark Theme)
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-xl border border-stone-200 dark:border-rose-500/20 bg-white/95 dark:bg-[#1A0F13]/95 p-3 shadow-xl backdrop-blur-md text-xs">
+        <p className="font-bold text-stone-900 dark:text-rose-300 mb-1">{label}</p>
+        {payload.map((entry, index) => (
+          <div key={`item-${index}`} className="flex items-center justify-between gap-4 py-0.5">
+            <span className="flex items-center gap-1.5 text-stone-600 dark:text-slate-300">
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: entry.color || entry.fill }}
+              />
+              {entry.name}:
+            </span>
+            <span className="font-mono font-bold text-stone-900 dark:text-white">
+              {entry.name.toLowerCase().includes("revenue") || entry.name.toLowerCase().includes("sales")
+                ? `৳${Number(entry.value).toLocaleString()}`
+                : entry.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function DashboardOverviewPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -62,7 +115,7 @@ export default function DashboardOverviewPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <RefreshCw className="h-8 w-8 animate-spin text-rose-500" />
-          <p className="text-sm font-medium text-slate-400">Loading Dashboard Analytics...</p>
+          <p className="text-sm font-medium text-stone-600 dark:text-rose-200/80">Loading Super Admin Analytics...</p>
         </div>
       </div>
     );
@@ -76,29 +129,50 @@ export default function DashboardOverviewPage() {
   const charts = stats?.charts || { salesOverview: [], orderDistribution: [], topProducts: [], revenueByType: [] };
   const recent = stats?.recentActivity || { recentOrders: [], recentUsers: [], lowStockAlerts: [] };
 
+  // Data for Recharts Product Type breakdown
+  const productTypeData = [
+    { name: "Single Items", count: prod.singleCount, fill: "#F43F5E" },
+    { name: "Combo Deals", count: prod.comboCount, fill: "#FB7185" },
+  ];
+
+  // Colors for Order Distribution
+  const ORDER_STATUS_COLORS = {
+    Pending: "#F59E0B",
+    Processing: "#3B82F6",
+    Shipped: "#8B5CF6",
+    Delivered: "#10B981",
+    Cancelled: "#EF4444",
+  };
+
+  const formattedOrderDistribution = (charts.orderDistribution || []).map((item) => ({
+    ...item,
+    color: ORDER_STATUS_COLORS[item.name] || "#94A3B8",
+  }));
+
   return (
     <div className="space-y-8">
       {/* Top Banner Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-rose-900/30 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Dashboard Overview
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
+              <span>Dashboard Overview</span>
+              <Sparkles className="h-5 w-5 text-rose-500 dark:text-rose-400 animate-pulse" />
             </h1>
-            <span className="rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-400">
+            <span className="rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-bold text-rose-600 dark:text-rose-400">
               Live Real-Time
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-slate-400 mt-1">
             Real-time revenue, sales analytics, inventory warnings & recent customer activity.
           </p>
         </div>
 
         <button
           onClick={fetchStats}
-          className="inline-flex items-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2 text-xs font-medium text-slate-200 transition-colors shadow-sm self-start sm:self-auto"
+          className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-rose-950/60 hover:bg-stone-50 dark:hover:bg-rose-900/60 border border-stone-200 dark:border-rose-800/40 px-4 py-2 text-xs font-semibold text-stone-700 dark:text-rose-200 transition-all shadow-xs hover:shadow-md cursor-pointer self-start sm:self-auto"
         >
-          <RefreshCw className="h-3.5 w-3.5 text-rose-400" />
+          <RefreshCw className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400" />
           <span>Refresh Data</span>
         </button>
       </div>
@@ -106,196 +180,283 @@ export default function DashboardOverviewPage() {
       {/* 1. TOP SUMMARY STATS CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Total Revenue */}
-        <div className="relative overflow-hidden rounded-2xl border border-rose-900/40 bg-gradient-to-br from-slate-900 via-rose-950/40 to-slate-900 p-5 shadow-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-rose-200 dark:border-rose-500/30 bg-gradient-to-br from-rose-500/5 via-rose-500/10 to-rose-500/5 dark:from-[#1C1014] dark:via-[#2A121A] dark:to-[#1C1014] p-5 shadow-xs transition-all duration-300 hover:border-rose-400 dark:hover:border-rose-500/50">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-400">Total Revenue</span>
-            <div className="rounded-xl bg-rose-500/20 p-2 text-rose-300">
+            <span className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Total Revenue</span>
+            <div className="rounded-xl bg-rose-500/15 p-2.5 text-rose-600 dark:text-rose-300 border border-rose-500/20">
               <DollarSign className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-white">
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
             ৳{rev.total.toLocaleString()}
           </p>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-rose-900/30 pt-2">
-            <span>Today: <strong className="text-rose-200">৳{rev.today.toLocaleString()}</strong></span>
-            <span>Month: <strong className="text-rose-200">৳{rev.thisMonth.toLocaleString()}</strong></span>
+          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-600 dark:text-slate-400 border-t border-rose-200/60 dark:border-rose-900/40 pt-2">
+            <span>Today: <strong className="text-rose-600 dark:text-rose-300">৳{rev.today.toLocaleString()}</strong></span>
+            <span>Month: <strong className="text-rose-600 dark:text-rose-300">৳{rev.thisMonth.toLocaleString()}</strong></span>
           </div>
         </div>
 
         {/* Total Orders */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-slate-800 bg-white dark:bg-[#160E12]/90 p-5 shadow-xs transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-500/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Orders</span>
-            <div className="rounded-xl bg-blue-500/20 p-2 text-blue-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-slate-400">Total Orders</span>
+            <div className="rounded-xl bg-blue-500/15 p-2.5 text-blue-600 dark:text-blue-400 border border-blue-500/20">
               <ShoppingBag className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-white">
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
             {ord.total.toLocaleString()}
           </p>
-          <div className="mt-2 flex items-center gap-2 text-[11px]">
-            <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-amber-400 font-semibold border border-amber-500/20">
+          <div className="mt-3 flex items-center gap-2 text-[11px] border-t border-stone-100 dark:border-slate-800/80 pt-2">
+            <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/20">
               Pending: {ord.pending}
             </span>
-            <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-emerald-400 font-semibold border border-emerald-500/20">
+            <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/20">
               Delivered: {ord.delivered}
             </span>
           </div>
         </div>
 
         {/* Total Products */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-slate-800 bg-white dark:bg-[#160E12]/90 p-5 shadow-xs transition-all duration-300 hover:border-purple-400 dark:hover:border-purple-500/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Products</span>
-            <div className="rounded-xl bg-purple-500/20 p-2 text-purple-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-slate-400">Total Products</span>
+            <div className="rounded-xl bg-purple-500/15 p-2.5 text-purple-600 dark:text-purple-400 border border-purple-500/20">
               <Package className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-white">
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
             {prod.total}
           </p>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800 pt-2">
-            <span>Single: <strong className="text-slate-200">{prod.singleCount}</strong></span>
-            <span>Combo Deals: <strong className="text-rose-400">{prod.comboCount}</strong></span>
+          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-500 dark:text-slate-400 border-t border-stone-100 dark:border-slate-800/80 pt-2">
+            <span>Single: <strong className="text-stone-800 dark:text-slate-200">{prod.singleCount}</strong></span>
+            <span>Combo Deals: <strong className="text-rose-600 dark:text-rose-400">{prod.comboCount}</strong></span>
           </div>
         </div>
 
         {/* Total Customers */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-slate-800 bg-white dark:bg-[#160E12]/90 p-5 shadow-xs transition-all duration-300 hover:border-emerald-400 dark:hover:border-emerald-500/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Customers</span>
-            <div className="rounded-xl bg-emerald-500/20 p-2 text-emerald-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-slate-400">Total Users</span>
+            <div className="rounded-xl bg-emerald-500/15 p-2.5 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               <Users className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-white">
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
             {cust.totalUsers}
           </p>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800 pt-2">
-            <span>Registered: <strong className="text-slate-200">{cust.customerCount}</strong></span>
-            <span>Admins: <strong className="text-amber-400">{cust.adminCount}</strong></span>
+          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-500 dark:text-slate-400 border-t border-stone-100 dark:border-slate-800/80 pt-2">
+            <span>Customers: <strong className="text-stone-800 dark:text-slate-200">{cust.customerCount}</strong></span>
+            <span>Admins: <strong className="text-amber-600 dark:text-amber-400">{cust.adminCount}</strong></span>
           </div>
         </div>
 
         {/* Low Stock Warning Card */}
-        <div className={`relative overflow-hidden rounded-2xl border p-5 shadow-xl ${
+        <div className={`relative overflow-hidden rounded-2xl border p-5 shadow-xs transition-all duration-300 ${
           prod.lowStockCount > 0
-            ? "border-amber-500/40 bg-gradient-to-br from-slate-900 via-amber-950/30 to-slate-900"
-            : "border-slate-800 bg-slate-900/90"
+            ? "border-amber-400/60 dark:border-amber-500/50 bg-amber-50/50 dark:bg-gradient-to-br dark:from-[#1E1510] dark:via-amber-950/30 dark:to-[#160E12]"
+            : "border-stone-200/80 dark:border-slate-800 bg-white dark:bg-[#160E12]/90"
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Low Stock Alert</span>
-            <div className="rounded-xl bg-amber-500/20 p-2 text-amber-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Low Stock Alert</span>
+            <div className="rounded-xl bg-amber-500/15 p-2.5 text-amber-600 dark:text-amber-400 border border-amber-500/20">
               <AlertTriangle className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-white">
-            {prod.lowStockCount} <span className="text-xs font-medium text-slate-400">items</span>
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
+            {prod.lowStockCount} <span className="text-xs font-medium text-stone-500 dark:text-slate-400">items</span>
           </p>
-          <div className="mt-2 text-[11px] text-amber-300/80 font-medium">
+          <div className="mt-3 text-[11px] text-amber-700 dark:text-amber-300/80 font-bold border-t border-amber-200/60 dark:border-amber-950/60 pt-2">
             {prod.lowStockCount > 0 ? "Requires restock action" : "Inventory stock optimal"}
           </div>
         </div>
       </div>
 
-      {/* 2. CHARTS & GRAPH SECTION */}
+      {/* 2. RECHARTS ANALYTICS CHARTS SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sales Overview Trend Bar Chart */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
+        {/* Sales & Revenue Trend Area Chart (2 Cols) */}
+        <div className="lg:col-span-2 rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-rose-400" />
-                Sales & Revenue Overview (7 Days)
+              <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
+                <TrendingUp className="h-4.5 w-4.5 text-rose-500 dark:text-rose-400" />
+                Sales & Revenue Analytics (7 Days)
               </h3>
-              <p className="text-xs text-slate-400">Daily revenue totals and order counts</p>
+              <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">Daily revenue trend (৳) and total orders placed</p>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-500" /> Revenue (৳)
+              </span>
+              <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold">
+                <span className="h-2.5 w-2.5 rounded-full bg-blue-500" /> Orders
+              </span>
             </div>
           </div>
 
-          {/* Custom Responsive CSS Bar Chart */}
-          <div className="h-64 pt-6 flex items-end justify-between gap-2 border-b border-slate-800 pb-2">
-            {charts.salesOverview.map((item, idx) => {
-              const maxRev = Math.max(...charts.salesOverview.map((s) => s.revenue), 1000);
-              const heightPercent = Math.max(Math.round((item.revenue / maxRev) * 100), 8);
-
-              return (
-                <div key={idx} className="flex flex-1 flex-col items-center gap-2 group h-full justify-end">
-                  {/* Tooltip on hover */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-[10px] text-rose-200 px-2 py-1 rounded-md font-mono border border-slate-700 shadow-md">
-                    ৳{item.revenue} ({item.orders} orders)
-                  </div>
-                  {/* Bar */}
-                  <div
-                    style={{ height: `${heightPercent}%` }}
-                    className="w-full max-w-[40px] rounded-t-lg bg-gradient-to-t from-rose-700 to-rose-500 group-hover:from-rose-500 group-hover:to-rose-400 transition-all duration-300 shadow-lg shadow-rose-950"
+          {/* Recharts Area Chart Container */}
+          <div className="h-[280px] w-full pt-2">
+            {isMounted && (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={charts.salesOverview}
+                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#F43F5E" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#F43F5E" stopOpacity={0.0} />
+                    </linearGradient>
+                    <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#CBD5E1" strokeOpacity={0.4} vertical={false} />
+                  <XAxis
+                    dataKey="day"
+                    stroke="#64748B"
+                    tick={{ fill: "#64748B", fontSize: 11 }}
+                    axisLine={{ stroke: "#E2E8F0" }}
                   />
-                  <span className="text-[11px] font-medium text-slate-400">{item.day}</span>
-                </div>
-              );
-            })}
+                  <YAxis
+                    stroke="#64748B"
+                    tick={{ fill: "#64748B", fontSize: 11 }}
+                    axisLine={{ stroke: "#E2E8F0" }}
+                    tickFormatter={(val) => `৳${val}`}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    name="Revenue"
+                    stroke="#F43F5E"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorRevenue)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="orders"
+                    name="Orders"
+                    stroke="#3B82F6"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorOrders)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
-        {/* Order Status Distribution */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl space-y-4 flex flex-col justify-between">
-          <div>
-            <h3 className="text-base font-bold text-white">Order Status Distribution</h3>
-            <p className="text-xs text-slate-400">Breakdown across order fulfillment states</p>
+        {/* Order Status Distribution Donut Chart */}
+        <div className="rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4 flex flex-col justify-between">
+          <div className="border-b border-stone-100 dark:border-rose-950/60 pb-3">
+            <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
+              <PieChartIcon className="h-4.5 w-4.5 text-rose-500 dark:text-rose-400" />
+              Order Fulfillment Breakdown
+            </h3>
+            <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">Live distribution by order status</p>
           </div>
 
-          <div className="space-y-3 my-4">
-            {charts.orderDistribution.map((st, idx) => {
-              const pct = ord.total > 0 ? Math.round((st.value / ord.total) * 100) : 0;
-              return (
-                <div key={idx} className="space-y-1">
-                  <div className="flex justify-between text-xs font-medium text-slate-300">
-                    <span>{st.name}</span>
-                    <span className="font-mono text-slate-400">{st.value} ({pct}%)</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
-                    <div
-                      style={{ width: `${pct}%`, backgroundColor: st.color }}
-                      className="h-full rounded-full transition-all duration-500"
-                    />
-                  </div>
-                </div>
-              );
-            })}
+          {/* Donut Chart */}
+          <div className="h-[200px] w-full relative flex items-center justify-center">
+            {isMounted && (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={formattedOrderDistribution.length > 0 ? formattedOrderDistribution : [{ name: "No Orders", value: 1, color: "#94A3B8" }]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={80}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {formattedOrderDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+            {/* Center Summary */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-2xl font-black text-stone-900 dark:text-white">{ord.total}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400">Total Orders</span>
+            </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-            <span>Fulfillment Rate</span>
-            <span className="font-bold text-emerald-400">
-              {ord.total > 0 ? Math.round((ord.delivered / ord.total) * 100) : 0}%
-            </span>
+          {/* Status Pills */}
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100 dark:border-rose-950/60">
+            {formattedOrderDistribution.map((st, idx) => (
+              <div key={idx} className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-lg bg-stone-50 dark:bg-slate-900/60 border border-stone-200/60 dark:border-slate-800">
+                <span className="flex items-center gap-1.5 text-stone-700 dark:text-slate-300 font-medium text-[11px]">
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: st.color }} />
+                  {st.name}
+                </span>
+                <span className="font-mono font-bold text-stone-900 dark:text-white text-[11px]">{st.value}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* 3. RECENT ACTIVITY & LOW STOCK ALERTS */}
+      {/* 3. PRODUCT TYPE BREAKDOWN & TOP REVENUE PRODUCTS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Product Type Breakdown (Single vs Combo Deals) */}
+        <div className="rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4">
+          <div className="border-b border-stone-100 dark:border-rose-950/60 pb-3">
+            <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
+              <Gift className="h-4.5 w-4.5 text-rose-500 dark:text-rose-400" />
+              Catalog Composition
+            </h3>
+            <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">Single items vs Combo Deals in inventory</p>
+          </div>
+
+          <div className="h-[200px] w-full">
+            {isMounted && (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={productTypeData} margin={{ top: 20, right: 20, left: -20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#CBD5E1" strokeOpacity={0.4} vertical={false} />
+                  <XAxis dataKey="name" stroke="#64748B" tick={{ fill: "#64748B", fontSize: 11 }} />
+                  <YAxis stroke="#64748B" tick={{ fill: "#64748B", fontSize: 11 }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="count" name="Products Count" radius={[8, 8, 0, 0]}>
+                    {productTypeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
         {/* Recent Orders Table (2 cols) */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Clock className="h-4 w-4 text-rose-400" />
-              Recent Orders
+        <div className="lg:col-span-2 rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
+            <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
+              <Clock className="h-4.5 w-4.5 text-rose-500 dark:text-rose-400" />
+              Recent Customer Orders
             </h3>
             <Link
               href="/admin/orders"
-              className="text-xs font-semibold text-rose-400 hover:text-rose-300 flex items-center gap-1"
+              className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 flex items-center gap-1 transition-colors"
             >
-              View All <ArrowUpRight className="h-3.5 w-3.5" />
+              View All Orders <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
           {recent.recentOrders.length === 0 ? (
-            <p className="text-xs text-slate-500 py-6 text-center">No recent orders recorded.</p>
+            <p className="text-xs text-stone-400 dark:text-slate-500 py-8 text-center">No recent orders recorded.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-semibold">
+                  <tr className="border-b border-stone-200 dark:border-rose-950/80 text-stone-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
                     <th className="pb-3">Order #</th>
                     <th className="pb-3">Customer</th>
                     <th className="pb-3">Total</th>
@@ -303,26 +464,26 @@ export default function DashboardOverviewPage() {
                     <th className="pb-3 text-right">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-stone-100 dark:divide-rose-950/40">
                   {recent.recentOrders.map((o) => (
-                    <tr key={o._id} className="hover:bg-slate-800/40">
-                      <td className="py-3 font-mono font-bold text-rose-300">{o.orderNumber}</td>
-                      <td className="py-3 text-slate-200">{o.customer?.name || "Guest"}</td>
-                      <td className="py-3 font-semibold text-white">৳{o.pricing?.total || 0}</td>
+                    <tr key={o._id} className="hover:bg-stone-50 dark:hover:bg-rose-950/20 transition-colors">
+                      <td className="py-3 font-mono font-bold text-rose-600 dark:text-rose-400">{o.orderNumber}</td>
+                      <td className="py-3 text-stone-800 dark:text-slate-200 font-medium">{o.customer?.name || "Guest User"}</td>
+                      <td className="py-3 font-bold text-stone-900 dark:text-white">৳{(o.pricing?.total || 0).toLocaleString()}</td>
                       <td className="py-3">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                             o.status === "delivered"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
                               : o.status === "pending"
-                              ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                              : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                              ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20"
+                              : "bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20"
                           }`}
                         >
                           {o.status}
                         </span>
                       </td>
-                      <td className="py-3 text-right text-slate-400">
+                      <td className="py-3 text-right text-stone-500 dark:text-slate-400 font-mono">
                         {new Date(o.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
@@ -332,53 +493,56 @@ export default function DashboardOverviewPage() {
             </div>
           )}
         </div>
+      </div>
 
-        {/* Low Stock Warnings */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-400" />
-              Low Stock Warnings
-            </h3>
-            <Link
-              href="/admin/products"
-              className="text-xs font-semibold text-rose-400 hover:text-rose-300"
-            >
-              Manage Stock
-            </Link>
-          </div>
-
-          {recent.lowStockAlerts.length === 0 ? (
-            <p className="text-xs text-slate-500 py-6 text-center">All inventory stock levels optimal.</p>
-          ) : (
-            <div className="space-y-3">
-              {recent.lowStockAlerts.map((item) => (
-                <div
-                  key={item._id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-800"
-                >
-                  <div className="flex items-center gap-3">
-                    {item.thumbnail && (
-                      <img
-                        src={item.thumbnail}
-                        alt={item.name}
-                        className="h-9 w-9 rounded-lg object-cover border border-slate-700"
-                      />
-                    )}
-                    <div>
-                      <p className="text-xs font-bold text-slate-200 line-clamp-1">{item.name}</p>
-                      <p className="text-[10px] text-slate-400">৳{item.price}</p>
-                    </div>
-                  </div>
-
-                  <span className="px-2.5 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 font-extrabold text-xs">
-                    {item.stock} left
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+      {/* 4. LOW STOCK INVENTORY WARNINGS */}
+      <div className="rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
+          <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
+            <AlertTriangle className="h-4.5 w-4.5 text-amber-500 dark:text-amber-400" />
+            Low Stock Inventory Alerts
+          </h3>
+          <Link
+            href="/admin/products"
+            className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 flex items-center gap-1 transition-colors"
+          >
+            Manage Product Stock <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
+
+        {recent.lowStockAlerts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center space-y-2">
+            <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+            <p className="text-xs font-medium text-stone-500 dark:text-slate-400">All inventory stock levels are optimal!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {recent.lowStockAlerts.map((item) => (
+              <div
+                key={item._id}
+                className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50 dark:bg-slate-900/70 border border-stone-200/70 dark:border-amber-500/20 hover:border-amber-400 dark:hover:border-amber-500/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  {item.thumbnail && (
+                    <img
+                      src={item.thumbnail}
+                      alt={item.name}
+                      className="h-10 w-10 rounded-lg object-cover border border-stone-200 dark:border-slate-800 shrink-0"
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-stone-800 dark:text-slate-200 truncate">{item.name}</p>
+                    <p className="text-[11px] font-mono text-rose-600 dark:text-rose-300">৳{item.price?.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                <span className="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 font-extrabold text-xs shrink-0">
+                  {item.stock} left
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

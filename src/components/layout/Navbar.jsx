@@ -35,6 +35,11 @@ export default function Navbar() {
   const pathname = usePathname();
   const tNav = useTranslations("nav");
 
+  // Do not render public Navbar on Admin pages
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const navLinks = [
     { name: tNav("home"), href: "/" },
     { name: tNav("products"), href: "/products" },
