@@ -126,14 +126,13 @@ export default function Testimonials() {
                       {/* User Info Header */}
                       <div className="flex items-center gap-3">
                         <div className="relative h-11 w-11 rounded-full overflow-hidden border-2 border-rose-100 dark:border-rose-900/60 shrink-0 bg-rose-50 dark:bg-slate-900 shadow-2xs">
-                          <Image
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
                             src={avatar}
                             alt={item.userName || "Customer"}
-                            fill
-                            sizes="44px"
-                            className="object-cover"
+                            className="w-full h-full object-cover"
                             onError={(e) => {
-                              e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.userName}`;
+                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.userName || "Customer")}&background=f43f5e&color=fff`;
                             }}
                           />
                         </div>

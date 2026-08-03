@@ -280,11 +280,11 @@ function ProductsPageInner() {
             </p>
           </div>
 
-          {/* Quick Filter Pills */}
-          <div className="flex flex-wrap items-center gap-2 pt-4">
+          {/* Quick Filter Pills (Horizontally Scrollable on Mobile) */}
+          <div className="flex items-center gap-2 pt-4 overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
             <button
               onClick={() => setTypeFilter("all")}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer shrink-0 ${
                 typeFilter === "all"
                   ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white border-transparent shadow-sm"
                   : "bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-rose-100/70 hover:border-rose-300 hover:text-rose-600"
@@ -294,7 +294,7 @@ function ProductsPageInner() {
             </button>
             <button
               onClick={() => setTypeFilter("combo")}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer shrink-0 ${
                 typeFilter === "combo"
                   ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white border-transparent shadow-sm"
                   : "bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-rose-100/70 hover:border-rose-300 hover:text-rose-600"
@@ -304,7 +304,7 @@ function ProductsPageInner() {
             </button>
             <button
               onClick={() => setTypeFilter("single")}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer shrink-0 ${
                 typeFilter === "single"
                   ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white border-transparent shadow-sm"
                   : "bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-rose-100/70 hover:border-rose-300 hover:text-rose-600"
@@ -563,7 +563,7 @@ function ProductsPageInner() {
                 <div
                   className={
                     viewMode === "grid"
-                      ? "grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch"
+                      ? "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 items-stretch"
                       : "space-y-4"
                   }
                 >
@@ -595,7 +595,7 @@ function ProductsPageInner() {
                   <div
                     className={
                       viewMode === "grid"
-                        ? "grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch"
+                        ? "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 items-stretch"
                         : "space-y-4"
                     }
                   >

@@ -221,36 +221,36 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
 
   /* ---------------- GRID VIEW LAYOUT (FULL-BLEED BEAUTY CARDS) ---------------- */
   const CardContent = (
-    <div className="flex h-full flex-col rounded-2xl bg-white dark:bg-[#1e1215] p-3.5 border border-stone-200/80 dark:border-white/10 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
+    <div className="flex h-full flex-col rounded-2xl bg-white dark:bg-[#1e1215] p-3 sm:p-3.5 border border-stone-200/80 dark:border-white/10 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
       
       {/* Full-Bleed Image Banner */}
-      <div className="relative w-full h-52 sm:h-56 mb-3 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden group/img">
+      <div className="relative w-full h-40 sm:h-52 md:h-56 mb-2.5 sm:mb-3 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden group/img">
         <Image
           src={optimizedImage}
           alt={name}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           priority={index < 4}
           className="object-cover transition-transform duration-500 group-hover/img:scale-105"
         />
 
         {/* Floating Top-Left Badges */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
+        <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-10 flex flex-col gap-1 items-start">
           {type === "combo" ? (
-            <span className="text-[10px] font-black uppercase tracking-wider text-white bg-rose-600/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
-              🔥 Combo Deal
+            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white bg-rose-600/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
+              🔥 Combo
             </span>
           ) : (
             category && (
-              <span className="text-[10px] font-bold text-stone-900 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
+              <span className="text-[9px] sm:text-[10px] font-bold text-stone-900 bg-white/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs max-w-[100px] truncate">
                 {category}
               </span>
             )
           )}
 
           {hasDiscount && (
-            <span className="text-[10px] font-black text-white bg-red-600/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
-              -{calculatedDiscountPercent}% OFF
+            <span className="text-[9px] sm:text-[10px] font-black text-white bg-red-600/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
+              -{calculatedDiscountPercent}%
             </span>
           )}
         </div>
@@ -260,18 +260,18 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
           onClick={(e) => toggleWishlist(product, e)}
           title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
           aria-label="Wishlist"
-          className={`absolute top-2.5 right-2.5 z-10 w-8.5 h-8.5 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
+          className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10 w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
             isWishlisted
               ? "bg-rose-50 dark:bg-rose-950/90 border-rose-200 dark:border-rose-900/50 text-rose-500"
               : "bg-white/90 dark:bg-[#1e1215]/90 border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-rose-100 hover:text-rose-500"
           }`}
         >
-          <Heart className={`w-4 h-4 transition ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
+          <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
         </button>
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col justify-between space-y-3">
+      <div className="flex flex-1 flex-col justify-between space-y-2.5">
         <div>
           <h3 className="font-semibold text-stone-900 dark:text-rose-50 text-xs sm:text-sm line-clamp-2 leading-snug">
             {name}
@@ -279,12 +279,12 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
 
           {/* Variant Selector */}
           {variants.length > 1 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-1.5 flex flex-wrap gap-1">
               {variants.map((v, i) => (
                 <button
                   key={i}
                   onClick={() => setSelectedVariant(v)}
-                  className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border transition cursor-pointer ${
+                  className={`px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full border transition cursor-pointer ${
                     selectedVariant === v
                       ? "bg-rose-500 text-white border-rose-500 shadow-2xs"
                       : "bg-stone-50 dark:bg-white/5 text-stone-600 dark:text-rose-100/70 border-stone-200 dark:border-white/10 hover:bg-rose-50"
@@ -300,20 +300,20 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
         <div>
           {/* Price & Stock */}
           <div className="flex items-center justify-between pt-1">
-            <div className="flex gap-2 items-baseline">
-              <span className="text-sm sm:text-base font-extrabold text-rose-600 dark:text-rose-400 font-mono">
+            <div className="flex gap-1.5 sm:gap-2 items-baseline flex-wrap">
+              <span className="text-xs sm:text-base font-extrabold text-rose-600 dark:text-rose-400 font-mono">
                 ৳ {finalPrice.toLocaleString()}
               </span>
 
               {hasDiscount && (
-                <span className="text-xs line-through text-stone-400 font-mono">
+                <span className="text-[10px] sm:text-xs line-through text-stone-400 font-mono">
                   ৳ {originalPrice.toLocaleString()}
                 </span>
               )}
             </div>
 
             <span
-              className={`text-[10px] font-bold ${
+              className={`text-[9px] sm:text-[10px] font-bold ${
                 inStock ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"
               }`}
             >
@@ -322,10 +322,10 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
           </div>
 
           {/* Actions Footer */}
-          <div className="flex gap-2 pt-3">
+          <div className="flex gap-1.5 sm:gap-2 pt-2.5">
             <Link
               href={`/products/${productId}`}
-              className="w-1/2 text-center rounded-xl border border-rose-400/80 text-rose-600 dark:text-rose-400 py-2 text-xs font-bold hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
+              className="w-1/2 text-center rounded-xl border border-rose-400/80 text-rose-600 dark:text-rose-400 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer flex items-center justify-center truncate"
             >
               Details
             </Link>
@@ -333,13 +333,13 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
             <button
               onClick={handleAddToCart}
               disabled={!inStock}
-              className={`w-1/2 rounded-xl py-2 text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shadow-2xs ${
+              className={`w-1/2 rounded-xl py-1.5 sm:py-2 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shadow-2xs flex items-center justify-center truncate ${
                 inStock
                   ? "bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
                   : "bg-stone-200 dark:bg-white/10 text-stone-400 cursor-not-allowed"
               }`}
             >
-              {inStock ? "Add to Cart" : "Sold Out"}
+              {inStock ? "Add" : "Out"}
             </button>
           </div>
         </div>

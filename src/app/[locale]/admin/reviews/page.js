@@ -241,7 +241,8 @@ export default function AdminReviewsPage() {
                     <div className="flex items-center gap-3">
                       <div className="relative h-10 w-10 rounded-full overflow-hidden border border-stone-200 dark:border-slate-800 bg-stone-100 dark:bg-slate-900 shrink-0">
                         {rev.userAvatar ? (
-                          <Image src={rev.userAvatar} alt={rev.userName} fill className="object-cover" />
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={rev.userAvatar} alt={rev.userName} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-stone-400 bg-rose-50 dark:bg-rose-950">
                             <User className="h-5 w-5 text-rose-500" />

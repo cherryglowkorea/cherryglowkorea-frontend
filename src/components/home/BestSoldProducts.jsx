@@ -80,7 +80,7 @@ export default function BestSoldProducts() {
 
         {/* 4-Column Uniform Products Grid */}
         {!loading && !error && products.length > 0 && (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {products.map((product, idx) => (
               <ProductCard
                 key={product._id || idx}
