@@ -1,32 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import Image from "next/image";
 import {
   Star,
-  CheckCircle2,
-  XCircle,
+  Check,
+  X,
   Trash2,
   MessageSquare,
   Sparkles,
   Search,
-  Filter,
-  Check,
-  X,
-  Loader2,
+  RefreshCw,
   User,
+  LayoutGrid,
+  List,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  ShoppingBag,
+  ThumbsUp,
 } from "lucide-react";
 
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [search, setSearch] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  // Filters & Views
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [ratingFilter, setRatingFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'table'
+
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:5000";
 
   /* ---------------- Fetch All Admin Reviews ---------------- */
   const fetchReviews = async () => {
@@ -51,14 +62,13 @@ export default function AdminReviewsPage() {
     setUpdatingId(id);
     try {
       await axios.patch(`${API_BASE}/reviews/admin/${id}/status`, { status });
-      toast.success(`Review set to "${status.toUpperCase()}"!`);
-      // Update local state instantly
+      toast.success(`Review status set to "${status.toUpperCase()}"`);
       setReviews((prev) =>
         prev.map((r) => (r._id === id ? { ...r, status } : r))
       );
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update status");
+      toast.error("Failed to update review status");
     } finally {
       setUpdatingId(null);
     }
@@ -66,7 +76,7 @@ export default function AdminReviewsPage() {
 
   /* ---------------- Delete Handler ---------------- */
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this customer review?")) return;
+    if (!confirm("Are you sure you want to permanently delete this customer review?")) return;
     setUpdatingId(id);
     try {
       await axios.delete(`${API_BASE}/reviews/admin/${id}`);
@@ -80,151 +90,365 @@ export default function AdminReviewsPage() {
     }
   };
 
-  /* ---------------- Filtering ---------------- */
-  const filteredReviews = reviews.filter((r) => {
-    const matchesStatus = statusFilter === "all" || r.status === statusFilter;
-    const matchesSearch =
-      r.userName?.toLowerCase().includes(search.toLowerCase()) ||
-      r.comment?.toLowerCase().includes(search.toLowerCase()) ||
-      r.productName?.toLowerCase().includes(search.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
+  /* ---------------- Analytics & Metrics ---------------- */
+  const metrics = useMemo(() => {
+    const total = reviews.length;
+    const pending = reviews.filter((r) => r.status === "pending").length;
+    const approved = reviews.filter((r) => r.status === "approved").length;
+    const rejected = reviews.filter((r) => r.status === "rejected").length;
 
-  const totalCount = reviews.length;
-  const pendingCount = reviews.filter((r) => r.status === "pending").length;
-  const approvedCount = reviews.filter((r) => r.status === "approved").length;
-  const rejectedCount = reviews.filter((r) => r.status === "rejected").length;
+    const totalStars = reviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
+    const avgRating = total > 0 ? (totalStars / total).toFixed(1) : "5.0";
+
+    const starCounts = {
+      5: reviews.filter((r) => Math.round(r.rating) === 5).length,
+      4: reviews.filter((r) => Math.round(r.rating) === 4).length,
+      3: reviews.filter((r) => Math.round(r.rating) === 3).length,
+      2: reviews.filter((r) => Math.round(r.rating) === 2).length,
+      1: reviews.filter((r) => Math.round(r.rating) === 1).length,
+    };
+
+    return { total, pending, approved, rejected, avgRating, starCounts };
+  }, [reviews]);
+
+  /* ---------------- Filter Reviews ---------------- */
+  const filteredReviews = useMemo(() => {
+    return reviews.filter((r) => {
+      // Status Filter
+      if (statusFilter !== "all" && r.status !== statusFilter) {
+        return false;
+      }
+
+      // Rating Filter
+      if (ratingFilter !== "all" && Math.round(r.rating) !== Number(ratingFilter)) {
+        return false;
+      }
+
+      // Search Query
+      if (search.trim()) {
+        const q = search.toLowerCase().trim();
+        const user = (r.userName || "").toLowerCase();
+        const comment = (r.comment || "").toLowerCase();
+        const product = (r.productName || "").toLowerCase();
+        return user.includes(q) || comment.includes(q) || product.includes(q);
+      }
+
+      return true;
+    });
+  }, [reviews, statusFilter, ratingFilter, search]);
+
+  const clearFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+    setRatingFilter("all");
+  };
+
+  const isFiltered = search !== "" || statusFilter !== "all" || ratingFilter !== "all";
+
+  const getInitial = (name) => {
+    if (!name) return "U";
+    return name.charAt(0).toUpperCase();
+  };
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-[1600px] mx-auto text-stone-800 dark:text-stone-100">
-      
-      {/* Top Header & Metrics */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-200 dark:border-rose-950/60 pb-5">
+    <div className="w-full space-y-8">
+      {/* 1. Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-transparent p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 bg-white/70 dark:bg-[#160E12]/80 backdrop-blur-md">
         <div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/40 shadow-2xs">
-            <Sparkles className="h-3.5 w-3.5" /> Customer Feedback & Approval
-          </span>
-          <h1 className="text-2xl md:text-3xl font-extrabold font-serif text-stone-900 dark:text-white mt-1">
-            Customer Reviews Management
-          </h1>
-          <p className="text-xs text-stone-500 dark:text-slate-400">
-            Approve or reject reviews to control which testimonials show on Swiper landing page & product details page
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-rose-50 flex items-center gap-2">
+              Customer Reviews & Feedback
+            </h1>
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-xs">
+              {reviews.length} Total
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-300/70 mt-1">
+            Approve, reject, or manage customer testimonials shown on storefront and product details pages.
           </p>
         </div>
 
         <button
           onClick={fetchReviews}
-          className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-slate-800 hover:bg-stone-200 dark:hover:bg-slate-700 text-stone-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
+          disabled={loading}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-stone-200 dark:border-rose-800/60 bg-white dark:bg-rose-950/60 text-xs font-semibold text-stone-700 dark:text-rose-200 hover:bg-stone-100 dark:hover:bg-rose-900/50 transition-all shadow-2xs self-start sm:self-auto cursor-pointer"
         >
-          🔄 Refresh Reviews
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-rose-500" : ""}`} />
+          <span>Refresh Reviews</span>
         </button>
       </div>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* 2. Metrics & Average Rating Analytics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {/* Rating Analytics Card */}
+        <div className="col-span-2 sm:col-span-1 p-4 rounded-2xl border border-amber-200 dark:border-amber-950 bg-gradient-to-br from-amber-500/10 to-amber-500/5 dark:from-amber-950/40 dark:to-transparent flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+              Avg Rating
+            </span>
+            <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-300">
+              <Star className="h-4 w-4 fill-amber-400" />
+            </div>
+          </div>
+
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
+              {metrics.avgRating}
+            </span>
+            <span className="text-xs text-amber-700/80 dark:text-amber-300/80 font-medium">
+              out of 5.0
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1 mt-1 text-amber-500">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className={`h-3.5 w-3.5 ${
+                  i < Math.round(Number(metrics.avgRating))
+                    ? "fill-amber-400 text-amber-400"
+                    : "text-amber-200 dark:text-amber-950"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Total Reviews */}
         <div
           onClick={() => setStatusFilter("all")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             statusFilter === "all"
-              ? "bg-rose-500 text-white border-rose-500 shadow-md"
-              : "bg-white dark:bg-[#160E12] border-stone-200 dark:border-slate-800 hover:border-stone-300"
+              ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/40"
+              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-rose-300"
           }`}
         >
-          <p className="text-[11px] font-bold uppercase tracking-wider opacity-80">Total Reviews</p>
-          <p className="text-2xl font-black font-mono mt-1">{totalCount}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-stone-500 dark:text-rose-300/70">
+              Total Reviews
+            </span>
+            <div className="p-2 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">
+              <MessageSquare className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-stone-900 dark:text-rose-100 mt-2">
+            {metrics.total}
+          </div>
+          <div className="text-[11px] text-stone-400 dark:text-rose-300/50 mt-1">
+            Submitted feedback
+          </div>
         </div>
 
+        {/* Pending Approval */}
         <div
           onClick={() => setStatusFilter("pending")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             statusFilter === "pending"
-              ? "bg-amber-500 text-white border-amber-500 shadow-md"
-              : "bg-white dark:bg-[#160E12] border-stone-200 dark:border-slate-800 hover:border-amber-400"
+              ? "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/50 dark:bg-amber-950/40"
+              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-amber-300"
           }`}
         >
-          <p className="text-[11px] font-bold uppercase tracking-wider opacity-80">Pending Approval</p>
-          <p className="text-2xl font-black font-mono mt-1">{pendingCount}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+              Pending Approval
+            </span>
+            <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
+              <Clock className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-2">
+            {metrics.pending}
+          </div>
+          <div className="text-[11px] text-amber-600/70 dark:text-amber-400/60 mt-1">
+            Requires moderation
+          </div>
         </div>
 
+        {/* Approved (Live) */}
         <div
           onClick={() => setStatusFilter("approved")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             statusFilter === "approved"
-              ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
-              : "bg-white dark:bg-[#160E12] border-stone-200 dark:border-slate-800 hover:border-emerald-400"
+              ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/40"
+              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-emerald-300"
           }`}
         >
-          <p className="text-[11px] font-bold uppercase tracking-wider opacity-80">Approved (Live)</p>
-          <p className="text-2xl font-black font-mono mt-1">{approvedCount}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+              Approved (Live)
+            </span>
+            <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-2">
+            {metrics.approved}
+          </div>
+          <div className="text-[11px] text-emerald-600/70 dark:text-emerald-400/60 mt-1">
+            Visible on store
+          </div>
         </div>
 
+        {/* Rejected */}
         <div
           onClick={() => setStatusFilter("rejected")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             statusFilter === "rejected"
-              ? "bg-rose-700 text-white border-rose-700 shadow-md"
-              : "bg-white dark:bg-[#160E12] border-stone-200 dark:border-slate-800 hover:border-rose-400"
+              ? "border-rose-600 ring-2 ring-rose-600/20 bg-rose-100/50 dark:bg-rose-950/60"
+              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-rose-300"
           }`}
         >
-          <p className="text-[11px] font-bold uppercase tracking-wider opacity-80">Rejected</p>
-          <p className="text-2xl font-black font-mono mt-1">{rejectedCount}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-rose-700 dark:text-rose-300">
+              Rejected
+            </span>
+            <div className="p-2 rounded-xl bg-rose-200 dark:bg-rose-900 text-rose-700 dark:text-rose-300">
+              <XCircle className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-rose-700 dark:text-rose-300 mt-2">
+            {metrics.rejected}
+          </div>
+          <div className="text-[11px] text-rose-600/80 dark:text-rose-400/80 mt-1">
+            Hidden from store
+          </div>
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-[#160E12] p-4 rounded-2xl border border-stone-200 dark:border-slate-800">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-stone-400" />
-          <input
-            type="text"
-            placeholder="Search by customer name or text..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-stone-50 dark:bg-slate-900 border border-stone-200 dark:border-slate-800 text-xs"
-          />
-        </div>
+      {/* 3. Search, Filters & View Toggle Bar */}
+      <div className="space-y-4 bg-white dark:bg-[#180f14] p-4 sm:p-5 rounded-2xl border border-stone-200 dark:border-rose-900/40 shadow-xs">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-rose-300/50" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by customer name, product name, or review comment..."
+              className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 pl-10 pr-10 text-xs sm:text-sm text-stone-900 dark:text-rose-100 placeholder-stone-400 dark:placeholder-rose-300/40 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-stone-400 hover:text-stone-600 dark:hover:text-rose-200"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-2">
-          {["all", "pending", "approved", "rejected"].map((st) => (
-            <button
-              key={st}
-              onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer ${
-                statusFilter === st
-                  ? "bg-rose-500 text-white"
-                  : "bg-stone-100 dark:bg-slate-900 text-stone-600 dark:text-slate-300 hover:bg-stone-200"
-              }`}
+          {/* Rating Dropdown Filter */}
+          <div className="flex items-center gap-2">
+            <select
+              value={ratingFilter}
+              onChange={(e) => setRatingFilter(e.target.value)}
+              className="rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 px-3 py-2.5 text-xs text-stone-800 dark:text-rose-200 focus:border-rose-500 focus:outline-none"
             >
-              {st}
-            </button>
-          ))}
+              <option value="all">All Ratings (1-5 Stars)</option>
+              <option value="5">5 Stars Only ★★★★★</option>
+              <option value="4">4 Stars Only ★★★★</option>
+              <option value="3">3 Stars Only ★★★</option>
+              <option value="2">2 Stars Only ★★</option>
+              <option value="1">1 Star Only ★</option>
+            </select>
+
+            {/* Layout View Mode Toggle */}
+            <div className="flex items-center rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 p-1">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-xl transition-all ${
+                  viewMode === "grid"
+                    ? "bg-rose-600 text-white shadow-xs"
+                    : "text-stone-500 dark:text-rose-300/70 hover:text-stone-900"
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("table")}
+                className={`p-1.5 rounded-xl transition-all ${
+                  viewMode === "table"
+                    ? "bg-rose-600 text-white shadow-xs"
+                    : "text-stone-500 dark:text-rose-300/70 hover:text-stone-900"
+                }`}
+                title="Table View"
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
+
+            {isFiltered && (
+              <button
+                onClick={clearFilters}
+                className="p-2 rounded-2xl border border-stone-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 text-xs font-semibold shrink-0"
+                title="Clear Filters"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Status Filter Pill Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-stone-100 dark:border-rose-900/30">
+          {[
+            { key: "all", label: "All Reviews", count: metrics.total },
+            { key: "pending", label: "Pending", count: metrics.pending },
+            { key: "approved", label: "Approved (Live)", count: metrics.approved },
+            { key: "rejected", label: "Rejected", count: metrics.rejected },
+          ].map((tab) => {
+            const isActive = statusFilter === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setStatusFilter(tab.key)}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  isActive
+                    ? "bg-rose-600 text-white shadow-xs"
+                    : "bg-stone-100 dark:bg-rose-950/60 text-stone-600 dark:text-rose-300 hover:bg-stone-200 dark:hover:bg-rose-900/40"
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : "bg-stone-200 dark:bg-rose-900/60 text-stone-700 dark:text-rose-200"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Reviews Table Grid */}
+      {/* 4. Results Info Bar */}
+      <div className="flex items-center justify-between text-xs text-stone-500 dark:text-rose-300/70">
+        <span>
+          Showing <strong>{filteredReviews.length}</strong> of {reviews.length} customer reviews
+        </span>
+      </div>
+
+      {/* 5. Main Content: Grid View or Table View */}
       {loading ? (
         <div className="py-20 text-center space-y-3">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-rose-500" />
-          <p className="text-xs text-stone-500">Loading customer reviews...</p>
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-rose-500" />
+          <p className="text-xs text-stone-500 dark:text-rose-300/70">Loading customer reviews...</p>
         </div>
       ) : filteredReviews.length === 0 ? (
-        <div className="p-12 text-center bg-white dark:bg-[#160E12] rounded-3xl border border-stone-200 dark:border-slate-800 space-y-2">
-          <MessageSquare className="h-10 w-10 text-stone-300 mx-auto" />
-          <p className="text-sm font-bold text-stone-700 dark:text-white">No reviews found</p>
-          <p className="text-xs text-stone-500">Try changing the search query or status filter.</p>
+        <div className="p-12 text-center bg-white dark:bg-[#180f14] rounded-3xl border border-stone-200 dark:border-rose-900/40 space-y-2">
+          <MessageSquare className="h-10 w-10 text-stone-300 dark:text-rose-950 mx-auto" />
+          <p className="text-sm font-bold text-stone-900 dark:text-rose-100">No customer reviews found</p>
+          <p className="text-xs text-stone-500 dark:text-rose-300/60">Try adjusting your search query or status filter.</p>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      ) : viewMode === "grid" ? (
+        /* GRID VIEW */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredReviews.map((rev) => {
-            const dateStr = rev.createdAt
-              ? new Date(rev.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })
-              : "";
-
             const isPending = rev.status === "pending";
             const isApproved = rev.status === "approved";
             const isRejected = rev.status === "rejected";
@@ -232,85 +456,89 @@ export default function AdminReviewsPage() {
             return (
               <div
                 key={rev._id}
-                className="p-5 rounded-3xl bg-white dark:bg-[#160E12] border border-stone-200 dark:border-slate-800 space-y-4 flex flex-col justify-between transition-all hover:border-stone-300"
+                className="p-5 rounded-3xl bg-white dark:bg-[#180f14] border border-stone-200 dark:border-rose-900/40 shadow-xs hover:shadow-md space-y-4 flex flex-col justify-between transition-all relative overflow-hidden group"
               >
                 <div className="space-y-3">
-                  
-                  {/* Top Customer Info & Status Badge */}
+                  {/* Top Row: User Avatar, Name & Status Badge */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="relative h-10 w-10 rounded-full overflow-hidden border border-stone-200 dark:border-slate-800 bg-stone-100 dark:bg-slate-900 shrink-0">
-                        {rev.userAvatar ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={rev.userAvatar} alt={rev.userName} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-stone-400 bg-rose-50 dark:bg-rose-950">
-                            <User className="h-5 w-5 text-rose-500" />
-                          </div>
-                        )}
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-rose-500 to-pink-600 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                        {getInitial(rev.userName)}
                       </div>
                       <div>
-                        <h4 className="font-bold text-stone-900 dark:text-white text-xs">{rev.userName}</h4>
-                        <p className="text-[10px] text-stone-400">{dateStr || "Recent Review"}</p>
+                        <h4 className="font-bold text-sm text-stone-900 dark:text-rose-100">
+                          {rev.userName || "Customer"}
+                        </h4>
+                        <p className="text-[11px] text-stone-400 dark:text-rose-300/60">
+                          {rev.createdAt
+                            ? new Date(rev.createdAt).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })
+                            : "Recent Review"}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Status Badge */}
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider capitalize ${
                         isApproved
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300"
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
                           : isRejected
-                          ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-300"
-                          : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-300"
+                          ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800"
+                          : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800"
                       }`}
                     >
                       {rev.status}
                     </span>
                   </div>
 
-                  {/* Rating Stars */}
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        className={
-                          i < (rev.rating || 5)
-                            ? "fill-amber-400 text-amber-400"
-                            : "text-stone-200 dark:text-slate-800"
-                        }
-                      />
-                    ))}
-                    <span className="text-[11px] font-bold text-stone-500 ml-1 font-mono">{rev.rating}/5</span>
+                  {/* Rating Stars Bar */}
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${
+                            i < (rev.rating || 5)
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-stone-200 dark:text-rose-950"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">
+                      {rev.rating || 5}.0
+                    </span>
                   </div>
 
-                  {/* Product Attached (if any) */}
+                  {/* Attached Product Card (If any) */}
                   {rev.productName && (
-                    <div className="p-2 rounded-xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 flex items-center gap-2 text-[11px]">
-                      {rev.productImage && (
-                        <div className="relative h-7 w-7 rounded-md overflow-hidden bg-white border shrink-0">
-                          <Image src={rev.productImage} alt={rev.productName} fill className="object-cover" />
-                        </div>
-                      )}
-                      <span className="font-semibold text-stone-700 dark:text-slate-300 truncate">{rev.productName}</span>
+                    <div className="p-2.5 rounded-2xl bg-stone-50 dark:bg-rose-950/40 border border-stone-100 dark:border-rose-900/30 flex items-center gap-2.5 text-xs">
+                      <ShoppingBag className="h-4 w-4 text-rose-500 shrink-0" />
+                      <span className="font-semibold text-stone-800 dark:text-rose-100 truncate">
+                        {rev.productName}
+                      </span>
                     </div>
                   )}
 
-                  {/* Comment */}
-                  <p className="text-xs text-stone-700 dark:text-slate-300 leading-relaxed font-sans bg-stone-50/50 dark:bg-slate-900/40 p-3 rounded-2xl border border-stone-100 dark:border-slate-800">
-                    “{rev.comment}”
-                  </p>
+                  {/* Review Comment Quote */}
+                  <div className="p-3.5 rounded-2xl bg-stone-50/70 dark:bg-rose-950/20 border border-stone-100 dark:border-rose-900/30">
+                    <p className="text-xs text-stone-700 dark:text-rose-200/90 leading-relaxed italic">
+                      “{rev.comment}”
+                    </p>
+                  </div>
                 </div>
 
-                {/* Actions Row */}
-                <div className="pt-3 border-t border-stone-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 flex-1">
+                {/* Balanced Actions Row */}
+                <div className="pt-3 border-t border-stone-100 dark:border-rose-900/30 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
                     {!isApproved && (
                       <button
                         onClick={() => handleStatusChange(rev._id, "approved")}
                         disabled={updatingId === rev._id}
-                        className="flex-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 disabled:opacity-50"
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-50"
                       >
                         <Check className="h-3.5 w-3.5" /> Approve
                       </button>
@@ -320,9 +548,9 @@ export default function AdminReviewsPage() {
                       <button
                         onClick={() => handleStatusChange(rev._id, "rejected")}
                         disabled={updatingId === rev._id}
-                        className="flex-1 px-3 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-950 dark:text-rose-300 font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 disabled:opacity-50"
+                        className="px-3 py-1.5 rounded-xl border border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950 text-stone-700 dark:text-rose-200 hover:bg-stone-100 dark:hover:bg-rose-900/50 font-semibold text-xs transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
                       >
-                        <X className="h-3.5 w-3.5" /> Reject
+                        <X className="h-3.5 w-3.5 text-stone-400" /> Reject
                       </button>
                     )}
                   </div>
@@ -330,19 +558,118 @@ export default function AdminReviewsPage() {
                   <button
                     onClick={() => handleDelete(rev._id)}
                     disabled={updatingId === rev._id}
-                    className="p-2 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950 transition cursor-pointer shrink-0"
+                    className="p-1.5 rounded-xl border border-stone-200 dark:border-rose-900/50 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/80 transition-all cursor-pointer"
                     title="Delete Review"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-
               </div>
             );
           })}
         </div>
-      )}
+      ) : (
+        /* TABLE VIEW */
+        <div className="overflow-hidden rounded-2xl border border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] shadow-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-stone-50 dark:bg-rose-950/40 border-b border-stone-200 dark:border-rose-900/40">
+                <tr className="text-stone-600 dark:text-rose-200 font-bold uppercase tracking-wider text-[11px]">
+                  <th className="py-3.5 px-4">Customer</th>
+                  <th className="py-3.5 px-4">Product</th>
+                  <th className="py-3.5 px-4 text-center">Rating</th>
+                  <th className="py-3.5 px-4">Review Comment</th>
+                  <th className="py-3.5 px-4 text-center">Status</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100 dark:divide-rose-900/30">
+                {filteredReviews.map((rev) => {
+                  const isApproved = rev.status === "approved";
+                  const isRejected = rev.status === "rejected";
 
+                  return (
+                    <tr key={rev._id} className="hover:bg-rose-500/5 dark:hover:bg-rose-900/20 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-rose-500 to-pink-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                            {getInitial(rev.userName)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-stone-900 dark:text-rose-100">{rev.userName}</p>
+                            <p className="text-[10px] text-stone-400 dark:text-rose-300/60">
+                              {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : "Recent"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-stone-800 dark:text-rose-200 font-medium">
+                        {rev.productName || "General Store Review"}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1 font-bold text-amber-500 font-mono">
+                          <Star className="h-3.5 w-3.5 fill-amber-400" />
+                          {rev.rating || 5}.0
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-stone-700 dark:text-rose-200/90 max-w-xs truncate">
+                        “{rev.comment}”
+                      </td>
+
+                      <td className="py-3.5 px-4 text-center">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider capitalize ${
+                            isApproved
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                              : isRejected
+                              ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
+                              : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                          }`}
+                        >
+                          {rev.status}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {!isApproved && (
+                            <button
+                              onClick={() => handleStatusChange(rev._id, "approved")}
+                              className="p-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition"
+                              title="Approve Review"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                          {!isRejected && (
+                            <button
+                              onClick={() => handleStatusChange(rev._id, "rejected")}
+                              className="p-1.5 rounded-lg border border-stone-200 dark:border-rose-900/50 text-stone-600 dark:text-rose-200 hover:bg-stone-100"
+                              title="Reject Review"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDelete(rev._id)}
+                            className="p-1.5 rounded-lg border border-stone-200 dark:border-rose-900/50 text-stone-400 hover:text-rose-600"
+                            title="Delete Review"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

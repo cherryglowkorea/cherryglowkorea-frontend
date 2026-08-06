@@ -41,7 +41,7 @@ export default function AdminLayout({ children }) {
       <Sidebar />
 
       {/* Main Workspace Area */}
-      <div className="flex flex-1 flex-col overflow-x-hidden min-w-0">
+      <div className="flex flex-1 flex-col min-w-0">
         {/* Topbar Navigation */}
         <Topbar />
 

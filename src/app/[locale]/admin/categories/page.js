@@ -20,6 +20,7 @@ import {
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import ImageUploader from "@/components/ui/ImageUploader";
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState([]);
@@ -380,65 +381,13 @@ export default function AdminCategoriesPage() {
                 />
               </div>
 
-              {/* Image Upload / URL Input */}
-              <div className="space-y-2">
-                <label className="font-bold text-stone-700 dark:text-slate-300 block">
-                  Category Image
-                </label>
-
-                {/* Live Preview if image exists */}
-                {formData.image && (
-                  <div className="relative h-24 w-24 rounded-2xl overflow-hidden border border-rose-200 dark:border-rose-900/60 bg-stone-100 dark:bg-slate-900 shadow-xs mb-2 group">
-                    <Image
-                      src={formData.image}
-                      alt="Category preview"
-                      fill
-                      sizes="96px"
-                      className="object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, image: "" })}
-                      className="absolute top-1 right-1 bg-black/70 text-white p-1 rounded-full hover:bg-rose-600 transition-colors"
-                      title="Remove image"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                  <Input
-                    placeholder="Paste Image URL (https://...)"
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="bg-stone-50 dark:bg-slate-900 border-stone-200 dark:border-slate-800 rounded-xl flex-1"
-                  />
-
-                  {/* Local Computer File Upload Button */}
-                  <label className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-300 font-bold border border-rose-500/30 transition-all cursor-pointer shrink-0">
-                    {uploadingImage ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
-                        <span>Uploading...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4 text-rose-500" />
-                        <span>Upload File</span>
-                      </>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      disabled={uploadingImage}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-                <p className="text-[10px] text-stone-400">You can paste a web URL or select an image file directly from your computer to upload to Cloudinary.</p>
-              </div>
+              {/* Image Uploader */}
+              <ImageUploader
+                label="Category Image (PC / Mobile Upload to Cloudinary)"
+                value={formData.image}
+                onChange={(url) => setFormData({ ...formData, image: url })}
+                folder="cherry-glow/categories"
+              />
 
               <div>
                 <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">

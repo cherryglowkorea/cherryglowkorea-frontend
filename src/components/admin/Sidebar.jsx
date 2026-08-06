@@ -97,7 +97,7 @@ export default function Sidebar() {
         className={`
           fixed top-0 left-0 z-40 h-screen w-64 transform bg-white dark:bg-[#180E12] border-r border-stone-200 dark:border-rose-900/60 p-4 text-stone-700 dark:text-rose-100 flex flex-col justify-between
           transition-all duration-300 ease-in-out shadow-lg dark:shadow-2xl
-          sm:static sm:translate-x-0
+          sm:sticky sm:top-0 sm:translate-x-0 shrink-0
           ${open ? "translate-x-0" : "-translate-x-full"}
         `}
       >
@@ -126,17 +126,6 @@ export default function Sidebar() {
               <X className="h-5 w-5" />
             </button>
           </div>
-
-          {/* Super Admin Status Pill */}
-          {isSuperAdmin && (
-            <div className="mb-5 rounded-xl bg-amber-500/10 dark:bg-gradient-to-r dark:from-amber-950/80 dark:to-rose-950 border border-amber-500/30 p-3 flex items-center gap-2.5">
-              <ShieldCheck className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
-              <div>
-                <p className="text-xs font-bold text-amber-900 dark:text-amber-200">Super Admin Mode</p>
-                <p className="text-[10px] text-amber-700 dark:text-amber-300/70">Full control & permissions</p>
-              </div>
-            </div>
-          )}
 
           {/* Nav Group List */}
           <nav className="space-y-5 overflow-y-auto max-h-[calc(100vh-220px)] pr-1 scrollbar-thin scrollbar-thumb-stone-200 dark:scrollbar-thumb-rose-800">
