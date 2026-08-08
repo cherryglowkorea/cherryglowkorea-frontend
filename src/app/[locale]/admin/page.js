@@ -21,6 +21,10 @@ import {
   ShieldAlert,
   BarChart3,
   PieChart as PieChartIcon,
+  Calendar,
+  FileText,
+  Printer,
+  Filter,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -73,16 +77,30 @@ export default function DashboardOverviewPage() {
   const [error, setError] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
+  const [dateRange, setDateRange] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const fetchStats = async () => {
+  const fetchStats = async (rangeOverride, startOverride, endOverride) => {
     try {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/admin/dashboard/stats", {
+      const activeRange = rangeOverride !== undefined ? rangeOverride : dateRange;
+      const activeStart = startOverride !== undefined ? startOverride : startDate;
+      const activeEnd = endOverride !== undefined ? endOverride : endDate;
+
+      const queryParams = new URLSearchParams({
+        range: activeRange,
+        ...(activeStart ? { startDate: activeStart } : {}),
+        ...(activeEnd ? { endDate: activeEnd } : {}),
+      });
+
+      const res = await fetch(`http://localhost:5000/admin/dashboard/stats?${queryParams.toString()}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -110,7 +128,23 @@ export default function DashboardOverviewPage() {
     fetchStats();
   }, []);
 
-  if (loading) {
+  const handleRangeChange = (newRange) => {
+    setDateRange(newRange);
+    if (newRange !== "custom") {
+      fetchStats(newRange, "", "");
+    }
+  };
+
+  const handleCustomDateSubmit = (e) => {
+    e.preventDefault();
+    fetchStats("custom", startDate, endDate);
+  };
+
+  const handleExportPDF = () => {
+    window.print();
+  };
+
+  if (loading && !stats) {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -122,18 +156,12 @@ export default function DashboardOverviewPage() {
   }
 
   // Fallbacks
-  const rev = stats?.revenue || { today: 0, thisMonth: 0, total: 0 };
-  const ord = stats?.orders || { total: 0, pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 };
+  const rev = stats?.revenue || { today: 0, thisMonth: 0, total: 0, rangeFiltered: 0 };
+  const ord = stats?.orders || { total: 0, pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0, aov: 0, fulfillmentRate: 0 };
   const prod = stats?.products || { total: 0, singleCount: 0, comboCount: 0, lowStockCount: 0 };
   const cust = stats?.customers || { totalUsers: 0, customerCount: 0, adminCount: 0 };
   const charts = stats?.charts || { salesOverview: [], orderDistribution: [], topProducts: [], revenueByType: [] };
   const recent = stats?.recentActivity || { recentOrders: [], recentUsers: [], lowStockAlerts: [] };
-
-  // Data for Recharts Product Type breakdown
-  const productTypeData = [
-    { name: "Single Items", count: prod.singleCount, fill: "#F43F5E" },
-    { name: "Combo Deals", count: prod.comboCount, fill: "#FB7185" },
-  ];
 
   // Colors for Order Distribution
   const ORDER_STATUS_COLORS = {
@@ -149,10 +177,15 @@ export default function DashboardOverviewPage() {
     color: ORDER_STATUS_COLORS[item.name] || "#94A3B8",
   }));
 
+  const productTypeData = [
+    { name: "Single Items", count: prod.singleCount || 0, fill: "#F43F5E" },
+    { name: "Combo Deals", count: prod.comboCount || 0, fill: "#8B5CF6" },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Top Banner Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-rose-900/30 pb-5">
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 border-b border-stone-200 dark:border-rose-900/30 pb-5">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
@@ -164,17 +197,92 @@ export default function DashboardOverviewPage() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-slate-400 mt-1">
-            Real-time revenue, sales analytics, inventory warnings & recent customer activity.
+            Filter revenue, order statistics, inventory alerts & print executive PDF reports.
           </p>
         </div>
 
-        <button
-          onClick={fetchStats}
-          className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-rose-950/60 hover:bg-stone-50 dark:hover:bg-rose-900/60 border border-stone-200 dark:border-rose-800/40 px-4 py-2 text-xs font-semibold text-stone-700 dark:text-rose-200 transition-all shadow-xs hover:shadow-md cursor-pointer self-start sm:self-auto"
-        >
-          <RefreshCw className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400" />
-          <span>Refresh Data</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Export PDF Button */}
+          <button
+            onClick={handleExportPDF}
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white px-4 py-2 text-xs font-bold transition-all shadow-md hover:shadow-lg cursor-pointer"
+          >
+            <Printer className="h-4 w-4" />
+            <span>Export PDF Report</span>
+          </button>
+
+          {/* Refresh Data Button */}
+          <button
+            onClick={() => fetchStats()}
+            className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-rose-950/60 hover:bg-stone-50 dark:hover:bg-rose-900/60 border border-stone-200 dark:border-rose-800/40 px-4 py-2 text-xs font-semibold text-stone-700 dark:text-rose-200 transition-all shadow-xs hover:shadow-md cursor-pointer"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 text-rose-500 dark:text-rose-400 ${loading ? "animate-spin" : ""}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 🗓️ DATE RANGE FILTER BAR */}
+      <div className="rounded-2xl border border-stone-200/80 dark:border-rose-900/40 bg-white/80 dark:bg-[#180E13]/90 p-4 shadow-sm backdrop-blur-md">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-xs font-bold text-stone-700 dark:text-rose-200">
+            <Filter className="h-4 w-4 text-rose-500" />
+            <span>Filter Analytics Period:</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              { id: "all", label: "All Time" },
+              { id: "today", label: "Today" },
+              { id: "7days", label: "Last 7 Days" },
+              { id: "30days", label: "Last 30 Days" },
+              { id: "thisMonth", label: "This Month" },
+              { id: "custom", label: "Custom Range" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleRangeChange(tab.id)}
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  dateRange === tab.id
+                    ? "bg-rose-600 text-white shadow-md shadow-rose-500/20"
+                    : "bg-stone-100 dark:bg-rose-950/50 text-stone-600 dark:text-rose-300 hover:bg-stone-200 dark:hover:bg-rose-900/40"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Custom Date Selector inputs */}
+        {dateRange === "custom" && (
+          <form onSubmit={handleCustomDateSubmit} className="mt-3 pt-3 border-t border-stone-200 dark:border-rose-900/30 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-stone-600 dark:text-slate-400">From:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="rounded-xl border border-stone-300 dark:border-rose-800/60 bg-stone-50 dark:bg-[#251219] px-3 py-1.5 text-xs font-mono text-stone-900 dark:text-white outline-none focus:border-rose-500"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-stone-600 dark:text-slate-400">To:</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="rounded-xl border border-stone-300 dark:border-rose-800/60 bg-stone-50 dark:bg-[#251219] px-3 py-1.5 text-xs font-mono text-stone-900 dark:text-white outline-none focus:border-rose-500"
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-xl bg-stone-900 dark:bg-rose-900 hover:bg-stone-800 dark:hover:bg-rose-800 text-white px-4 py-1.5 text-xs font-bold transition-all cursor-pointer"
+            >
+              Apply Filter
+            </button>
+          </form>
+        )}
       </div>
 
       {/* 1. TOP SUMMARY STATS CARDS */}
@@ -544,6 +652,39 @@ export default function DashboardOverviewPage() {
           </div>
         )}
       </div>
-    </div>
-  );
-}
+
+      {/* 📄 PDF PRINT REPORT CONTAINER (Visible during window.print()) */}
+        <div id="printable-pdf-report" className="mt-8 border-t border-stone-200 dark:border-rose-900/30 pt-6 space-y-6">
+          <div className="flex items-center justify-between border-b-2 border-rose-600 pb-3">
+            <div>
+              <h2 className="text-xl font-black text-rose-600 uppercase tracking-wide">CHERRY GLOW K-BEAUTY STORE</h2>
+              <p className="text-xs text-stone-500">Executive Admin Analytics & Sales Performance PDF Summary</p>
+            </div>
+            <div className="text-right text-xs text-stone-500">
+              <p className="font-bold text-stone-900 dark:text-white">Period: <span className="uppercase text-rose-600 font-extrabold">{dateRange}</span></p>
+              <p className="font-mono">Generated: {new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="p-3 rounded-xl bg-stone-50 dark:bg-rose-950/30 border border-stone-200 dark:border-rose-900/30">
+              <p className="text-stone-500 uppercase font-bold text-[10px]">Total Store Revenue</p>
+              <p className="text-lg font-black text-stone-900 dark:text-white mt-0.5">{"৳"}{rev.total.toLocaleString()}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/40">
+              <p className="text-rose-600 uppercase font-bold text-[10px]">Period Filtered Sales</p>
+              <p className="text-lg font-black text-rose-700 dark:text-rose-300 mt-0.5">{"৳"}{(rev.rangeFiltered || rev.total).toLocaleString()}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-stone-50 dark:bg-rose-950/30 border border-stone-200 dark:border-rose-900/30">
+              <p className="text-stone-500 uppercase font-bold text-[10px]">Total Orders</p>
+              <p className="text-lg font-black text-stone-900 dark:text-white mt-0.5">{ord.total.toLocaleString()}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-stone-50 dark:bg-rose-950/30 border border-stone-200 dark:border-rose-900/30">
+              <p className="text-stone-500 uppercase font-bold text-[10px]">Average Order Value (AOV)</p>
+              <p className="text-lg font-black text-stone-900 dark:text-white mt-0.5">{"৳"}{ord.aov?.toLocaleString() || 0}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
