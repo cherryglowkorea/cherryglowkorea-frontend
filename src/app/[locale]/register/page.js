@@ -28,7 +28,6 @@ function passwordIssue(password) {
 export default function RegisterPage() {
   const router = useRouter();
   const tAuth = useTranslations("auth");
-  const [method, setMethod] = React.useState("email");
   const [name, setName] = React.useState("");
   const [identifier, setIdentifier] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -44,7 +43,7 @@ export default function RegisterPage() {
   function validate() {
     const next = {};
     if (!name.trim()) next.name = "আপনার নাম লিখুন।";
-    if (!identifier.trim()) next.identifier = method === "email" ? "ইমেইল লিখুন।" : "ফোন নম্বর লিখুন।";
+    if (!identifier.trim()) next.identifier = "ইমেইল অথবা মোবাইল নম্বর লিখুন।";
     const pwIssue = passwordIssue(password);
     if (pwIssue) next.password = pwIssue;
     if (password !== confirmPassword) next.confirmPassword = "পাসওয়ার্ড মিলছে না।";
@@ -59,13 +58,13 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const endpoint = method === "email" ? "/api/auth/register/email" : "/api/auth/register/phone";
+      const isEmail = identifier.includes("@");
+      const endpoint = isEmail ? "/api/auth/register/email" : "/api/auth/register/phone";
       const selectedAvatar = avatars[avatar];
 
-      const body =
-        method === "email"
-          ? { name, email: identifier, password, avatar: selectedAvatar, photoURL: selectedAvatar }
-          : { name, phone: identifier, password, avatar: selectedAvatar, photoURL: selectedAvatar };
+      const body = isEmail
+        ? { name, email: identifier.trim(), password, avatar: selectedAvatar, photoURL: selectedAvatar }
+        : { name, phone: identifier.trim(), password, avatar: selectedAvatar, photoURL: selectedAvatar };
 
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
@@ -105,28 +104,6 @@ export default function RegisterPage() {
         </>
       }
     >
-      <div className="mb-4 flex rounded-xl bg-stone-100 p-1 dark:bg-white/5">
-        {["email", "phone"].map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => {
-              setMethod(m);
-              setIdentifier("");
-              setErrors({});
-              setFormError("");
-            }}
-            className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-colors cursor-pointer ${
-              method === m
-                ? "bg-white text-rose-600 shadow-sm dark:bg-white/10 dark:text-rose-300"
-                : "text-stone-500 dark:text-rose-100/50"
-            }`}
-          >
-            {m === "email" ? tAuth("emailTab") : tAuth("phoneTab")}
-          </button>
-        ))}
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-3" noValidate>
         {/* Avatar Selector Inline */}
         <div className="flex items-center justify-between rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-2 dark:border-white/5 dark:bg-white/5">
@@ -170,13 +147,13 @@ export default function RegisterPage() {
 
         <FormField
           id="identifier"
-          label={method === "email" ? tAuth("emailLabel") : tAuth("phoneLabel")}
-          type={method === "email" ? "email" : "tel"}
-          placeholder={method === "email" ? tAuth("emailPlaceholder") : tAuth("phonePlaceholder")}
+          label={tAuth("emailOrPhoneLabel")}
+          type="text"
+          placeholder={tAuth("emailOrPhonePlaceholder")}
           value={identifier}
           onChange={setIdentifier}
           error={errors.identifier}
-          autoComplete={method === "email" ? "email" : "tel"}
+          autoComplete="username"
         />
 
         <FormField

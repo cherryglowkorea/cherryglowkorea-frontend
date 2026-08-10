@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -59,6 +60,7 @@ const BANGLADESH_DISTRICTS = [
 
 export default function CheckoutPage() {
   const { cart, clearCart, coupon: contextCoupon } = useCart();
+  const { setAuthData } = useAuth();
   const router = useRouter();
   const t = useTranslations("checkout");
 
@@ -269,11 +271,16 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        if (data.token && data.user) {
-          localStorage.setItem("token", data.token);
+        if (data.user) {
           localStorage.setItem("user", JSON.stringify(data.user));
+        }
+        if (data.token) {
+          localStorage.setItem("token", data.token);
           setIsLoggedIn(true);
           toast.success("🎉 Account created and logged in automatically!");
+        }
+        if (setAuthData && data.user) {
+          setAuthData(data.user, data.token || null);
         }
 
         setOrderSuccess({
@@ -321,6 +328,9 @@ export default function CheckoutPage() {
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
           setIsLoggedIn(true);
+          if (setAuthData) {
+            setAuthData(data.user, data.token);
+          }
           toast.success("🎉 Account password saved! You are now logged in.");
         }
       } else {

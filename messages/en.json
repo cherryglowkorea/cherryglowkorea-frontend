@@ -47,6 +47,8 @@
     "female": "Female",
     "nameLabel": "Your Name",
     "namePlaceholder": "Please enter your full name",
+    "emailOrPhoneLabel": "Email or mobile phone number",
+    "emailOrPhonePlaceholder": "Email or phone number",
     "emailLabel": "Email Address",
     "emailPlaceholder": "Please enter your email (e.g. name@domain.com)",
     "phoneLabel": "Phone Number",

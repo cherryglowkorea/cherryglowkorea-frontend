@@ -47,6 +47,8 @@
     "female": "নারী",
     "nameLabel": "আপনার নাম",
     "namePlaceholder": "আপনার পুরো নাম লিখুন",
+    "emailOrPhoneLabel": "ইমেইল অথবা মোবাইল নম্বর",
+    "emailOrPhonePlaceholder": "ইমেইল অথবা মোবাইল নম্বর লিখুন",
     "emailLabel": "ইমেইল ঠিকানা",
     "emailPlaceholder": "আপনার ইমেইল ঠিকানা লিখুন (যেমন: name@domain.com)",
     "phoneLabel": "মোবাইল নম্বর",

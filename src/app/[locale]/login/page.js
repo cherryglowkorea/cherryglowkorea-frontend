@@ -16,7 +16,6 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tAuth = useTranslations("auth");
-  const [method, setMethod] = React.useState("email");
   const [identifier, setIdentifier] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
@@ -35,13 +34,10 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const endpoint = method === "email" ? "/api/auth/login/email" : "/api/auth/login/phone";
-      const body = method === "email" ? { email: identifier, password } : { phone: identifier, password };
-
-      const res = await fetch(`${API_BASE}${endpoint}`, {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ identifier: identifier.trim(), password }),
       });
       const data = await res.json();
 
@@ -53,7 +49,7 @@ export default function LoginPage() {
       if (data.token) {
         localStorage.setItem("token", data.token);
         const userRole = data.user?.role;
-        const redirectTarget = searchParams.get("redirect") || (userRole === "admin" || userRole === "super_admin" ? "/admin" : "/");
+        const redirectTarget = searchParams.get("redirect") || (["admin", "super_admin", "manager"].includes(userRole) ? "/admin" : "/");
         window.location.href = redirectTarget;
       }
     } catch {
@@ -78,37 +74,15 @@ export default function LoginPage() {
         </>
       }
     >
-      {/* method switch */}
-      <div className="mb-5 flex rounded-xl bg-stone-100 p-1 dark:bg-white/5">
-        {["email", "phone"].map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => {
-              setMethod(m);
-              setIdentifier("");
-              setFormError("");
-            }}
-            className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-colors cursor-pointer ${
-              method === m
-                ? "bg-white text-rose-600 shadow-sm dark:bg-white/10 dark:text-rose-300"
-                : "text-stone-500 dark:text-rose-100/50"
-            }`}
-          >
-            {m === "email" ? tAuth("emailTab") : tAuth("phoneTab")}
-          </button>
-        ))}
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <FormField
           id="identifier"
-          label={method === "email" ? tAuth("emailLabel") : tAuth("phoneLabel")}
-          type={method === "email" ? "email" : "tel"}
-          placeholder={method === "email" ? tAuth("emailPlaceholder") : tAuth("phonePlaceholder")}
+          label={tAuth("emailOrPhoneLabel")}
+          type="text"
+          placeholder={tAuth("emailOrPhonePlaceholder")}
           value={identifier}
           onChange={setIdentifier}
-          autoComplete={method === "email" ? "email" : "tel"}
+          autoComplete="username"
         />
 
         <FormField

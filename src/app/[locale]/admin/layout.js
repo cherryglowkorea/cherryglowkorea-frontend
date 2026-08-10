@@ -10,12 +10,14 @@ export default function AdminLayout({ children }) {
   const { loading, user } = useAuth();
   const router = useRouter();
 
+  const ALLOWED_ROLES = ["admin", "super_admin", "manager"];
+
   useEffect(() => {
     if (loading) return; // ⛔ wait until auth state resolves
 
-    // Allow both 'admin' and 'super_admin'
-    if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
-      router.push("/login");
+    // Allow 'admin', 'super_admin', and 'manager'
+    if (!user || !ALLOWED_ROLES.includes(user.role)) {
+      router.push("/");
       return;
     }
   }, [user, loading, router]);
@@ -25,13 +27,13 @@ export default function AdminLayout({ children }) {
       <div className="flex min-h-screen items-center justify-center bg-rose-950 text-white font-medium">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-rose-500 border-t-transparent" />
-          <p className="text-sm text-rose-300">Loading Super Admin Dashboard...</p>
+          <p className="text-sm text-rose-300">Loading Admin Dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+  if (!user || !ALLOWED_ROLES.includes(user.role)) {
     return null;
   }
 

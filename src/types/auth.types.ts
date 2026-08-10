@@ -10,7 +10,7 @@ export interface User {
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   authProviders: string[];
-  role: 'user' | 'admin' | 'super_admin';
+  role: 'user' | 'admin' | 'super_admin' | 'manager';
   createdAt?: string;
   updatedAt?: string;
 }

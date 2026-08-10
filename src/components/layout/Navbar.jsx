@@ -180,7 +180,7 @@ export default function Navbar() {
 
                     <DropdownMenuSeparator className="bg-stone-100 dark:bg-white/10" />
 
-                    {["admin", "super_admin"].includes(user.role) && (
+                    {["admin", "super_admin", "manager"].includes(user.role) && (
                       <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
                         <Link href="/admin" className="flex items-center gap-2 font-medium">
                           <LayoutDashboard size={16} />
@@ -259,7 +259,7 @@ export default function Navbar() {
                         </div>
                       </div>
 
-                      {["admin", "super_admin"].includes(user.role) && (
+                      {["admin", "super_admin", "manager"].includes(user.role) && (
                         <Link href="/admin" className="p-2 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600">
                           <LayoutDashboard size={16} />
                         </Link>

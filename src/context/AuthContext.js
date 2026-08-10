@@ -78,13 +78,36 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Helper to directly update auth state (e.g. guest checkout, password creation)
+  const setAuthData = (userData, tokenData) => {
+    if (tokenData) {
+      localStorage.setItem("token", tokenData);
+      setToken(tokenData);
+    }
+    if (userData) {
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    }
+  };
+
   const getToken = () => {
-    return token || localStorage.getItem("token");
+    return token || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, login, register, logout, getToken }}
+      value={{
+        user,
+        token,
+        loading,
+        login,
+        register,
+        logout,
+        getToken,
+        setUser,
+        setToken,
+        setAuthData,
+      }}
     >
       {children}
     </AuthContext.Provider>
