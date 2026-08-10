@@ -3,9 +3,11 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import {
   ShoppingBag,
   Truck,
@@ -69,6 +71,9 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [altPhone, setAltPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [setPasswordLoading, setSetPasswordLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [deliveryArea, setDeliveryArea] = useState("outside"); // "dhaka" | "outside"
   const [district, setDistrict] = useState("Dhaka (ঢাকা)");
   const [isCustomDistrict, setIsCustomDistrict] = useState(false);
@@ -89,12 +94,18 @@ export default function CheckoutPage() {
     setMounted(true);
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Please log in to complete your checkout and place an order.");
-        router.push("/login?redirect=/checkout");
+      setIsLoggedIn(!!token);
+      const storedUserStr = localStorage.getItem("user");
+      if (storedUserStr) {
+        try {
+          const storedUser = JSON.parse(storedUserStr);
+          if (storedUser.name) setName(storedUser.name);
+          if (storedUser.phone) setPhone(storedUser.phone);
+          if (storedUser.email) setEmail(storedUser.email);
+        } catch (e) {}
       }
     }
-  }, [router]);
+  }, []);
 
   // Sync context coupon if available
   useEffect(() => {
@@ -132,7 +143,7 @@ export default function CheckoutPage() {
 
   // Apply Coupon API Call
   const handleApplyCoupon = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!couponCode.trim()) {
       toast.error("Please enter a coupon code");
       return;
@@ -224,6 +235,17 @@ export default function CheckoutPage() {
       name,
       phone: altPhone.trim() ? `${phone} (Alt: ${altPhone})` : phone,
       email,
+      password: password || undefined,
+      shippingAddress: {
+        recipientName: name,
+        recipientPhone: phone,
+        district: finalDistrict,
+        thana,
+        addressLine: address,
+        address,
+      },
+      orderItems: cart,
+      cart,
       district: finalDistrict,
       thana,
       address,
@@ -232,12 +254,13 @@ export default function CheckoutPage() {
       shippingCost: deliveryCharge,
       discount,
       couponCode: appliedCoupon?.code || "",
-      cart,
     };
 
     try {
       const apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      const res = await fetch(`${apiHost}/orders/order`, {
+      const targetEndpoint = !isLoggedIn ? `${apiHost}/api/auth/guest-checkout` : `${apiHost}/orders/order`;
+      
+      const res = await fetch(targetEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -246,8 +269,15 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
+        if (data.token && data.user) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          setIsLoggedIn(true);
+          toast.success("🎉 Account created and logged in automatically!");
+        }
+
         setOrderSuccess({
-          orderNumber: data.orderNumber || data.orderId || `CG-${Date.now()}`,
+          orderNumber: data.orderNumber || data.orderId || (data.order && data.order.orderNumber) || `CG-${Date.now()}`,
           customerName: name,
           phone,
           address: `${address}, ${thana ? thana + ", " : ""}${finalDistrict}`,
@@ -265,6 +295,41 @@ export default function CheckoutPage() {
       toast.error("Network error. Please check your connection.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSetPasswordOnSuccess = async (e) => {
+    e.preventDefault();
+    if (!password || password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+    setSetPasswordLoading(true);
+    try {
+      const apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const res = await fetch(`${apiHost}/api/auth/set-guest-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: orderSuccess.phone,
+          password,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.token && data.user) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          setIsLoggedIn(true);
+          toast.success("🎉 Account password saved! You are now logged in.");
+        }
+      } else {
+        toast.error(data.message || "Failed to set password.");
+      }
+    } catch (err) {
+      toast.error("Network error setting password.");
+    } finally {
+      setSetPasswordLoading(false);
     }
   };
 
@@ -326,6 +391,42 @@ export default function CheckoutPage() {
                 </span>
               </div>
             </div>
+
+            {/* Optional Account Creation Card for Guest Users */}
+            {!isLoggedIn && (
+              <div className="bg-gradient-to-br from-pink-50/80 to-rose-50/50 dark:from-pink-950/20 dark:to-rose-950/10 border border-pink-200/80 dark:border-pink-900/30 rounded-2xl p-5 text-left space-y-3 shadow-xs">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="text-pink-500 shrink-0" size={20} />
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-white">
+                      Create Account & Track Orders / পাসওয়ার্ড সেট করুন (ঐচ্ছিক)
+                    </h3>
+                    <p className="text-[11px] sm:text-xs text-stone-500 dark:text-rose-100/60 mt-0.5">
+                      Set a password to create an account so you can log in & track future orders anytime!
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSetPasswordOnSuccess} className="flex flex-col sm:flex-row gap-2.5 pt-1">
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    placeholder="Set a password (min 6 characters)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="flex-1 h-10 px-3.5 text-xs sm:text-sm rounded-xl border border-pink-300 dark:border-pink-900/50 bg-white dark:bg-stone-900 text-stone-800 dark:text-rose-50 placeholder-stone-400 outline-none focus:ring-1 focus:ring-pink-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={setPasswordLoading}
+                    className="h-10 px-5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer shrink-0 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    {setPasswordLoading ? "Saving..." : "Save Password & Log In"}
+                  </button>
+                </form>
+              </div>
+            )}
 
             {/* Delivery Timeline Notice */}
             <div className="bg-pink-50/70 dark:bg-pink-950/20 border border-pink-100 dark:border-pink-900/30 rounded-2xl p-4 flex items-center gap-3.5 text-left">
@@ -401,35 +502,66 @@ export default function CheckoutPage() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
         
-        {/* Streamlined Header Bar */}
+        {/* Streamlined Distraction-Free Header Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 sm:mb-8 sm:pb-4 border-b border-stone-200/80 dark:border-white/10">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push("/cart")}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white dark:bg-white/5 border border-stone-200 dark:border-white/10 flex items-center justify-center text-stone-600 dark:text-rose-100 hover:text-pink-500 hover:border-pink-300 transition cursor-pointer shrink-0 shadow-xs"
-              title="Return to Cart"
-            >
-              <ArrowLeft size={17} />
-            </button>
-            <div>
-              <h1 className="text-lg sm:text-2xl font-black text-stone-900 dark:text-white leading-tight flex items-center gap-2">
-                {t("title")}
-              </h1>
-              <p className="text-[11px] sm:text-xs text-stone-500 dark:text-rose-100/50 mt-0.5">
-                {t("subtitle")}
-              </p>
+          <div className="flex items-center gap-3 sm:gap-4 flex-wrap sm:flex-nowrap">
+            {/* Brand Logo */}
+            <Link href="/" className="flex items-center gap-2 group shrink-0">
+              <Image
+                src="/logo.png"
+                alt="Cherry Glow Korea"
+                width={32}
+                height={32}
+                className="transition-transform group-hover:scale-105 shrink-0"
+              />
+              <div className="flex items-baseline gap-1">
+                <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-stone-900 dark:text-white">
+                  Cherry Glow
+                </span>
+                <span className="font-serif text-lg sm:text-xl italic font-semibold text-rose-500 dark:text-rose-400 hidden sm:inline">
+                  Korea
+                </span>
+              </div>
+            </Link>
+
+            <span className="hidden sm:inline-block text-stone-300 dark:text-white/20 font-light">|</span>
+
+            {/* Back Button & Title */}
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => router.push("/cart")}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white dark:bg-white/5 border border-stone-200 dark:border-white/10 flex items-center justify-center text-stone-600 dark:text-rose-100 hover:text-pink-500 hover:border-pink-300 transition cursor-pointer shrink-0 shadow-xs"
+                title="Return to Cart"
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <div>
+                <h1 className="text-base sm:text-xl font-black text-stone-900 dark:text-white leading-tight flex items-center gap-2">
+                  {t("title")}
+                </h1>
+                <p className="text-[11px] sm:text-xs text-stone-500 dark:text-rose-100/50 mt-0.5">
+                  {t("subtitle")}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Stepper indicator */}
-          <div className="hidden sm:flex items-center gap-2 text-xs font-semibold">
-            <span className="text-stone-400 dark:text-rose-100/40">1. {t("stepCart")}</span>
-            <ChevronRight size={13} className="text-stone-300" />
-            <span className="font-bold text-pink-500 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/40 px-3.5 py-1 rounded-xl border border-pink-200 dark:border-pink-900/30">
-              2. {t("stepCheckout")}
-            </span>
-            <ChevronRight size={13} className="text-stone-300" />
-            <span className="text-stone-400 dark:text-rose-100/40">3. {t("stepConfirmation")}</span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Stepper indicator */}
+            <div className="hidden lg:flex items-center gap-2 text-xs font-semibold mr-1">
+              <span className="text-stone-400 dark:text-rose-100/40">1. {t("stepCart")}</span>
+              <ChevronRight size={13} className="text-stone-300" />
+              <span className="font-bold text-pink-500 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/40 px-3 py-1 rounded-xl border border-pink-200 dark:border-pink-900/30">
+                2. {t("stepCheckout")}
+              </span>
+              <ChevronRight size={13} className="text-stone-300" />
+              <span className="text-stone-400 dark:text-rose-100/40">3. {t("stepConfirmation")}</span>
+            </div>
+
+            {/* Language & Theme Controls */}
+            <LanguageSwitcher />
+            <ThemeToggle />
           </div>
         </div>
 
@@ -518,6 +650,8 @@ export default function CheckoutPage() {
                     />
                   </div>
                 </div>
+
+
               </div>
             </div>
 
@@ -695,7 +829,7 @@ export default function CheckoutPage() {
               {/* Coupon Accordion / Field */}
               <div className="border-t border-stone-100 dark:border-white/5 pt-3.5 sm:pt-4">
                 {!appliedCoupon ? (
-                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                  <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Tag size={13} className="absolute left-3 top-3 text-stone-400" />
                       <input
@@ -703,17 +837,24 @@ export default function CheckoutPage() {
                         placeholder={t("couponPlaceholder")}
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleApplyCoupon(e);
+                          }
+                        }}
                         className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-stone-900/60 text-stone-800 dark:text-rose-100 outline-none uppercase font-mono"
                       />
                     </div>
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleApplyCoupon}
                       disabled={couponLoading}
                       className="px-4 py-2 bg-stone-800 dark:bg-white/10 hover:bg-stone-900 text-white rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
                     >
                       {couponLoading ? "..." : t("apply")}
                     </button>
-                  </form>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 p-2.5 rounded-xl">
                     <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs">

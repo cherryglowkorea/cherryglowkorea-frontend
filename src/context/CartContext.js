@@ -51,13 +51,6 @@ export function CartProvider({ children }) {
 
   // ✅ Add to cart (auto-selects first variant for price display)
   const addToCart = (product) => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (!token) {
-      toast.error("Please log in to add products to your cart and place an order.");
-      setIsLoginModalOpen(true);
-      return;
-    }
-
     setCart((prev) => {
       const pId = product._id || product.productId;
       const exists = prev.find((i) => i.productId === pId || i._id === pId);

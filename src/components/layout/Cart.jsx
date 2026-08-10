@@ -6,22 +6,12 @@ import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 
 export default function Cart() {
-  const { totalItems, setIsLoginModalOpen } = useCart();
+  const { totalItems } = useCart();
   const router = useRouter();
 
   const handleClick = (e) => {
     e.preventDefault();
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (!token) {
-      toast.error("Please log in to view your shopping cart.");
-      if (setIsLoginModalOpen) {
-        setIsLoginModalOpen(true);
-      } else {
-        router.push("/login?redirect=/cart");
-      }
-    } else {
-      router.push("/cart");
-    }
+    router.push("/cart");
   };
 
   return (

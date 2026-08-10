@@ -36,8 +36,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const tNav = useTranslations("nav");
 
-  // Do not render public Navbar on Admin pages
-  if (pathname?.startsWith("/admin")) {
+  // Do not render public Navbar on Admin or Checkout pages
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/checkout")) {
     return null;
   }
 

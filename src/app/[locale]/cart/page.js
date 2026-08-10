@@ -18,14 +18,7 @@ export default function CartPage() {
 
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Please log in to access your cart and place an order.");
-        router.push("/login?redirect=/cart");
-      }
-    }
-  }, [router]);
+  }, []);
 
   const subtotal = useMemo(() => {
     return cart.reduce((sum, item) => {
