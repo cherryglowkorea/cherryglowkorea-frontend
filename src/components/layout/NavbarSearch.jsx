@@ -118,30 +118,30 @@ export default function NavbarSearch({ isMobile = false }) {
   return (
     <div ref={containerRef} className="relative w-full">
       
-      {/* Amazon Style Search Bar Box */}
+      {/* Amazon / Daraz Premium E-Commerce Style Search Bar Box */}
       <form
         onSubmit={handleFullSearchSubmit}
-        className={`flex items-center w-full rounded-2xl bg-stone-100/90 dark:bg-white/10 border transition-all ${
+        className={`flex items-center w-full rounded-full bg-white dark:bg-[#1A1013] border-2 overflow-hidden transition-all shadow-2xs ${
           isFocused
-            ? "border-rose-500 ring-2 ring-rose-400/30 bg-white dark:bg-[#1C1417]"
-            : "border-stone-200/80 dark:border-white/10 hover:border-stone-300 dark:hover:border-white/20"
+            ? "border-rose-500 ring-4 ring-rose-500/15 bg-white dark:bg-[#1C1215]"
+            : "border-stone-200 dark:border-rose-950/80 hover:border-rose-300 dark:hover:border-rose-800/60"
         }`}
       >
-        <div className="pl-3.5 pr-1.5 text-stone-400 dark:text-rose-100/60 shrink-0">
-          <Search className="h-4 w-4 text-rose-500" />
+        <div className="pl-4 pr-1.5 text-stone-400 dark:text-rose-300/60 shrink-0">
+          <Search className="h-4 w-4 text-stone-400 dark:text-rose-400" />
         </div>
 
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search skincare, products, brands..."
+          placeholder="Search for skincare, serums, sunscreen, brands..."
           value={query}
           onFocus={() => setIsFocused(true)}
           onChange={(e) => {
             setQuery(e.target.value);
             setIsFocused(true);
           }}
-          className="w-full py-2 text-xs sm:text-sm font-medium text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-rose-100/50 bg-transparent outline-none"
+          className="w-full py-2 px-1 text-xs sm:text-sm font-medium text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-rose-100/40 bg-transparent outline-none"
         />
 
         {loading ? (
@@ -153,28 +153,19 @@ export default function NavbarSearch({ isMobile = false }) {
               setQuery("");
               setProductResults([]);
             }}
-            className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-white mr-1 transition cursor-pointer shrink-0"
+            className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-white mr-2 transition cursor-pointer shrink-0"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-4 w-4" />
           </button>
         ) : null}
 
         <button
           type="submit"
-          className="px-3.5 py-2 mr-0.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold text-xs transition cursor-pointer shrink-0 flex items-center justify-center gap-1 shadow-2xs"
+          className="self-stretch px-6 flex items-center justify-center bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-extrabold text-xs sm:text-sm transition-all cursor-pointer shrink-0"
         >
-          <Search className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Search</span>
+          <span>Search</span>
         </button>
       </form>
-
-      {/* Dimmed Backdrop when search input is focused */}
-      {showDropdown && (
-        <div
-          onClick={() => setIsFocused(false)}
-          className="fixed inset-0 top-[112px] md:top-16 bg-stone-950/40 dark:bg-black/70 backdrop-blur-xs z-40 cursor-pointer"
-        />
-      )}
 
       {/* Amazon Live Dropdown Menu (Attached directly underneath the searchbar) */}
       {showDropdown && (
