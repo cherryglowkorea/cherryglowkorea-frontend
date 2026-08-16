@@ -11,22 +11,12 @@ export default function FloatingSummary({
 }) {
   const [open, setOpen] = useState(false);
 
-  // Tiers progress calculation
   const nextTierText = () => {
-    if (subtotal === 0) return "Build your combo to get up to 10% extra discount!";
-    if (subtotal < 4000) {
-      return `Add ৳${4000 - subtotal} more to unlock 5% discount!`;
+    if (subtotal === 0) return "Select products to build your custom combo bundle!";
+    if (discount > 0) {
+      return `🎉 Total Combo Discount: ৳${discount.toFixed(0)}`;
     }
-    if (subtotal < 8000) {
-      return `Add ৳${8000 - subtotal} more to unlock 10% discount!`;
-    }
-    return "🎉 Max 10% Combo Discount Unlocked!";
-  };
-
-  const discountRatePercent = () => {
-    if (subtotal >= 8000) return 10;
-    if (subtotal >= 4000) return 5;
-    return 0;
+    return "Custom Combo Package Ready!";
   };
 
   return (
@@ -106,7 +96,7 @@ export default function FloatingSummary({
           </div>
 
           <div className="flex justify-between text-xs text-emerald-500 font-medium">
-            <span>Extra Combo Discount ({discountRatePercent()}%)</span>
+            <span>Combo Savings</span>
             <span>-৳{discount.toFixed(0)}</span>
           </div>
 
@@ -133,7 +123,7 @@ export default function FloatingSummary({
 
           {discount > 0 && (
             <div className="flex justify-between text-xs text-emerald-500 font-semibold bg-emerald-50/50 dark:bg-emerald-950/20 p-2 rounded-lg border border-emerald-100 dark:border-white/5">
-              <span>Combo Discount ({discountRatePercent()}%)</span>
+              <span>Combo Discount</span>
               <span>-৳{discount.toFixed(0)}</span>
             </div>
           )}

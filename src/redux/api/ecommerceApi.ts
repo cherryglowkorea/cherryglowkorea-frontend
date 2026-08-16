@@ -54,10 +54,15 @@ export const ecommerceApi = createApi({
     }),
 
     // ==========================================
-    // 2. CATEGORIES
+    // 2. CATEGORIES & ATTRIBUTES
     // ==========================================
     getCategories: builder.query<any[], void>({
       query: () => "/categories",
+      providesTags: ["Categories"],
+    }),
+
+    getAttributes: builder.query<any[], void>({
+      query: () => "/attributes",
       providesTags: ["Categories"],
     }),
 
@@ -136,6 +141,7 @@ export const {
   useGetFeaturedProductsQuery,
   useGetBestSellersQuery,
   useGetCategoriesQuery,
+  useGetAttributesQuery,
   useGetBrandsQuery,
   useValidateCouponMutation,
   useGetProductReviewsQuery,

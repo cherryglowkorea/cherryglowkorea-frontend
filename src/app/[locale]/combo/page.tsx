@@ -71,18 +71,23 @@ export default function ComboPage() {
     toast.info("Product removed");
   };
 
-  // 🔥 Pricing
-  const subtotal = useMemo(() => {
+  // 🔥 Pricing calculated strictly from backend product prices
+  const regularSubtotal = useMemo(() => {
     return combo.reduce((sum, p) => {
-      if (!p.selectedVariant) return sum;
-      return sum + p.selectedVariant.price;
+      const orig = p.price || p.basePrice || p.selectedVariant?.price || 0;
+      return sum + Number(orig);
     }, 0);
   }, [combo]);
 
-  const discountRate = subtotal > 8000 ? 0.1 : subtotal > 4000 ? 0.05 : 0;
+  const subtotal = useMemo(() => {
+    return combo.reduce((sum, p) => {
+      const finalP = p.selectedVariant?.price || p.salePrice || p.price || 0;
+      return sum + Number(finalP);
+    }, 0);
+  }, [combo]);
 
-  const discount = subtotal * discountRate;
-  const total = subtotal - discount;
+  const discount = Math.max(0, regularSubtotal - subtotal);
+  const total = subtotal;
 
   // 🔥 Direct Checkout (Redirects to /checkout)
   const handleCheckout = () => {
@@ -163,7 +168,7 @@ export default function ComboPage() {
 
                   {discount > 0 && (
                     <div className="flex justify-between text-xs text-emerald-500 font-semibold bg-emerald-50/50 dark:bg-emerald-950/20 p-2 rounded-lg border border-emerald-100 dark:border-white/5">
-                      <span>Combo Discount ({discountRate * 100}%)</span>
+                      <span>Combo Discount</span>
                       <span>-৳{discount.toFixed(0)}</span>
                     </div>
                   )}

@@ -5,23 +5,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { useGetCategoriesQuery } from "@/redux/api/ecommerceApi";
 import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale } from "next-intl";
 
 const defaultCategories = [
-  { id: 1, name: "Cleanser", image: "https://i.ibb.co/XZmby8wp/body-care.jpg" },
-  { id: 2, name: "Toner", image: "https://i.ibb.co/DTj6vTX/fragrance.jpg" },
-  { id: 3, name: "Serum", image: "https://i.ibb.co/jPVqmVjK/hair-care.jpg" },
-  { id: 4, name: "Eye Care", image: "https://i.ibb.co/WNXFcJdX/makeup.jpg" },
-  { id: 5, name: "Moisturizer", image: "https://i.ibb.co/vxBd6rWx/skin-care.jpg" },
-  { id: 6, name: "Sunscreen", image: "https://i.ibb.co/XZmby8wp/body-care.jpg" },
-  { id: 7, name: "Mask", image: "https://i.ibb.co/jPVqmVjK/hair-care.jpg" },
-  { id: 8, name: "Essence", image: "https://i.ibb.co/WNXFcJdX/makeup.jpg" },
-  { id: 9, name: "Lip Care", image: "https://i.ibb.co/WNXFcJdX/makeup.jpg" },
-  { id: 10, name: "Acne Care", image: "https://i.ibb.co/vxBd6rWx/skin-care.jpg" },
-  { id: 11, name: "Body Care", image: "https://i.ibb.co/XZmby8wp/body-care.jpg" },
-  { id: 12, name: "Hair Care", image: "https://i.ibb.co/jPVqmVjK/hair-care.jpg" },
+  { id: 1, name: "Cleanser", nameBn: "ক্লিনজার", image: "https://i.ibb.co/XZmby8wp/body-care.jpg" },
+  { id: 2, name: "Toner", nameBn: "টোনার", image: "https://i.ibb.co/DTj6vTX/fragrance.jpg" },
+  { id: 3, name: "Serum", nameBn: "সিরাম", image: "https://i.ibb.co/jPVqmVjK/hair-care.jpg" },
+  { id: 4, name: "Eye Care", nameBn: "আই কেয়ার", image: "https://i.ibb.co/WNXFcJdX/makeup.jpg" },
+  { id: 5, name: "Moisturizer", nameBn: "ময়েশ্চারাইজার", image: "https://i.ibb.co/vxBd6rWx/skin-care.jpg" },
+  { id: 6, name: "Sunscreen", nameBn: "সানস্ক্রিন", image: "https://i.ibb.co/XZmby8wp/body-care.jpg" },
+  { id: 7, name: "Mask", nameBn: "মাস্ক", image: "https://i.ibb.co/jPVqmVjK/hair-care.jpg" },
+  { id: 8, name: "Essence", nameBn: "এসেন্স", image: "https://i.ibb.co/WNXFcJdX/makeup.jpg" },
+  { id: 9, name: "Lip Care", nameBn: "লিপ কেয়ার", image: "https://i.ibb.co/WNXFcJdX/makeup.jpg" },
+  { id: 10, name: "Acne Care", nameBn: "একনি কেয়ার", image: "https://i.ibb.co/vxBd6rWx/skin-care.jpg" },
+  { id: 11, name: "Body Care", nameBn: "বডি কেয়ার", image: "https://i.ibb.co/XZmby8wp/body-care.jpg" },
+  { id: 12, name: "Hair Care", nameBn: "হেয়ার কেয়ার", image: "https://i.ibb.co/jPVqmVjK/hair-care.jpg" },
 ];
 
 export default function CategoriesSection() {
+  const locale = useLocale();
   const { data: dbCategories, isLoading } = useGetCategoriesQuery() as any;
   const scrollRef = useRef(null);
 
@@ -96,6 +98,7 @@ export default function CategoriesSection() {
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {categories.map((cat, index) => {
+              const displayName = (locale === "bn" && cat.nameBn) ? cat.nameBn : cat.name;
               const catName = cat.name || "Category";
               const catImg = cat.image || "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=400&auto=format&fit=crop";
 
@@ -121,7 +124,7 @@ export default function CategoriesSection() {
 
                   {/* Category Name */}
                   <span className="text-[11px] sm:text-xs font-bold text-stone-800 dark:text-rose-100 group-hover:text-pink-600 transition truncate w-full px-0.5">
-                    {catName}
+                    {displayName}
                   </span>
                 </Link>
               );

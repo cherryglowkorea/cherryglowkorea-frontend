@@ -661,25 +661,58 @@ export default function UserProfilePage() {
                         </div>
                       </div>
 
-                      {/* Email */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300">
-                          Email Address
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="email"
-                            placeholder="user@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 rounded-2xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#120A0D] text-stone-900 dark:text-white text-xs sm:text-sm font-medium outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition"
-                          />
-                          <Mail
-                            size={16}
-                            className="absolute left-3.5 top-3.5 text-stone-400"
-                          />
-                        </div>
-                      </div>
+                      {/* Email Address Field */}
+                      {(() => {
+                        const isEmailLocked = !!(user?.email && user.email.trim().length > 0) || !!user?.googleId || user?.authProviders?.includes("google");
+                        const isGoogleUser = !!user?.googleId || user?.authProviders?.includes("google");
+
+                        return (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
+                                <span>Email Address</span>
+                              </label>
+                              {isEmailLocked ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-900/40">
+                                  <Lock size={10} /> {isGoogleUser ? "Google Account 🔒" : "Verified 🔒"}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2.5 py-0.5 rounded-full border border-rose-200 dark:border-rose-900/40">
+                                  + Add Email Address
+                                </span>
+                              )}
+                            </div>
+                            <div className="relative">
+                              <input
+                                type="email"
+                                disabled={isEmailLocked}
+                                readOnly={isEmailLocked}
+                                placeholder={isEmailLocked ? email : "your.email@example.com (ইমেইল এড্রেস যোগ করুন)"}
+                                value={email}
+                                onChange={(e) => !isEmailLocked && setEmail(e.target.value)}
+                                className={`w-full pl-10 pr-4 py-3 rounded-2xl border text-xs sm:text-sm font-medium outline-none transition ${
+                                  isEmailLocked
+                                    ? "bg-stone-100 dark:bg-stone-900/80 border-stone-200 dark:border-white/10 text-stone-500 dark:text-stone-400 cursor-not-allowed select-none"
+                                    : "bg-stone-50 dark:bg-[#120A0D] border-rose-300 dark:border-rose-900/50 text-stone-900 dark:text-white focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                                }`}
+                              />
+                              <Mail
+                                size={16}
+                                className={`absolute left-3.5 top-3.5 ${isEmailLocked ? "text-stone-400" : "text-rose-500"}`}
+                              />
+                            </div>
+                            {isEmailLocked ? (
+                              <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium leading-snug pt-0.5">
+                                🔒 অ্যাকাউন্টের নিরাপত্তার জন্য ইমেইল এড্রেস পরিবর্তন করা যাবে না। প্রয়োজনে কাস্টমার কেয়ারে যোগাযোগ করুন।
+                              </p>
+                            ) : (
+                              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium leading-snug pt-0.5">
+                                💡 এখানে আপনার ইমেইল এড্রেস দিন। সেভ করার পর এটি আপনার অ্যাকাউন্টের সাথে যুক্ত হয়ে যাবে।
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       {/* Phone */}
                       <div className="space-y-2 sm:col-span-2">

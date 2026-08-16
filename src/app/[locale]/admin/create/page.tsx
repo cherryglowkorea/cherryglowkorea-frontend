@@ -8,6 +8,8 @@ import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import ImageUploader from "@/components/ui/ImageUploader";
+
 import {
   Trash2,
   Plus,
@@ -30,27 +32,42 @@ import {
   DollarSign,
   Boxes,
   Heart,
+  Droplets,
+  Sliders,
+  Check,
+  Info,
 } from "lucide-react";
 import Image from "next/image";
-import { useGetCategoriesQuery } from "@/redux/api/ecommerceApi";
+import { useGetCategoriesQuery, useGetAttributesQuery } from "@/redux/api/ecommerceApi";
 
-const DEFAULT_SKIN_TYPES = ["Dry", "Oily", "Sensitive", "Combination", "Normal", "All Skin Types"];
-const DEFAULT_CONCERNS = ["Acne & Blemishes", "Dark Spots & Pigmentation", "Anti-Aging & Wrinkles", "Deep Hydration", "Pores & Texture", "Redness & Calming"];
+const DEFAULT_SKIN_TYPES = ["Dry Skin", "Oily Skin", "Sensitive Skin", "Combination Skin", "Normal Skin", "All Skin Types"];
+const DEFAULT_CONCERNS = [
+  "Acne & Blemishes",
+  "Dark Spots & Pigmentation",
+  "Anti-Aging & Wrinkles",
+  "Deep Hydration",
+  "Pores & Oil Control",
+  "Redness & Calming",
+  "Sun Protection",
+  "Skin Barrier Repair",
+];
+
+const POPULAR_BRANDS = ["Cherry Glow", "Beauty of Joseon", "COSRX", "Anua", "Innisfree", "Laneige", "SK-II", "Torriden"];
 
 export default function CreateProductPage() {
   const router = useRouter();
   const params = useParams();
-  const locale = params?.locale || "en";
-  const isBn = locale === "bn";
+  const locale = (params?.locale as string) || "en";
 
   const [submitting, setSubmitting] = useState(false);
-  const [uploadingIdx, setUploadingIdx] = useState(null); // Index of image field currently uploading
-  const [images, setImages] = useState([""]); // Array of image URLs
+  const [images, setImages] = useState<string[]>([""]); // Array of image URLs
 
-  const { data: dbCategories } = useGetCategoriesQuery();
+  const { data: dbCategories = [] } = useGetCategoriesQuery();
+  const { data: dbAttributes = [] } = useGetAttributesQuery();
 
   const [form, setForm] = useState({
     name: "",
+    nameBn: "",
     brand: "Cherry Glow",
     category: "",
     sku: "",
@@ -65,8 +82,8 @@ export default function CreateProductPage() {
     salePrice: "",
     stock: "",
     type: "single", // "single" | "combo"
-    skinType: [],
-    concerns: [],
+    skinType: [] as string[],
+    concerns: [] as string[],
     tagsText: "",
     isFeatured: false,
     isBestSelling: false,
@@ -75,12 +92,12 @@ export default function CreateProductPage() {
   });
 
   const [variants, setVariants] = useState([
-    { size: "30ml", weight: "", price: "", stock: "", sku: "" },
+    { size: "50ml", weight: "", price: "", stock: "", sku: "" },
   ]);
 
   // Combo specific states
-  const [allSingleProducts, setAllSingleProducts] = useState([]);
-  const [selectedComboProducts, setSelectedComboProducts] = useState([]);
+  const [allSingleProducts, setAllSingleProducts] = useState<any[]>([]);
+  const [selectedComboProducts, setSelectedComboProducts] = useState<any[]>([]);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -90,7 +107,7 @@ export default function CreateProductPage() {
     return token;
   };
 
-  /* ---------------- Fetch Products list for Combo Selection ---------------- */
+  /* ---------------- Fetch Single Products list for Combo Selection ---------------- */
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
@@ -98,47 +115,13 @@ export default function CreateProductPage() {
         const res = await axios.get(`${API_BASE}/products/allProduct`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setAllSingleProducts((res.data || []).filter((p) => p.type !== "combo"));
+        setAllSingleProducts((res.data || []).filter((p: any) => p.type !== "combo"));
       } catch (err) {
         console.error("Failed to load products for combo selection", err);
       }
     };
     fetchAllProducts();
   }, [API_BASE]);
-
-  /* ---------------- Handle Local File Upload to Cloudinary ---------------- */
-  const handleFileUpload = async (e, index) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploadingIdx(index);
-      const token = getToken();
-
-      const uploadData = new FormData();
-      uploadData.append("file", file);
-      uploadData.append("folder", "cherry-glow/products");
-
-      const res = await axios.post(`${API_BASE}/upload/image`, uploadData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (res.data?.url) {
-        const updated = [...images];
-        updated[index] = res.data.url;
-        setImages(updated);
-        toast.success(`Image uploaded to Cloudinary!`);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to upload image");
-    } finally {
-      setUploadingIdx(null);
-    }
-  };
 
   /* ---------------- Auto Pricing calculation for Combo ---------------- */
   const { calculatedRegularPrice, calculatedSalePrice, calculatedStock } = useMemo(() => {
@@ -152,7 +135,7 @@ export default function CreateProductPage() {
       sale += (item.salePrice || item.price || 0) * qty;
 
       const totalComponentStock = item.variants && item.variants.length > 0
-        ? item.variants.reduce((sum, v) => sum + (v.stock || 0), 0)
+        ? item.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
         : (item.stock || 0);
 
       const possibleStock = Math.floor(totalComponentStock / qty);
@@ -176,27 +159,27 @@ export default function CreateProductPage() {
     ]);
   };
 
-  const removeVariant = (index) => {
+  const removeVariant = (index: number) => {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  const updateVariant = (index, field, value) => {
+  const updateVariant = (index: number, field: string, value: string) => {
     const updated = [...variants];
-    updated[index][field] = value;
+    (updated[index] as any)[field] = value;
     setVariants(updated);
   };
 
   /* ---------------- Images Handlers ---------------- */
   const addImageField = () => setImages([...images, ""]);
-  const removeImageField = (index) => setImages(images.filter((_, i) => i !== index));
-  const updateImageField = (index, value) => {
+  const removeImageField = (index: number) => setImages(images.filter((_, i) => i !== index));
+  const updateImageField = (index: number, value: string) => {
     const updated = [...images];
     updated[index] = value;
     setImages(updated);
   };
 
   /* ---------------- Tag Checkboxes Handlers ---------------- */
-  const toggleSkinType = (type) => {
+  const toggleSkinType = (type: string) => {
     setForm((prev) => ({
       ...prev,
       skinType: prev.skinType.includes(type)
@@ -205,7 +188,7 @@ export default function CreateProductPage() {
     }));
   };
 
-  const toggleConcern = (concern) => {
+  const toggleConcern = (concern: string) => {
     setForm((prev) => ({
       ...prev,
       concerns: prev.concerns.includes(concern)
@@ -215,11 +198,11 @@ export default function CreateProductPage() {
   };
 
   /* ---------------- Form Submission ---------------- */
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!form.name.trim()) {
-      toast.error("Please enter a product name.");
+      toast.error("Product name is required.");
       return;
     }
 
@@ -239,16 +222,19 @@ export default function CreateProductPage() {
         ? form.ingredientsText.split(",").map((i) => i.trim()).filter(Boolean)
         : [];
 
-      const parsedVariants = variants.map((v) => ({
-        size: v.size || "30ml",
-        weight: v.weight,
-        price: Number(v.price) || Number(form.price) || 0,
-        stock: Number(v.stock) || Number(form.stock) || 0,
-        sku: v.sku || form.sku,
-      }));
+      const parsedVariants = variants
+        .filter((v) => v.size || v.price)
+        .map((v) => ({
+          size: v.size || "50ml",
+          weight: v.weight,
+          price: Number(v.price) || Number(form.price) || 0,
+          stock: Number(v.stock) || Number(form.stock) || 0,
+          sku: v.sku || form.sku,
+        }));
 
       const payload = {
         name: form.name,
+        nameBn: form.nameBn,
         brand: form.brand || "Cherry Glow",
         category: form.category,
         sku: form.sku || `CG-${Date.now().toString().slice(-6)}`,
@@ -272,14 +258,17 @@ export default function CreateProductPage() {
         basePrice: Number(form.price) || (form.type === "combo" ? calculatedRegularPrice : 0),
         stock: Number(form.stock) || (form.type === "combo" ? calculatedStock : 0),
 
-        variants: parsedVariants,
+        variants: parsedVariants.length > 0 ? parsedVariants : [{ size: "Standard", price: Number(form.price) || 0, stock: Number(form.stock) || 10 }],
 
-        comboProducts: form.type === "combo" ? selectedComboProducts.map((p) => ({
-          productId: p._id,
-          quantity: p.quantity,
-          name: p.name,
-          price: p.price,
-        })) : [],
+        comboProducts:
+          form.type === "combo"
+            ? selectedComboProducts.map((p) => ({
+                productId: p._id,
+                quantity: p.quantity,
+                name: p.name,
+                price: p.price,
+              }))
+            : [],
 
         isFeatured: form.isFeatured,
         isBestSelling: form.isBestSelling,
@@ -291,9 +280,9 @@ export default function CreateProductPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      toast.success("Product created successfully!");
+      toast.success("✨ Product published successfully!");
       router.push("/admin/products");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       toast.error(err?.response?.data?.message || "Failed to create product");
     } finally {
@@ -302,7 +291,7 @@ export default function CreateProductPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20">
+    <div className="max-w-7xl mx-auto space-y-6 pb-24">
       {/* Top Banner Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-rose-900/30 pb-5">
         <div className="flex items-center gap-3">
@@ -315,14 +304,14 @@ export default function CreateProductPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-white">
-                Add New Product
+                Add New Product / Combo
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                Shopify Grade Form
+                Skincare Catalog Form
               </span>
             </div>
             <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">
-              Fill out product details, manage variants, upload high-res images, and publish to store.
+              Fill out product info, select category, upload Cloudinary images, set pricing, and publish.
             </p>
           </div>
         </div>
@@ -340,7 +329,7 @@ export default function CreateProductPage() {
 
           <Button
             onClick={handleSubmit}
-            disabled={submitting || uploadingIdx !== null}
+            disabled={submitting}
             className="gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl px-6 py-2 text-xs shadow-md hover:shadow-rose-500/30 cursor-pointer"
           >
             {submitting ? (
@@ -358,7 +347,7 @@ export default function CreateProductPage() {
         </div>
       </div>
 
-      {/* Main Grid: 2-Columns (Left Main 65% / Right Sidebar 35%) */}
+      {/* Main Form Layout */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* ========================================== */}
@@ -366,268 +355,327 @@ export default function CreateProductPage() {
         {/* ========================================== */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* CARD 1: PRODUCT IDENTITY */}
-          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
-            <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+          {/* STEP 1: PRODUCT TYPE SELECTION */}
+          <div className="p-5 rounded-3xl border border-rose-200/80 dark:border-rose-900/40 bg-gradient-to-r from-pink-50/60 to-rose-50/40 dark:from-rose-950/20 dark:to-stone-900/40 space-y-3">
+            <label className="text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+              <Package size={15} />
+              <span>Product Type Selection</span>
+            </label>
+            <div className="grid grid-cols-2 gap-3 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, type: "single" })}
+                className={`p-3.5 rounded-2xl border transition-all text-left flex items-center justify-between cursor-pointer ${
+                  form.type === "single"
+                    ? "bg-white dark:bg-rose-900/80 border-rose-500 text-rose-700 dark:text-white shadow-sm ring-1 ring-rose-400"
+                    : "bg-white/60 dark:bg-stone-900/40 border-stone-200 dark:border-slate-800 text-stone-600 dark:text-slate-300 hover:border-rose-300"
+                }`}
+              >
+                <div>
+                  <div className="font-extrabold text-sm flex items-center gap-1.5">
+                    <Droplets size={16} className="text-rose-500" />
+                    <span>Single Product</span>
+                  </div>
+                  <p className="text-[11px] font-normal text-stone-500 dark:text-slate-400 mt-0.5">
+                    Standard skincare item (Serum, Cleanser, Cream, etc.)
+                  </p>
+                </div>
+                {form.type === "single" && <CheckCircle2 className="h-5 w-5 text-rose-500 shrink-0" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, type: "combo" })}
+                className={`p-3.5 rounded-2xl border transition-all text-left flex items-center justify-between cursor-pointer ${
+                  form.type === "combo"
+                    ? "bg-white dark:bg-rose-900/80 border-rose-500 text-rose-700 dark:text-white shadow-sm ring-1 ring-rose-400"
+                    : "bg-white/60 dark:bg-stone-900/40 border-stone-200 dark:border-slate-800 text-stone-600 dark:text-slate-300 hover:border-rose-300"
+                }`}
+              >
+                <div>
+                  <div className="font-extrabold text-sm flex items-center gap-1.5">
+                    <Gift size={16} className="text-pink-500" />
+                    <span>Skincare Combo Bundle</span>
+                  </div>
+                  <p className="text-[11px] font-normal text-stone-500 dark:text-slate-400 mt-0.5">
+                    Set / Kit of multiple products bundled at special discount
+                  </p>
+                </div>
+                {form.type === "combo" && <CheckCircle2 className="h-5 w-5 text-rose-500 shrink-0" />}
+              </button>
+            </div>
+          </div>
+
+          {/* STEP 2: BASIC PRODUCT INFORMATION */}
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 shadow-xs">
+            <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 border-b border-stone-100 dark:border-rose-950/60 pb-3">
               <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
                 <Tag className="h-4 w-4" />
               </div>
-              <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Identity</h2>
+              <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Identity & Details</h2>
             </div>
 
             <div className="space-y-4 text-xs">
-              {/* Title */}
-              <div>
-                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
-                  Product Title *
-                </label>
-                <Input
-                  placeholder="e.g. Beauty of Joseon Relief Sun : Rice + Probiotics SPF50+ PA++++"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl text-sm font-semibold"
-                  required
-                />
+              {/* Product Title English & Bangla */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
+                    Product Title (English) *
+                  </label>
+                  <Input
+                    placeholder="e.g. Beauty of Joseon Relief Sun SPF50+"
+                    value={form.name || ""}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
+                    প্রোডাক্ট নাম (Bangla Name - Optional) 🇧🇩
+                  </label>
+                  <Input
+                    placeholder="যেমন: বিউটি অব জোশন রিলিফ সানস্ক্রিন..."
+                    value={form.nameBn || ""}
+                    onChange={(e) => setForm({ ...form, nameBn: e.target.value })}
+                    className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl text-xs font-medium"
+                  />
+                </div>
               </div>
 
-              {/* SKU & Country Grid */}
+              {/* Brand & Category Selection */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Brand</label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="e.g. Cherry Glow, COSRX..."
+                      value={form.brand || ""}
+                      onChange={(e) => setForm({ ...form, brand: e.target.value })}
+                      className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl text-xs"
+                    />
+                  </div>
+                  {/* Popular Brands quick pick */}
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {POPULAR_BRANDS.slice(0, 5).map((b) => (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => setForm({ ...form, brand: b })}
+                        className="text-[10px] font-semibold text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md hover:bg-rose-100 transition"
+                      >
+                        + {b}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
+                    Category *
+                  </label>
+                  <select
+                    value={form.category || ""}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className="w-full h-10 px-3 bg-stone-50/70 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 rounded-xl text-xs font-bold text-stone-900 dark:text-white outline-none focus:ring-1 focus:ring-rose-400"
+                    required
+                  >
+                    <option value="">Select Category...</option>
+                    {dbCategories.map((c: any) => (
+                      <option key={c._id || c.name} value={c.name}>
+                        {c.name} {c.nameBn ? `(${c.nameBn})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* SKU, Barcode, Country Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">SKU Code</label>
                   <Input
                     placeholder="e.g. CG-BOJ-001"
-                    value={form.sku}
+                    value={form.sku || ""}
                     onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                    className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl font-mono text-[11px]"
+                    className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl font-mono text-xs"
                   />
                 </div>
-
                 <div>
                   <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Country of Origin</label>
                   <Input
-                    placeholder="e.g. South Korea"
-                    value={form.country}
+                    placeholder="e.g. South Korea, Japan..."
+                    value={form.country || ""}
                     onChange={(e) => setForm({ ...form, country: e.target.value })}
-                    className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl"
+                    className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Manufacturer / Supplier</label>
+                  <Input
+                    placeholder="e.g. Kolmar Korea Co."
+                    value={form.manufacturer || ""}
+                    onChange={(e) => setForm({ ...form, manufacturer: e.target.value })}
+                    className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl text-xs"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* CARD 2: MEDIA & GALLERY (Shopify-Grade Upload Zone & Gallery List) */}
-          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
-                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
-                  <ImageIcon className="h-4 w-4" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Media & Gallery</h2>
-                  <p className="text-[11px] text-stone-500 font-normal">Add high-resolution product photos & thumbnail images</p>
-                </div>
+          {/* STEP 3: PRICING & INVENTORY */}
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 shadow-xs">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 border-b border-stone-100 dark:border-rose-950/60 pb-3">
+              <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60">
+                <DollarSign className="h-4 w-4 text-emerald-500" />
               </div>
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40">
-                Cloudinary Storage
-              </span>
+              <h2 className="text-sm font-extrabold uppercase tracking-wider">Pricing & Stock Inventory</h2>
             </div>
 
-            {/* Top Dropzone / Upload Banner */}
-            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-rose-200 dark:border-rose-900/60 hover:border-rose-400 bg-rose-50/20 dark:bg-rose-950/20 rounded-2xl cursor-pointer transition-all text-center space-y-2 group">
-              <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform">
-                {uploadingIdx !== null ? (
-                  <Loader2 className="h-7 w-7 animate-spin text-rose-500" />
-                ) : (
-                  <Upload className="h-7 w-7 text-rose-500" />
-                )}
+            {form.type === "combo" ? (
+              <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-200 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold">
+                  <Info size={16} />
+                  <span>Combo Auto-Pricing Active</span>
+                </div>
+                <p>
+                  Prices and available stock for this combo are automatically calculated based on the selected items below. You can also override them manually:
+                </p>
+                <div className="grid grid-cols-3 gap-3 pt-1">
+                  <div>
+                    <span className="font-bold block">Regular Sum:</span> ৳{calculatedRegularPrice}
+                  </div>
+                  <div>
+                    <span className="font-bold block">Suggested Bundle Sale:</span> ৳{calculatedSalePrice}
+                  </div>
+                  <div>
+                    <span className="font-bold block">Max Build Stock:</span> {calculatedStock} units
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div>
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
+                  Regular Price (৳ BDT) *
+                </label>
+                <Input
+                  type="number"
+                  placeholder="e.g. 1500"
+                  value={form.price || ""}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl font-bold text-sm text-stone-900 dark:text-white"
+                />
               </div>
 
               <div>
-                <p className="text-xs font-extrabold text-stone-900 dark:text-white">
-                  {uploadingIdx !== null ? "Uploading Image to Cloudinary..." : "Click or Drag & Drop Product Photos"}
-                </p>
-                <p className="text-[11px] text-stone-500 dark:text-slate-400 mt-0.5">
-                  Upload directly from your local computer (PNG, JPG, WEBP - Max 10MB)
-                </p>
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
+                  Sale Price (৳ Discounted)
+                </label>
+                <Input
+                  type="number"
+                  placeholder="e.g. 1250"
+                  value={form.salePrice || ""}
+                  onChange={(e) => setForm({ ...form, salePrice: e.target.value })}
+                  className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl font-bold text-sm text-rose-600 dark:text-rose-400"
+                />
               </div>
 
-              <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-500 text-white font-bold text-xs group-hover:bg-rose-600 transition-colors">
-                <Upload className="h-3.5 w-3.5" />
-                <span>Upload File from Device</span>
-              </div>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const targetIdx = images.findIndex((url) => !url) >= 0 ? images.findIndex((url) => !url) : images.length;
-                  handleFileUpload(e, targetIdx);
-                }}
-                disabled={uploadingIdx !== null}
-                className="hidden"
-              />
-            </label>
-
-            {/* List of Image Cards */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs font-bold text-stone-700 dark:text-slate-300">
-                <span>Product Images ({images.filter(Boolean).length})</span>
-                <button
-                  type="button"
-                  onClick={addImageField}
-                  className="text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 text-[11px]"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Add URL Field
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {images.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200/80 dark:border-slate-800 space-y-2.5 transition-all hover:border-stone-300"
-                  >
-                    {/* Header line: Card Badge & Remove */}
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="flex items-center gap-1.5 font-extrabold text-[10px] text-stone-600 dark:text-slate-300">
-                        {idx === 0 ? (
-                          <span className="px-2 py-0.5 rounded-md bg-rose-500 text-white font-black">
-                            ★ MAIN THUMBNAIL
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded-md bg-stone-200 dark:bg-slate-800 text-stone-700 dark:text-slate-300">
-                            GALLERY IMAGE #{idx + 1}
-                          </span>
-                        )}
-                      </span>
-
-                      {images.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeImageField(idx)}
-                          className="text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-950 p-1 rounded-lg transition-colors"
-                          title="Remove Image"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Image Preview Box */}
-                    {img ? (
-                      <div className="relative h-32 w-full rounded-xl overflow-hidden border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs">
-                        <Image src={img} alt={`Media #${idx + 1}`} fill sizes="250px" className="object-cover" />
-                      </div>
-                    ) : (
-                      <div className="h-20 w-full rounded-xl border border-dashed border-stone-200 dark:border-slate-800 bg-white/60 dark:bg-slate-950/40 flex items-center justify-center text-stone-400 text-[11px] font-medium">
-                        No image uploaded yet
-                      </div>
-                    )}
-
-                    {/* URL Input & Upload Row */}
-                    <div className="flex items-center gap-2">
-                      <Input
-                        placeholder={idx === 0 ? "Main image URL (https://...)" : "Gallery image URL"}
-                        value={img}
-                        onChange={(e) => updateImageField(idx, e.target.value)}
-                        className="bg-white dark:bg-slate-900 border-stone-200 dark:border-slate-800 text-xs rounded-xl flex-1"
-                      />
-
-                      <label className="p-2 rounded-xl bg-stone-200/80 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-stone-700 dark:text-slate-300 transition-colors cursor-pointer shrink-0" title="Upload from Device">
-                        {uploadingIdx === idx ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
-                        ) : (
-                          <Upload className="h-4 w-4" />
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload(e, idx)}
-                          disabled={uploadingIdx !== null}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                ))}
+              <div>
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
+                  Stock Quantity (Units) *
+                </label>
+                <Input
+                  type="number"
+                  placeholder="e.g. 50"
+                  value={form.stock || ""}
+                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                  className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl font-bold text-sm"
+                />
               </div>
             </div>
           </div>
 
-          {/* CARD 3: VARIANTS OR COMBO DEALS */}
-          {form.type === "single" ? (
-            <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
+          {/* STEP 4: VARIANTS (Size, SPF, Options) */}
+          {form.type === "single" && (
+            <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 shadow-xs">
               <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
                 <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
                   <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
-                    <Layers className="h-4 w-4" />
+                    <Sliders className="h-4 w-4" />
                   </div>
-                  <h2 className="text-sm font-extrabold uppercase tracking-wider">Pricing & Size Variants</h2>
+                  <div>
+                    <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Size / Options</h2>
+                    <p className="text-[11px] text-stone-500 font-normal">Define sizes like 30ml, 50ml, 100ml with specific prices & stock.</p>
+                  </div>
                 </div>
 
-                <button
+                <Button
                   type="button"
                   onClick={addVariant}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/40 px-3 py-1.5 rounded-xl cursor-pointer"
+                  variant="outline"
+                  className="gap-1 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-300 border-rose-200 cursor-pointer"
                 >
-                  <Plus className="h-3.5 w-3.5" /> Add Size Variant
-                </button>
+                  <Plus size={13} />
+                  <span>+ Add Variant</span>
+                </Button>
               </div>
 
               <div className="space-y-3">
                 {variants.map((v, idx) => (
                   <div
                     key={idx}
-                    className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200/70 dark:border-slate-800 text-xs items-end"
+                    className="p-3.5 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-5 gap-3 items-center text-xs"
                   >
                     <div>
-                      <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Size / Volume</label>
+                      <label className="font-bold text-stone-600 dark:text-slate-400 block mb-1">Size / Volume</label>
                       <Input
-                        placeholder="e.g. 50ml, 100g"
-                        value={v.size}
+                        placeholder="e.g. 50ml"
+                        value={v.size || ""}
                         onChange={(e) => updateVariant(idx, "size", e.target.value)}
-                        className="bg-white dark:bg-slate-900 border-stone-200 dark:border-slate-800 rounded-xl"
+                        className="bg-white dark:bg-slate-950 text-xs h-9 rounded-xl"
                       />
                     </div>
-
                     <div>
-                      <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Price (৳) *</label>
+                      <label className="font-bold text-stone-600 dark:text-slate-400 block mb-1">Price (৳)</label>
                       <Input
                         type="number"
-                        placeholder="e.g. 1850"
-                        value={v.price}
+                        placeholder="Price"
+                        value={v.price || ""}
                         onChange={(e) => updateVariant(idx, "price", e.target.value)}
-                        className="bg-white dark:bg-slate-900 border-stone-200 dark:border-slate-800 rounded-xl font-mono font-bold"
-                        required
+                        className="bg-white dark:bg-slate-950 text-xs h-9 rounded-xl"
                       />
                     </div>
-
                     <div>
-                      <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Inventory Stock *</label>
+                      <label className="font-bold text-stone-600 dark:text-slate-400 block mb-1">Stock</label>
                       <Input
                         type="number"
-                        placeholder="e.g. 50"
-                        value={v.stock}
+                        placeholder="Stock"
+                        value={v.stock || ""}
                         onChange={(e) => updateVariant(idx, "stock", e.target.value)}
-                        className="bg-white dark:bg-slate-900 border-stone-200 dark:border-slate-800 rounded-xl font-mono font-bold"
-                        required
+                        className="bg-white dark:bg-slate-950 text-xs h-9 rounded-xl"
                       />
                     </div>
-
-                    <div className="flex items-center gap-2">
+                    <div>
+                      <label className="font-bold text-stone-600 dark:text-slate-400 block mb-1">SKU</label>
                       <Input
-                        placeholder="Variant SKU"
-                        value={v.sku}
+                        placeholder="SKU"
+                        value={v.sku || ""}
                         onChange={(e) => updateVariant(idx, "sku", e.target.value)}
-                        className="bg-white dark:bg-slate-900 border-stone-200 dark:border-slate-800 rounded-xl font-mono text-[11px]"
+                        className="bg-white dark:bg-slate-950 text-xs h-9 rounded-xl font-mono"
                       />
+                    </div>
+                    <div className="flex items-end justify-end pt-5 sm:pt-0">
                       {variants.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeVariant(idx)}
-                          className="p-2 text-rose-500 hover:bg-rose-100 rounded-lg"
+                          className="p-2 text-stone-400 hover:text-red-500 transition"
+                          title="Remove variant"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 size={16} />
                         </button>
                       )}
                     </div>
@@ -635,372 +683,317 @@ export default function CreateProductPage() {
                 ))}
               </div>
             </div>
-          ) : (
-            /* COMBO BUNDLE SELECTOR */
-            <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
-              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
-                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
-                  <Gift className="h-4 w-4" />
+          )}
+
+          {/* STEP 5: COMBO PRODUCTS SELECTOR (If Combo Type) */}
+          {form.type === "combo" && (
+            <div className="p-6 rounded-3xl border border-pink-200 dark:border-pink-900/40 bg-white dark:bg-[#160E12] space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
+                <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400">
+                  <div className="p-2 rounded-xl bg-pink-50 dark:bg-pink-950/60">
+                    <Gift className="h-4 w-4" />
+                  </div>
+                  <h2 className="text-sm font-extrabold uppercase tracking-wider">Select Bundle Component Products</h2>
                 </div>
-                <h2 className="text-sm font-extrabold uppercase tracking-wider">Bundle Component Items</h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto pr-1">
-                {allSingleProducts.map((p) => {
-                  const isSelected = selectedComboProducts.some((item) => item._id === p._id);
-                  const selectedItem = selectedComboProducts.find((item) => item._id === p._id);
-
-                  return (
-                    <div
-                      key={p._id}
-                      className={`p-3 rounded-2xl border transition-all flex items-center justify-between text-xs ${
-                        isSelected
-                          ? "border-rose-500 bg-rose-50/50 dark:bg-rose-950/40"
-                          : "border-stone-200 dark:border-slate-800 bg-stone-50 dark:bg-slate-900/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedComboProducts([
-                                ...selectedComboProducts,
-                                { _id: p._id, name: p.name, price: p.price || p.minPrice, salePrice: p.salePrice || p.minPrice, quantity: 1 },
-                              ]);
-                            } else {
-                              setSelectedComboProducts(selectedComboProducts.filter((item) => item._id !== p._id));
-                            }
-                          }}
-                          className="rounded border-stone-300 text-rose-500 focus:ring-rose-400 h-4 w-4"
-                        />
-                        <div className="min-w-0">
-                          <p className="font-bold text-stone-900 dark:text-white truncate">{p.name}</p>
-                          <p className="text-[10px] text-stone-500 font-mono">৳{(p.price || p.minPrice || 0).toLocaleString()}</p>
+              <div className="space-y-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-1">
+                  {allSingleProducts.map((p) => {
+                    const isSelected = selectedComboProducts.some((item) => item._id === p._id);
+                    return (
+                      <div
+                        key={p._id}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedComboProducts(selectedComboProducts.filter((item) => item._id !== p._id));
+                          } else {
+                            setSelectedComboProducts([...selectedComboProducts, { ...p, quantity: 1 }]);
+                          }
+                        }}
+                        className={`p-3 rounded-2xl border cursor-pointer transition flex items-center justify-between gap-3 ${
+                          isSelected
+                            ? "bg-rose-50/80 dark:bg-rose-950/60 border-rose-500 shadow-2xs"
+                            : "bg-stone-50 dark:bg-slate-900/40 border-stone-200 dark:border-slate-800 hover:border-rose-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {p.thumbnail && (
+                            <img src={p.thumbnail} alt={p.name} className="h-10 w-10 rounded-xl object-cover border border-stone-200" />
+                          )}
+                          <div className="min-w-0">
+                            <h4 className="font-bold truncate text-stone-900 dark:text-white text-xs">{p.name}</h4>
+                            <p className="text-[11px] font-semibold text-rose-600">৳{p.salePrice || p.price}</p>
+                          </div>
                         </div>
+
+                        {isSelected && <CheckCircle2 className="h-5 w-5 text-rose-500 shrink-0" />}
                       </div>
-
-                      {isSelected && (
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-rose-300 rounded-lg p-1">
-                          <span className="text-[10px] font-bold text-stone-500 px-1">Qty:</span>
-                          <input
-                            type="number"
-                            min={1}
-                            value={selectedItem.quantity}
-                            onChange={(e) => {
-                              const val = Math.max(1, parseInt(e.target.value) || 1);
-                              setSelectedComboProducts(
-                                selectedComboProducts.map((item) =>
-                                  item._id === p._id ? { ...item, quantity: val } : item
-                                )
-                              );
-                            }}
-                            className="w-10 text-center font-bold text-stone-900 dark:text-white bg-transparent focus:outline-none"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Calculated Prices summary */}
-              <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-xs">
-                <div>
-                  <span className="text-[10px] font-bold text-stone-500 uppercase">Combined Regular</span>
-                  <p className="font-mono font-bold text-stone-900 dark:text-white text-sm">৳{calculatedRegularPrice.toLocaleString()}</p>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-rose-600 uppercase">Combo Deal Price</span>
-                  <p className="font-mono font-bold text-rose-600 dark:text-rose-400 text-sm">৳{calculatedSalePrice.toLocaleString()}</p>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-emerald-600 uppercase">Max Combo Stock</span>
-                  <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">{calculatedStock} sets</p>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           )}
 
-          {/* CARD 4: DESCRIPTIONS & INGREDIENTS */}
-          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
-                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
-                  <FileText className="h-4 w-4" />
+          {/* STEP 6: PRODUCT MEDIA UPLOAD (Cloudinary Integration) */}
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
+              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60">
+                  <ImageIcon className="h-4 w-4 text-indigo-500" />
                 </div>
-                <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Content & Usage</h2>
+                <div>
+                  <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Gallery Images</h2>
+                  <p className="text-[11px] text-stone-500 font-normal">Upload from Mobile camera/gallery or PC device (Cloudinary Storage)</p>
+                </div>
               </div>
 
-              {/* Multilingual Support Badges */}
-              <div className="flex items-center gap-1.5 text-[10px] font-bold">
-                <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-slate-900 text-stone-700 dark:text-slate-300 border border-stone-200 dark:border-slate-800">
-                  🇧🇩 বাংলা
-                </span>
-                <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-slate-900 text-stone-700 dark:text-slate-300 border border-stone-200 dark:border-slate-800">
-                  🇰🇷 한국어
-                </span>
-                <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-slate-900 text-stone-700 dark:text-slate-300 border border-stone-200 dark:border-slate-800">
-                  🇬🇧 English
-                </span>
+              <Button
+                type="button"
+                onClick={addImageField}
+                variant="outline"
+                className="gap-1 rounded-xl text-xs font-bold text-indigo-600 border-indigo-200 cursor-pointer"
+              >
+                <Plus size={13} />
+                <span>Add Image Slot</span>
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {images.map((imgUrl, idx) => (
+                <div key={idx} className="relative space-y-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-stone-700 dark:text-slate-300">
+                    <span>{idx === 0 ? "🌟 Cover / Main Image" : `Gallery Image #${idx + 1}`}</span>
+                    {images.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeImageField(idx)}
+                        className="text-stone-400 hover:text-red-500 transition text-[11px]"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <ImageUploader
+                    value={imgUrl || ""}
+                    onChange={(url) => updateImageField(idx, url)}
+                    folder="cherry-glow/products"
+                    label=""
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* STEP 7: DESCRIPTIONS & HOW TO USE */}
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 shadow-xs">
+            <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 border-b border-stone-100 dark:border-rose-950/60 pb-3">
+              <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60">
+                <FileText className="h-4 w-4" />
               </div>
+              <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Description & Usage Guide</h2>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block flex items-center justify-between">
-                  <span>{isBn ? "সংক্ষিপ্ত বিবরণ (Short Summary)" : "Short Summary"}</span>
-                  <span className="text-[10px] font-normal text-stone-400">Supports Bangla, Korean & English</span>
-                </label>
-                <Textarea
-                  placeholder={
-                    isBn
-                      ? "যেমন: এই সানস্ক্রিনটি ত্বককে ক্ষতিকারক রোদ থেকে রক্ষা করে এবং গভীর আর্দ্রতা যোগায়..."
-                      : "e.g. Protects skin against harmful UV rays while deeply hydrating with Birch Juice..."
-                  }
-                  value={form.shortDescription}
-                  onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
-                  className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl leading-relaxed"
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block flex items-center justify-between">
-                  <span>{isBn ? "বিস্তারিত বিবরণ (Full Description)" : "Full Description"}</span>
-                  <span className="text-[10px] font-normal text-stone-400">Full UTF-8 HTML & Multiline Support</span>
-                </label>
-                <Textarea
-                  placeholder={
-                    isBn
-                      ? "বিস্তারিত প্রোডাক্ট বিবরণ, ব্যবহারবিধি এবং উপকারিতা লিখুন..."
-                      : "Enter complete formula description, clinical skin benefits, texture details, and fragrance notes..."
-                  }
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl leading-relaxed font-sans"
-                  rows={5}
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
-                  {isBn ? "মূল উপাদানসমূহ (Key Ingredients - Comma separated)" : "Key Ingredients (Comma separated)"}
-                </label>
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Short Summary</label>
                 <Input
-                  placeholder={
-                    isBn
-                      ? "যেমন: সেন্টেলা এশিয়াটিকা ১০%, নায়াসিনামাইড ৫%, রাইস এক্সট্রাক্ট"
-                      : "e.g. Centella Asiatica 10%, Niacinamide 5%, Rice Extract, Squalane"
-                  }
-                  value={form.ingredientsText}
-                  onChange={(e) => setForm({ ...form, ingredientsText: e.target.value })}
+                  placeholder="e.g. Lightweight hydrating sun serum that protects against UVA/UVB without white cast."
+                  value={form.shortDescription || ""}
+                  onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
                   className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">
-                  {isBn ? "ব্যবহারবিধি (How to Use Instructions)" : "How to Use Instructions"}
-                </label>
-                <Textarea
-                  placeholder={
-                    isBn
-                      ? "যেমন: সকালে স্কিনকেয়ারের শেষ ধাপে উপযুক্ত পরিমাণে নিয়ে মুখে ভালোভাবে লাগিয়ে নিন..."
-                      : "e.g. Apply appropriate amount evenly on face as the last step of morning skincare routine..."
-                  }
-                  value={form.howToUse}
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Full Description</label>
+                <textarea
+                  placeholder="Detailed product features, benefits, formula details..."
+                  value={form.description || ""}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  rows={4}
+                  className="w-full bg-stone-50/70 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 rounded-xl p-3 text-stone-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-400 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">How To Use / Application Guide</label>
+                <textarea
+                  placeholder="e.g. Apply evenly onto face and neck 15 minutes before sun exposure as the last step of skincare."
+                  value={form.howToUse || ""}
                   onChange={(e) => setForm({ ...form, howToUse: e.target.value })}
-                  className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl leading-relaxed"
-                  rows={2}
+                  rows={3}
+                  className="w-full bg-stone-50/70 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 rounded-xl p-3 text-stone-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-400 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Key Ingredients (Comma Separated)</label>
+                <Input
+                  placeholder="e.g. Niacinamide, Centella Asiatica, Hyaluronic Acid, Rice Extract"
+                  value={form.ingredientsText || ""}
+                  onChange={(e) => setForm({ ...form, ingredientsText: e.target.value })}
+                  className="bg-stone-50/70 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 rounded-xl"
                 />
               </div>
             </div>
           </div>
+
         </div>
 
         {/* ========================================== */}
-        {/* RIGHT COLUMN: SIDEBAR CONTROLS (1 col on LG) */}
+        {/* RIGHT COLUMN: SIDEBAR (1 col on LG) */}
         {/* ========================================== */}
         <div className="space-y-6">
 
-          {/* SIDEBAR CARD 1: TYPE SELECTOR */}
-          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
-              Product Structure Type
-            </h2>
-
-            <div className="space-y-2 text-xs">
-              <div
-                onClick={() => setForm({ ...form, type: "single" })}
-                className={`p-3 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-3 ${
-                  form.type === "single"
-                    ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 font-bold"
-                    : "border-stone-200 dark:border-slate-800 hover:border-blue-300"
-                }`}
-              >
-                <Package className="h-5 w-5 text-blue-500 shrink-0" />
-                <div>
-                  <h4 className="text-stone-900 dark:text-white">Single Item Product</h4>
-                  <p className="text-[10px] text-stone-500 font-normal">Individual item with size options.</p>
-                </div>
-              </div>
-
-              <div
-                onClick={() => setForm({ ...form, type: "combo" })}
-                className={`p-3 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-3 ${
-                  form.type === "combo"
-                    ? "border-rose-500 bg-rose-50/50 dark:bg-rose-950/40 font-bold"
-                    : "border-stone-200 dark:border-slate-800 hover:border-rose-300"
-                }`}
-              >
-                <Gift className="h-5 w-5 text-rose-500 shrink-0" />
-                <div>
-                  <h4 className="text-stone-900 dark:text-white">Combo Bundle Deal</h4>
-                  <p className="text-[10px] text-stone-500 font-normal">Package of multiple products.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* SIDEBAR CARD 2: CATEGORY & BRAND */}
-          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 text-xs">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
-              Product Organization
-            </h2>
-
-            {/* Category Select */}
-            <div>
-              <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Category *</label>
-              <select
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="w-full py-2.5 px-3 bg-stone-50 dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-xl text-stone-900 dark:text-white font-medium focus:border-rose-400 cursor-pointer"
-                required
-              >
-                <option value="">Select Category</option>
-                {dbCategories && dbCategories.length > 0 ? (
-                  dbCategories.map((c) => (
-                    <option key={c._id} value={c.name}>
-                      {c.name}
-                    </option>
-                  ))
-                ) : (
-                  <>
-                    <option value="Cleanser">Cleanser</option>
-                    <option value="Toner">Toner</option>
-                    <option value="Serum">Serum</option>
-                    <option value="Essence">Essence</option>
-                    <option value="Moisturizer">Moisturizer</option>
-                    <option value="Sunscreen">Sunscreen</option>
-                    <option value="Eye Care">Eye Care</option>
-                    <option value="Mask">Mask</option>
-                    <option value="Combo Deals">Combo Deals</option>
-                  </>
-                )}
-              </select>
+          {/* CARD 1: SKIN TYPE & CONCERNS BADGES */}
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-5 shadow-xs">
+            <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 border-b border-stone-100 dark:border-rose-950/60 pb-3">
+              <Sparkles className="h-4 w-4" />
+              <h2 className="text-sm font-extrabold uppercase tracking-wider">Skin Type & Concerns Filter</h2>
             </div>
 
-            {/* Brand */}
-            <div>
-              <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Brand Name</label>
-              <Input
-                placeholder="e.g. Beauty of Joseon"
-                value={form.brand}
-                onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                className="bg-stone-50 dark:bg-slate-900 border-stone-200 dark:border-slate-800 rounded-xl"
-              />
-            </div>
-          </div>
-
-          {/* SIDEBAR CARD 3: TARGET SKIN TYPES & CONCERNS */}
-          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 text-xs">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-              <Heart className="h-3.5 w-3.5" /> Skin Filters
-            </h2>
-
-            {/* Skin Types */}
-            <div>
-              <label className="font-bold text-stone-700 dark:text-slate-300 mb-2 block">Target Skin Type</label>
+            {/* Target Skin Types */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-700 dark:text-slate-300 block">Target Skin Type</label>
               <div className="flex flex-wrap gap-1.5">
-                {DEFAULT_SKIN_TYPES.map((st) => (
-                  <button
-                    key={st}
-                    type="button"
-                    onClick={() => toggleSkinType(st)}
-                    className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition-all cursor-pointer ${
-                      form.skinType.includes(st)
-                        ? "bg-rose-500 text-white shadow-xs"
-                        : "bg-stone-100 dark:bg-slate-900 text-stone-600 dark:text-slate-300 hover:bg-rose-100"
-                    }`}
-                  >
-                    {st}
-                  </button>
-                ))}
+                {DEFAULT_SKIN_TYPES.map((st) => {
+                  const isChecked = form.skinType.includes(st);
+                  return (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => toggleSkinType(st)}
+                      className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1 border ${
+                        isChecked
+                          ? "bg-rose-500 text-white border-rose-500 shadow-2xs"
+                          : "bg-stone-50 dark:bg-slate-900 text-stone-700 dark:text-slate-300 border-stone-200 dark:border-slate-800 hover:border-rose-300"
+                      }`}
+                    >
+                      {isChecked && <Check size={12} className="stroke-[3]" />}
+                      <span>{st}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Skin Concerns */}
-            <div>
-              <label className="font-bold text-stone-700 dark:text-slate-300 mb-2 block">Skin Concerns Targeted</label>
+            {/* Target Concerns */}
+            <div className="space-y-2 pt-2 border-t border-stone-100 dark:border-rose-950/60">
+              <label className="text-xs font-bold text-stone-700 dark:text-slate-300 block">Skin Concerns / Solution</label>
               <div className="flex flex-wrap gap-1.5">
-                {DEFAULT_CONCERNS.map((sc) => (
-                  <button
-                    key={sc}
-                    type="button"
-                    onClick={() => toggleConcern(sc)}
-                    className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition-all cursor-pointer ${
-                      form.concerns.includes(sc)
-                        ? "bg-purple-600 text-white shadow-xs"
-                        : "bg-stone-100 dark:bg-slate-900 text-stone-600 dark:text-slate-300 hover:bg-purple-100"
-                    }`}
-                  >
-                    {sc}
-                  </button>
-                ))}
+                {DEFAULT_CONCERNS.map((c) => {
+                  const isChecked = form.concerns.includes(c);
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => toggleConcern(c)}
+                      className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1 border ${
+                        isChecked
+                          ? "bg-pink-500 text-white border-pink-500 shadow-2xs"
+                          : "bg-stone-50 dark:bg-slate-900 text-stone-700 dark:text-slate-300 border-stone-200 dark:border-slate-800 hover:border-pink-300"
+                      }`}
+                    >
+                      {isChecked && <Check size={12} className="stroke-[3]" />}
+                      <span>{c}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* SIDEBAR CARD 4: PROMOTIONAL BADGES */}
-          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-3 text-xs">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5" /> Badges & Visibility
-            </h2>
+          {/* CARD 2: HOMEPAGE DISPLAY BADGES */}
+          <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 shadow-xs">
+            <div className="flex items-center gap-2 text-amber-500 border-b border-stone-100 dark:border-rose-950/60 pb-3">
+              <Flame className="h-4 w-4" />
+              <h2 className="text-sm font-extrabold uppercase tracking-wider">Store Badges & Status</h2>
+            </div>
 
-            <label className="flex items-center gap-2.5 p-3 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 font-bold cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.isFeatured}
-                onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })}
-                className="rounded border-stone-300 text-rose-500 focus:ring-rose-400 h-4 w-4"
-              />
-              <span>Feature on Homepage</span>
-            </label>
+            <div className="space-y-3 text-xs">
+              <label className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 cursor-pointer">
+                <span className="font-bold text-stone-800 dark:text-white flex items-center gap-2">
+                  <Sparkles size={15} className="text-amber-500" /> Feature on Homepage
+                </span>
+                <input
+                  type="checkbox"
+                  checked={form.isFeatured}
+                  onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })}
+                  className="h-4 w-4 rounded text-rose-500 focus:ring-rose-400 cursor-pointer"
+                />
+              </label>
 
-            <label className="flex items-center gap-2.5 p-3 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 font-bold cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.isBestSelling}
-                onChange={(e) => setForm({ ...form, isBestSelling: e.target.checked })}
-                className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-400 h-4 w-4"
-              />
-              <span>Mark as Best Seller</span>
-            </label>
+              <label className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 cursor-pointer">
+                <span className="font-bold text-stone-800 dark:text-white flex items-center gap-2">
+                  <Flame size={15} className="text-rose-500" /> Mark as Best Seller
+                </span>
+                <input
+                  type="checkbox"
+                  checked={form.isBestSelling}
+                  onChange={(e) => setForm({ ...form, isBestSelling: e.target.checked })}
+                  className="h-4 w-4 rounded text-rose-500 focus:ring-rose-400 cursor-pointer"
+                />
+              </label>
 
-            <label className="flex items-center gap-2.5 p-3 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 font-bold cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.isNewArrival}
-                onChange={(e) => setForm({ ...form, isNewArrival: e.target.checked })}
-                className="rounded border-stone-300 text-blue-500 focus:ring-blue-400 h-4 w-4"
-              />
-              <span>New Arrival Badge</span>
-            </label>
+              <label className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 cursor-pointer">
+                <span className="font-bold text-stone-800 dark:text-white flex items-center gap-2">
+                  <Sparkles size={15} className="text-emerald-500" /> Mark as New Arrival
+                </span>
+                <input
+                  type="checkbox"
+                  checked={form.isNewArrival}
+                  onChange={(e) => setForm({ ...form, isNewArrival: e.target.checked })}
+                  className="h-4 w-4 rounded text-rose-500 focus:ring-rose-400 cursor-pointer"
+                />
+              </label>
+
+              <div className="pt-2">
+                <label className="font-bold text-stone-700 dark:text-slate-300 mb-1 block">Catalog Visibility Status</label>
+                <select
+                  value={form.status || "active"}
+                  onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  className="w-full h-10 px-3 bg-stone-50 dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-xl text-xs font-bold text-stone-900 dark:text-white outline-none"
+                >
+                  <option value="active">Active (Visible in Store)</option>
+                  <option value="inactive">Draft / Inactive (Hidden)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* CARD 3: PUBLISH ACTION CARD */}
+          <div className="p-6 rounded-3xl border border-rose-200 dark:border-rose-900/40 bg-gradient-to-b from-rose-50/50 to-pink-50/30 dark:from-rose-950/40 dark:to-stone-900/40 space-y-3">
+            <h3 className="font-extrabold text-sm text-stone-900 dark:text-white flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-rose-500" /> Ready to Publish?
+            </h3>
+            <p className="text-xs text-stone-500 dark:text-slate-400">
+              Double check your pricing, variants, and high-res images before publishing to your live catalog.
+            </p>
+
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="w-full gap-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold rounded-xl py-3 text-xs shadow-md hover:shadow-rose-500/30 cursor-pointer"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Publishing Product...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Publish Product Now</span>
+                </>
+              )}
+            </Button>
           </div>
 
         </div>
+
       </form>
     </div>
   );

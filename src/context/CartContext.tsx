@@ -75,13 +75,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setCart([]);
       }
     }
-
-    const userCoupon: CouponType = {
-      type: "percentage",
-      value: 10,
-    };
-
-    setCoupon(userCoupon);
   }, []);
 
   // Save

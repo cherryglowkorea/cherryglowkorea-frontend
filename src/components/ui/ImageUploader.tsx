@@ -98,7 +98,7 @@ export default function ImageUploader({
         <div className="relative">
           <input
             type="text"
-            value={value}
+            value={value || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 font-mono focus:border-rose-500 focus:outline-none"
@@ -120,7 +120,7 @@ export default function ImageUploader({
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             className="hidden"
           />
 

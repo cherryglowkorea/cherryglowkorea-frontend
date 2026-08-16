@@ -104,42 +104,44 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
       <div className="flex flex-col sm:flex-row items-center gap-5 rounded-2xl bg-white dark:bg-[#1e1215] p-4 border border-stone-200/80 dark:border-white/10 shadow-xs hover:shadow-md transition-all duration-300 w-full group">
         {/* Full-Bleed Image Container */}
         <div className="relative w-full sm:w-48 h-44 shrink-0 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden">
-          <Image
-            src={optimizedImage}
-            alt={name}
-            fill
-            sizes="(max-width: 768px) 100vw, 220px"
-            priority={index < 4}
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          <Link href={`/products/${productId}`} className="block w-full h-full relative group/img cursor-pointer">
+            <Image
+              src={optimizedImage}
+              alt={name}
+              fill
+              sizes="(max-width: 768px) 100vw, 220px"
+              priority={index < 4}
+              className="object-cover transition-transform duration-500 group-hover/img:scale-105"
+            />
 
-          {/* Floating Badges */}
-          <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
-            {type === "combo" ? (
-              <span className="text-[10px] font-black uppercase tracking-wider text-white bg-rose-600/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
-                🔥 Combo Deal
-              </span>
-            ) : (
-              category && (
-                <span className="text-[10px] font-bold text-stone-900 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
-                  {category}
+            {/* Floating Badges */}
+            <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
+              {type === "combo" ? (
+                <span className="text-[10px] font-black uppercase tracking-wider text-white bg-rose-600/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
+                  🔥 Combo Deal
                 </span>
-              )
-            )}
+              ) : (
+                category && (
+                  <span className="text-[10px] font-bold text-stone-900 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
+                    {category}
+                  </span>
+                )
+              )}
 
-            {hasDiscount && (
-              <span className="text-[10px] font-black text-white bg-red-600/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
-                -{calculatedDiscountPercent}% OFF
-              </span>
-            )}
-          </div>
+              {hasDiscount && (
+                <span className="text-[10px] font-black text-white bg-red-600/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
+                  -{calculatedDiscountPercent}% OFF
+                </span>
+              )}
+            </div>
+          </Link>
 
           {/* Floating Wishlist Heart */}
           <button
             onClick={(e) => toggleWishlist(product, e)}
             title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
             aria-label="Wishlist"
-            className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
+            className={`absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
               isWishlisted
                 ? "bg-rose-50 dark:bg-rose-950/90 border-rose-200 dark:border-rose-900/50 text-rose-500"
                 : "bg-white/90 dark:bg-[#1e1215]/90 border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-rose-100 hover:text-rose-500"
@@ -152,7 +154,11 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col justify-between h-full w-full">
           <div>
-            <h3 className="font-bold text-stone-900 dark:text-rose-50 text-base line-clamp-1">{name}</h3>
+            <Link href={`/products/${productId}`} className="block">
+              <h3 className="font-bold text-stone-900 dark:text-rose-50 text-base line-clamp-1 hover:text-rose-600 dark:hover:text-rose-400 hover:underline transition cursor-pointer">
+                {name}
+              </h3>
+            </Link>
 
             {/* Variant Selector */}
             {variants.length > 1 && (
@@ -225,42 +231,44 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
       
       {/* Full-Bleed Image Banner */}
       <div className="relative w-full h-40 sm:h-52 md:h-56 mb-2.5 sm:mb-3 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden group/img">
-        <Image
-          src={optimizedImage}
-          alt={name}
-          fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          priority={index < 4}
-          className="object-cover transition-transform duration-500 group-hover/img:scale-105"
-        />
+        <Link href={`/products/${productId}`} className="block w-full h-full relative cursor-pointer">
+          <Image
+            src={optimizedImage}
+            alt={name}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            priority={index < 4}
+            className="object-cover transition-transform duration-500 group-hover/img:scale-105"
+          />
 
-        {/* Floating Top-Left Badges */}
-        <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-10 flex flex-col gap-1 items-start">
-          {type === "combo" ? (
-            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white bg-rose-600/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
-              🔥 Combo
-            </span>
-          ) : (
-            category && (
-              <span className="text-[9px] sm:text-[10px] font-bold text-stone-900 bg-white/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs max-w-[100px] truncate">
-                {category}
+          {/* Floating Top-Left Badges */}
+          <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-10 flex flex-col gap-1 items-start">
+            {type === "combo" ? (
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white bg-rose-600/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
+                🔥 Combo
               </span>
-            )
-          )}
+            ) : (
+              category && (
+                <span className="text-[9px] sm:text-[10px] font-bold text-stone-900 bg-white/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs max-w-[100px] truncate">
+                  {category}
+                </span>
+              )
+            )}
 
-          {hasDiscount && (
-            <span className="text-[9px] sm:text-[10px] font-black text-white bg-red-600/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
-              -{calculatedDiscountPercent}%
-            </span>
-          )}
-        </div>
+            {hasDiscount && (
+              <span className="text-[9px] sm:text-[10px] font-black text-white bg-red-600/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
+                -{calculatedDiscountPercent}%
+              </span>
+            )}
+          </div>
+        </Link>
 
         {/* Floating Wishlist Love Heart Button */}
         <button
           onClick={(e) => toggleWishlist(product, e)}
           title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
           aria-label="Wishlist"
-          className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10 w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
+          className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-20 w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
             isWishlisted
               ? "bg-rose-50 dark:bg-rose-950/90 border-rose-200 dark:border-rose-900/50 text-rose-500"
               : "bg-white/90 dark:bg-[#1e1215]/90 border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-rose-100 hover:text-rose-500"
@@ -273,9 +281,11 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
       {/* Content */}
       <div className="flex flex-1 flex-col justify-between space-y-2.5">
         <div>
-          <h3 className="font-semibold text-stone-900 dark:text-rose-50 text-xs sm:text-sm line-clamp-2 leading-snug">
-            {name}
-          </h3>
+          <Link href={`/products/${productId}`} className="block">
+            <h3 className="font-semibold text-stone-900 dark:text-rose-50 text-xs sm:text-sm line-clamp-2 leading-snug hover:text-rose-600 dark:hover:text-rose-400 hover:underline transition cursor-pointer">
+              {name}
+            </h3>
+          </Link>
 
           {/* Variant Selector */}
           {variants.length > 1 && (

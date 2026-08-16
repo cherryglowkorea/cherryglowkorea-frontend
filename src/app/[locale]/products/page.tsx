@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useGetCategoriesQuery, useGetBrandsQuery } from "@/redux/api/ecommerceApi";
+import { useLocale } from "next-intl";
 import {
   Select,
   SelectContent,
@@ -97,11 +98,23 @@ function ProductsPageInner() {
   const { data: dbCategories } = useGetCategoriesQuery();
   const { data: dbBrands } = useGetBrandsQuery();
 
-  const categories = useMemo(() => {
-    return dbCategories && dbCategories.length > 0
-      ? ["All", ...dbCategories.map((cat) => cat.name)]
-      : defaultCategories;
-  }, [dbCategories]);
+  const locale = useLocale();
+
+  const categoriesList = useMemo(() => {
+    if (dbCategories && dbCategories.length > 0) {
+      return [
+        { name: "All", displayName: locale === "bn" ? "সবগুলো" : "All" },
+        ...dbCategories.map((cat: any) => ({
+          name: cat.name,
+          displayName: locale === "bn" && cat.nameBn ? cat.nameBn : cat.name,
+        })),
+      ];
+    }
+    return defaultCategories.map((catName) => ({
+      name: catName,
+      displayName: catName,
+    }));
+  }, [dbCategories, locale]);
 
   const brands = useMemo(() => {
     return dbBrands && dbBrands.length > 0
@@ -386,19 +399,19 @@ function ProductsPageInner() {
                   </div>
 
                   <div className="space-y-1 max-h-64 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-rose-200 dark:[&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
-                    {categories.map((cat) => {
-                      const active = category === cat;
+                    {categoriesList.map((catItem) => {
+                      const active = category === catItem.name;
                       return (
                         <button
-                          key={cat}
-                          onClick={() => setCategory(cat)}
+                          key={catItem.name}
+                          onClick={() => setCategory(catItem.name)}
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all duration-200 text-left ${
                             active
                               ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-xs"
                               : "text-stone-600 dark:text-rose-100/70 hover:bg-rose-50 dark:hover:bg-white/5 hover:text-rose-600"
                           }`}
                         >
-                          <span>{cat}</span>
+                          <span>{catItem.displayName}</span>
                         </button>
                       );
                     })}

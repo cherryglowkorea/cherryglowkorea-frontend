@@ -77,6 +77,7 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [altPhone, setAltPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [successEmail, setSuccessEmail] = useState("");
   const [password, setPassword] = useState("");
   const [setPasswordLoading, setSetPasswordLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -91,10 +92,11 @@ export default function CheckoutPage() {
   // Payment Method State ("cod" | "bkash")
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
-  // Coupon State
+  // Coupon & Store Settings State
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+  const [storeSettings, setStoreSettings] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -111,6 +113,23 @@ export default function CheckoutPage() {
         } catch (e) {}
       }
     }
+
+    // Fetch dynamic store settings from backend
+    const fetchSettings = async () => {
+      try {
+        const apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const res = await fetch(`${apiHost}/api/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data) {
+            setStoreSettings(data.data);
+          }
+        }
+      } catch (e) {
+        // Fallback
+      }
+    };
+    fetchSettings();
   }, []);
 
   // Trigger Meta Pixel InitiateCheckout event
@@ -128,27 +147,27 @@ export default function CheckoutPage() {
     }
   }, [mounted]);
 
-  // Sync context coupon if available
-  useEffect(() => {
-    if (contextCoupon && !appliedCoupon) {
-      setAppliedCoupon({
-        code: "AUTO10",
-        discountType: contextCoupon.type,
-        discountAmount: contextCoupon.value,
-      });
-    }
-  }, [contextCoupon, appliedCoupon]);
-
-  // Delivery Charge computation
-  const deliveryCharge = deliveryArea === "dhaka" ? 70 : 120;
-
   // Subtotal computation
   const subtotal = useMemo(() => {
     return cart.reduce((sum, item) => {
       const price = item.selectedVariant?.price || item.price || 0;
-      return sum + price * item.quantity;
+      return sum + Number(price) * (item.quantity || 1);
     }, 0);
   }, [cart]);
+
+  // Dynamic Delivery Charge from Backend Store Settings
+  const deliveryCharge = useMemo(() => {
+    const insideDhakaCost = Number(storeSettings?.shipping?.insideDhaka ?? 60);
+    const outsideDhakaCost = Number(storeSettings?.shipping?.outsideDhaka ?? 120);
+    const freeThreshold = Number(storeSettings?.shipping?.freeShippingThreshold ?? 3000);
+
+    const baseCharge = deliveryArea === "dhaka" ? insideDhakaCost : outsideDhakaCost;
+
+    if (freeThreshold > 0 && subtotal >= freeThreshold) {
+      return 0; // Free shipping threshold met!
+    }
+    return baseCharge;
+  }, [storeSettings, deliveryArea, subtotal]);
 
   // Discount computation
   const discount = useMemo(() => {
@@ -351,12 +370,15 @@ export default function CheckoutPage() {
     setSetPasswordLoading(true);
     try {
       const apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const targetEmail = (successEmail || orderSuccess?.email || email || "").trim();
+
       const res = await fetch(`${apiHost}/api/auth/set-guest-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phone: orderSuccess.phone,
           password,
+          email: targetEmail || undefined,
         }),
       });
       const data = await res.json();
@@ -368,7 +390,7 @@ export default function CheckoutPage() {
           if (setAuthData) {
             setAuthData(data.user, data.token);
           }
-          toast.success("🎉 Account password saved! You are now logged in.");
+          toast.success("🎉 Account setup complete! You are now logged in.");
         }
       } else {
         if (data.alreadyRegistered) {
@@ -478,22 +500,31 @@ export default function CheckoutPage() {
                       </div>
                     </div>
 
-                    <form onSubmit={handleSetPasswordOnSuccess} className="flex flex-col sm:flex-row gap-2.5 pt-1">
-                      <input
-                        type="password"
-                        required
-                        minLength={6}
-                        placeholder="Set a password (min 6 characters)"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="flex-1 h-10 px-3.5 text-xs sm:text-sm rounded-xl border border-pink-300 dark:border-pink-900/50 bg-white dark:bg-stone-900 text-stone-800 dark:text-rose-50 placeholder-stone-400 outline-none focus:ring-1 focus:ring-pink-500"
-                      />
+                    <form onSubmit={handleSetPasswordOnSuccess} className="space-y-3 pt-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <input
+                          type="password"
+                          required
+                          minLength={6}
+                          placeholder="পাসওয়ার্ড সেট করুন (কমপক্ষে ৬ অক্ষর) *"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full h-10 px-3.5 text-xs sm:text-sm rounded-xl border border-pink-300 dark:border-pink-900/50 bg-white dark:bg-stone-900 text-stone-800 dark:text-rose-50 placeholder-stone-400 outline-none focus:ring-1 focus:ring-pink-500"
+                        />
+                        <input
+                          type="email"
+                          placeholder="ইমেইল এড্রেস (ঐচ্ছিক)"
+                          value={successEmail || orderSuccess.email || email}
+                          onChange={(e) => setSuccessEmail(e.target.value)}
+                          className="w-full h-10 px-3.5 text-xs sm:text-sm rounded-xl border border-pink-300 dark:border-pink-900/50 bg-white dark:bg-stone-900 text-stone-800 dark:text-rose-50 placeholder-stone-400 outline-none focus:ring-1 focus:ring-pink-500"
+                        />
+                      </div>
                       <button
                         type="submit"
                         disabled={setPasswordLoading}
-                        className="h-10 px-5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer shrink-0 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                        className="w-full h-10 px-5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer shrink-0 disabled:opacity-50 flex items-center justify-center gap-1.5"
                       >
-                        {setPasswordLoading ? "Saving..." : "Save Password & Log In"}
+                        {setPasswordLoading ? "সেভ হচ্ছে..." : "পাসওয়ার্ড ও ইমেইল সেভ করে অ্যাকাউন্ট সক্রিয় করুন"}
                       </button>
                     </form>
                   </>
