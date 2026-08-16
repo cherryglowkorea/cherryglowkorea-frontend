@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { toast } from "sonner";
 import LoginModal from "@/components/auth/LoginModal";
+import { trackAddToCart } from "@/lib/metaPixel";
 
 export interface VariantType {
   weight?: string | number;
@@ -122,6 +123,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
           comboProducts: product.comboProducts || [],
         },
       ];
+    });
+
+    const pId = product._id || product.productId;
+    const price = product.selectedVariant?.price || product.price || product.salePrice || 0;
+    trackAddToCart({
+      id: pId,
+      name: product.name || "Product",
+      price: Number(price),
+      quantity: 1,
     });
 
     toast.success("Added to cart");

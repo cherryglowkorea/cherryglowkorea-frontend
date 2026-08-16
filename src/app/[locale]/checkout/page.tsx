@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { trackInitiateCheckout, trackPurchase } from "@/lib/metaPixel";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import {
@@ -111,6 +112,21 @@ export default function CheckoutPage() {
       }
     }
   }, []);
+
+  // Trigger Meta Pixel InitiateCheckout event
+  useEffect(() => {
+    if (mounted && cart && cart.length > 0) {
+      trackInitiateCheckout(
+        cart.map((i) => ({
+          id: i._id || i.productId,
+          name: i.name,
+          price: i.price,
+          quantity: i.quantity,
+        })),
+        cart.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0)
+      );
+    }
+  }, [mounted]);
 
   // Sync context coupon if available
   useEffect(() => {
@@ -286,8 +302,26 @@ export default function CheckoutPage() {
           setAuthData(data.user, data.token || null);
         }
 
+        const assignedOrderNum =
+          data.orderNumber ||
+          data.orderId ||
+          (data.order && data.order.orderNumber) ||
+          `CG-${Date.now()}`;
+
+        trackPurchase({
+          orderId: assignedOrderNum,
+          value: total,
+          currency: "BDT",
+          items: cart.map((i) => ({
+            id: i._id || i.productId,
+            name: i.name,
+            price: i.price,
+            quantity: i.quantity,
+          })),
+        });
+
         setOrderSuccess({
-          orderNumber: data.orderNumber || data.orderId || (data.order && data.order.orderNumber) || `CG-${Date.now()}`,
+          orderNumber: assignedOrderNum,
           customerName: name,
           phone,
           address: `${address}, ${thana ? thana + ", " : ""}${finalDistrict}`,

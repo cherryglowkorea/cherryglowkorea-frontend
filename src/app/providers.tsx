@@ -1,8 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import { ThemeProvider } from "next-themes";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import ReduxProvider from "@/providers/ReduxProvider";
+import MetaPixel from "@/components/analytics/MetaPixel";
 
 export function Providers({ children }) {
   const googleClientId =
@@ -17,6 +19,9 @@ export function Providers({ children }) {
           enableSystem
           disableTransitionOnChange
         >
+          <Suspense fallback={null}>
+            <MetaPixel />
+          </Suspense>
           {children}
         </ThemeProvider>
       </GoogleOAuthProvider>

@@ -61,7 +61,7 @@ export default function AdminSettingsPage() {
       metaTitle: "Cherry Glow - Authentic Korean Beauty & Skincare in Bangladesh",
       metaDescription: "Shop authentic Korean skincare, serums, moisturizers & sunscreens in Bangladesh with fast nationwide delivery.",
       keywords: "K-Beauty, Korean Skincare Bangladesh, Cherry Glow, Dokdo Cleanser, Sunscreen",
-      pixelId: "",
+      pixelId: "2122589755279030",
     },
   });
 
@@ -626,6 +626,29 @@ export default function AdminSettingsPage() {
                   onChange={(e) => handleChange("seo.keywords", e.target.value)}
                   placeholder="K-Beauty, Korean Skincare Bangladesh, Cherry Glow, Sunscreen"
                   className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Meta Pixel ID */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-100 dark:border-blue-900/40 space-y-3 mt-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-stone-900 dark:text-rose-100 flex items-center gap-1.5">
+                    <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    Meta Pixel (Facebook Pixel ID)
+                  </label>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle2 className="h-3 w-3" /> Tracking Active
+                  </span>
+                </div>
+                <p className="text-[11px] text-stone-500 dark:text-rose-300/70">
+                  Enter your Meta/Facebook Pixel ID to track PageViews, AddToCart, Checkout, and Purchase events in Meta Events Manager.
+                </p>
+                <input
+                  type="text"
+                  value={formData.seo?.pixelId !== undefined ? formData.seo.pixelId : "2122589755279030"}
+                  onChange={(e) => handleChange("seo.pixelId", e.target.value)}
+                  placeholder="2122589755279030"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950/60 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 font-mono focus:border-blue-500 focus:outline-none"
                 />
               </div>
             </div>
