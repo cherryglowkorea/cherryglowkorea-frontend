@@ -100,13 +100,31 @@ export default function DashboardOverviewPage() {
         ...(activeEnd ? { endDate: activeEnd } : {}),
       });
 
-      const res = await fetch(`http://localhost:5000/admin/dashboard/stats?${queryParams.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const primaryUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+      const fallbackUrl = "http://localhost:5000";
 
-      if (!res.ok) {
+      let res: Response | null = null;
+      const targetBase = primaryUrl || fallbackUrl;
+
+      try {
+        res = await fetch(`${targetBase}/admin/dashboard/stats?${queryParams.toString()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (primaryErr) {
+        if (targetBase !== fallbackUrl) {
+          try {
+            res = await fetch(`${fallbackUrl}/admin/dashboard/stats?${queryParams.toString()}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+          } catch (fallbackErr) {
+            throw new Error("Backend server is unreachable. Please verify backend service on localhost:5000 or Render.");
+          }
+        } else {
+          throw new Error("Backend server is unreachable on http://localhost:5000. Please start your backend server.");
+        }
+      }
+
+      if (!res || !res.ok) {
         throw new Error("Failed to fetch dashboard statistics");
       }
 
@@ -116,9 +134,9 @@ export default function DashboardOverviewPage() {
       } else {
         throw new Error(data.message || "Failed to load dashboard");
       }
-    } catch (err) {
-      console.error(err);
-      setError(err.message);
+    } catch (err: any) {
+      console.error("Dashboard fetch error:", err);
+      setError(err?.message || "Failed to fetch dashboard statistics");
     } finally {
       setLoading(false);
     }

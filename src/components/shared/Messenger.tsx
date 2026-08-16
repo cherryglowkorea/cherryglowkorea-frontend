@@ -1,7 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Messenger() {
+  const pathname = usePathname();
+
+  // Do not render Messenger icon on Admin Dashboard pages
+  if (pathname?.includes("/admin") || pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <Link
       href="https://m.me/cherryglow786"
