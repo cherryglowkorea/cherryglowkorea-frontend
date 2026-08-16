@@ -3,6 +3,7 @@
 import HeroSection from "@/components/home/HeroSection";
 import HighlightsSection from "@/components/home/HighlightSection";
 import CategoriesSection from "@/components/home/CategoriesSection";
+import CampaignSection from "@/components/home/CampaignSection";
 import FeaturedComboDeals from "@/components/home/FeaturedComboDeals";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
 import BestSoldProducts from "@/components/home/BestSoldProducts";
@@ -21,13 +22,16 @@ export default function Page() {
       {/* 3. Shop By Categories */}
       <CategoriesSection />
 
-      {/* 4. High-Value Combo Bundles & Routine Sets (Max AOV & Conversion) */}
+      {/* 4. Dynamic Database Flash Sale Campaign Section */}
+      <CampaignSection />
+
+      {/* 5. High-Value Combo Bundles & Routine Sets (Max AOV & Conversion) */}
       <FeaturedComboDeals />
 
-      {/* 5. Featured K-Beauty Single Products */}
+      {/* 6. Featured K-Beauty Single Products */}
       <FeaturedProducts />
 
-      {/* 6. Best Sellers & Customer Favorites */}
+      {/* 7. Best Sellers & Customer Favorites */}
       <BestSoldProducts />
 
       {/* 7. Why Choose Cherry Glow Benefits */}

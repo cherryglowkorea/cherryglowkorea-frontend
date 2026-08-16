@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ImageUploader from "@/components/ui/ImageUploader";
+import MultiImageUploader from "@/components/ui/MultiImageUploader";
 
 import {
   Trash2,
@@ -736,55 +737,14 @@ export default function CreateProductPage() {
             </div>
           )}
 
-          {/* STEP 6: PRODUCT MEDIA UPLOAD (Cloudinary Integration) */}
+          {/* STEP 6: PRODUCT MEDIA UPLOAD (Multi-Image Batch Cloudinary Upload) */}
           <div className="p-6 rounded-3xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] space-y-4 shadow-xs">
-            <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
-              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-                <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60">
-                  <ImageIcon className="h-4 w-4 text-indigo-500" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-extrabold uppercase tracking-wider">Product Gallery Images</h2>
-                  <p className="text-[11px] text-stone-500 font-normal">Upload from Mobile camera/gallery or PC device (Cloudinary Storage)</p>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                onClick={addImageField}
-                variant="outline"
-                className="gap-1 rounded-xl text-xs font-bold text-indigo-600 border-indigo-200 cursor-pointer"
-              >
-                <Plus size={13} />
-                <span>Add Image Slot</span>
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {images.map((imgUrl, idx) => (
-                <div key={idx} className="relative space-y-1">
-                  <div className="flex items-center justify-between text-xs font-bold text-stone-700 dark:text-slate-300">
-                    <span>{idx === 0 ? "🌟 Cover / Main Image" : `Gallery Image #${idx + 1}`}</span>
-                    {images.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeImageField(idx)}
-                        className="text-stone-400 hover:text-red-500 transition text-[11px]"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-
-                  <ImageUploader
-                    value={imgUrl || ""}
-                    onChange={(url) => updateImageField(idx, url)}
-                    folder="cherry-glow/products"
-                    label=""
-                  />
-                </div>
-              ))}
-            </div>
+            <MultiImageUploader
+              value={images}
+              onChange={(urls) => setImages(urls)}
+              folder="cherry-glow/products"
+              label="Product Images Gallery (Select Multiple Photos at Once)"
+            />
           </div>
 
           {/* STEP 7: DESCRIPTIONS & HOW TO USE */}
