@@ -1,1 +1,0 @@
-// Firebase has been removed in favor of custom backend authentication.
