@@ -16,7 +16,6 @@ import {
   Headphones,
   Send,
   Sparkles,
-  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,7 +30,7 @@ export default function Footer() {
     return null;
   }
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !email.includes("@")) {
       toast.error("Please enter a valid email address.");
@@ -43,14 +42,12 @@ export default function Footer() {
 
   return (
     <footer className="bg-stone-900 text-stone-200 dark:bg-[#120a0d] dark:text-rose-100 border-t border-rose-950/40 relative z-10 transition-colors">
-      
       {/* 1. Top Trust & Service Feature Pillars */}
       <div className="border-b border-stone-800 dark:border-white/10 py-10 bg-stone-950/60 dark:bg-[#160d10]">
         <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
-            
             {/* Pillar 1 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-3.5 p-3 rounded-2xl bg-white/5 border border-white/5">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-3.5 p-3.5 rounded-2xl bg-white/5 border border-white/5 hover:border-pink-500/30 transition">
               <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/20">
                 <Truck className="w-5 h-5" />
               </div>
@@ -61,7 +58,7 @@ export default function Footer() {
             </div>
 
             {/* Pillar 2 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-3.5 p-3 rounded-2xl bg-white/5 border border-white/5">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-3.5 p-3.5 rounded-2xl bg-white/5 border border-white/5 hover:border-pink-500/30 transition">
               <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/20">
                 <ShieldCheck className="w-5 h-5" />
               </div>
@@ -72,18 +69,18 @@ export default function Footer() {
             </div>
 
             {/* Pillar 3 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-3.5 p-3 rounded-2xl bg-white/5 border border-white/5">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-3.5 p-3.5 rounded-2xl bg-white/5 border border-white/5 hover:border-pink-500/30 transition">
               <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/20">
                 <CreditCard className="w-5 h-5" />
               </div>
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-white">Secure Checkout</h4>
-                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">bKash, Nagad, Cards & Cash on Delivery</p>
+                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">bKash, Nagad, Cards & COD</p>
               </div>
             </div>
 
             {/* Pillar 4 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-3.5 p-3 rounded-2xl bg-white/5 border border-white/5">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-3.5 p-3.5 rounded-2xl bg-white/5 border border-white/5 hover:border-pink-500/30 transition">
               <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/20">
                 <Headphones className="w-5 h-5" />
               </div>
@@ -92,7 +89,6 @@ export default function Footer() {
                 <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">Fast customer service response</p>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -101,7 +97,7 @@ export default function Footer() {
       <div className="border-b border-stone-800/80 dark:border-white/10 py-10 bg-stone-900 dark:bg-[#140C0F]">
         <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8 bg-gradient-to-br from-rose-500/15 via-pink-500/10 to-rose-400/15 dark:from-rose-950/50 dark:via-pink-950/40 dark:to-purple-950/40 p-6 sm:p-8 rounded-3xl border border-rose-300/30 dark:border-rose-800/30 shadow-lg relative overflow-hidden">
-            {/* Soft Ambient Glow Effect */}
+            {/* Ambient Glow */}
             <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="space-y-1.5 text-center lg:text-left relative z-10">
@@ -117,13 +113,16 @@ export default function Footer() {
             </div>
 
             <form onSubmit={handleSubscribe} className="w-full lg:w-auto flex flex-col sm:flex-row gap-2.5 relative z-10">
-              <input
-                type="email"
-                placeholder="Enter your email address..."
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full min-w-0 sm:w-80 px-4.5 py-3.5 bg-stone-950/70 dark:bg-stone-900/90 border border-stone-700/80 focus:border-rose-400 text-xs sm:text-sm text-white placeholder-stone-400 rounded-2xl outline-none transition shadow-inner"
-              />
+              <div className="relative w-full sm:w-80">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-400 pointer-events-none" />
+                <input
+                  type="email"
+                  placeholder="Enter your email address..."
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3.5 bg-stone-950/80 dark:bg-[#1a0f13]/90 border border-stone-700/80 focus:border-rose-400 focus:ring-2 focus:ring-rose-500/30 text-xs sm:text-sm text-white placeholder-stone-400 rounded-2xl outline-none transition shadow-inner"
+                />
+              </div>
               <button
                 type="submit"
                 className="px-6 py-3.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-rose-500/20 transition cursor-pointer flex items-center justify-center gap-2 shrink-0"
@@ -138,7 +137,6 @@ export default function Footer() {
       {/* 3. Main 4-Column Footer */}
       <div className="mx-auto max-w-[1536px] px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
-          
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2 group">
@@ -269,65 +267,63 @@ export default function Footer() {
               </div>
             </div>
           </div>
-
         </div>
 
-        {/* 4. Bottom Footer Bar: Copyright & Payment Badges */}
+        {/* 4. Bottom Footer Bar: Copyright & Soft Card Payment Badges */}
         <div className="mt-14 pt-8 border-t border-stone-800 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-stone-400 dark:text-rose-100/50 text-center md:text-left">
             © {new Date().getFullYear()} <span className="text-white font-semibold">Cherry Glow Korea</span>. All rights reserved. Built with authentic care.
           </p>
 
-          {/* Payment Method Icons */}
+          {/* Softer Payment Method Icons */}
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <div className="h-11 px-4 py-1.5 bg-white rounded-xl border border-stone-200/80 shadow-xs flex items-center justify-center transition-transform hover:scale-105">
+            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
               <Image
                 src="/payment-icon/BKash-bKash-Logo.wine.svg"
                 alt="bKash Payment"
-                width={80}
-                height={34}
-                className="object-contain h-8 w-auto"
+                width={75}
+                height={30}
+                className="object-contain h-7 w-auto"
               />
             </div>
-            <div className="h-11 px-4 py-1.5 bg-white rounded-xl border border-stone-200/80 shadow-xs flex items-center justify-center transition-transform hover:scale-105">
+            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
               <Image
                 src="/payment-icon/Nagad-Horizontal-Logo.wine.svg"
                 alt="Nagad Payment"
-                width={80}
-                height={34}
-                className="object-contain h-8 w-auto"
+                width={75}
+                height={30}
+                className="object-contain h-7 w-auto"
               />
             </div>
-            <div className="h-11 px-4 py-1.5 bg-white rounded-xl border border-stone-200/80 shadow-xs flex items-center justify-center transition-transform hover:scale-105">
+            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
               <Image
                 src="/payment-icon/Visa_Inc.-Logo.wine.svg"
                 alt="Visa Payment"
-                width={65}
-                height={34}
-                className="object-contain h-7.5 w-auto"
+                width={60}
+                height={30}
+                className="object-contain h-6.5 w-auto"
               />
             </div>
-            <div className="h-11 px-4 py-1.5 bg-white rounded-xl border border-stone-200/80 shadow-xs flex items-center justify-center transition-transform hover:scale-105">
+            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
               <Image
                 src="/payment-icon/Mastercard-Logo.wine.svg"
                 alt="Mastercard Payment"
-                width={65}
-                height={34}
-                className="object-contain h-7.5 w-auto"
+                width={60}
+                height={30}
+                className="object-contain h-6.5 w-auto"
               />
             </div>
-            <div className="h-11 px-4 py-1.5 bg-white rounded-xl border border-stone-200/80 shadow-xs flex items-center justify-center transition-transform hover:scale-105">
+            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
               <Image
                 src="/payment-icon/cash-on-delivery.png"
                 alt="Cash on Delivery"
-                width={95}
-                height={34}
-                className="object-contain h-7.5 w-auto"
+                width={85}
+                height={30}
+                className="object-contain h-6.5 w-auto"
               />
             </div>
           </div>
         </div>
-
       </div>
     </footer>
   );

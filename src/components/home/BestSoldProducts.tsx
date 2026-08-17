@@ -3,25 +3,79 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
-import { Sparkles, ArrowRight, Flame } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import ProductCard from "../products/ProductCard";
 
 export default function BestSoldProducts() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const { addToCart } = useCart();
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  const API = `${API_BASE}/products/best?limit=4`;
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:5000";
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchBestProducts = async () => {
       try {
-        const res = await axios.get(API);
-        const fetched = res.data?.data || res.data || [];
+        // 1. Fetch featured product IDs to exclude duplicates across homepage sections
+        let excludeIds: string[] = [];
+        try {
+          const featRes = await axios.get(`${API_BASE}/products/featured?limit=8`);
+          const featData = featRes.data?.data || featRes.data || [];
+          if (Array.isArray(featData)) {
+            excludeIds = featData.map((p: any) => p._id).filter(Boolean);
+          }
+        } catch {
+          // Ignore error if featured endpoint fails, proceed with best products
+        }
+
+        // 2. Fetch best products excluding featured product IDs
+        const excludeStr = excludeIds.join(",");
+        const res = await axios.get(
+          `${API_BASE}/products/best?limit=4${excludeStr ? `&exclude=${excludeStr}` : ""}`
+        );
+        let fetched = res.data?.data || res.data || [];
+        if (!Array.isArray(fetched)) fetched = [];
+
+        // Fallback if backend returns fewer than 4 items
+        if (fetched.length < 4) {
+          try {
+            const fallbackRes = await axios.get(
+              `${API_BASE}/products/allProduct/public?limit=12`
+            );
+            const fallbackData =
+              fallbackRes.data?.products ||
+              fallbackRes.data?.data ||
+              fallbackRes.data ||
+              [];
+            if (Array.isArray(fallbackData) && fallbackData.length > 0) {
+              const existingIds = new Set([
+                ...excludeIds,
+                ...fetched.map((p: any) => p._id),
+              ]);
+              for (const p of fallbackData) {
+                if (fetched.length >= 4) break;
+                if (
+                  p &&
+                  p._id &&
+                  p.type !== "combo" &&
+                  !existingIds.has(p._id)
+                ) {
+                  fetched.push(p);
+                  existingIds.add(p._id);
+                }
+              }
+            }
+          } catch {
+            // Ignore fallback error
+          }
+        }
+
         setProducts(fetched.slice(0, 4));
       } catch (err) {
         setError("Failed to load best seller products");
@@ -30,15 +84,15 @@ export default function BestSoldProducts() {
       }
     };
 
-    fetchProducts();
-  }, [API]);
+    fetchBestProducts();
+  }, [API_BASE]);
 
+  // Hide section completely if no products available
   if (!loading && products.length === 0) return null;
 
   return (
     <section className="py-12 sm:py-16 bg-stone-50/50 dark:bg-[#1A1014]/40 border-b border-rose-100/60 dark:border-white/5">
       <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8 space-y-8">
-        
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div>
@@ -91,7 +145,6 @@ export default function BestSoldProducts() {
             ))}
           </div>
         )}
-
       </div>
     </section>
   );

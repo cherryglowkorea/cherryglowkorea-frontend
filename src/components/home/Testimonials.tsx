@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import axios from "axios";
 import { Star, CheckCircle2, Quote, Sparkles } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -57,7 +56,10 @@ const DEFAULT_TESTIMONIALS = [
 export default function Testimonials() {
   const [reviews, setReviews] = useState(DEFAULT_TESTIMONIALS);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:5000";
 
   useEffect(() => {
     const fetchApprovedReviews = async () => {
@@ -77,7 +79,6 @@ export default function Testimonials() {
   return (
     <section className="py-16 sm:py-20 bg-gradient-to-b from-stone-50/40 via-rose-50/20 to-stone-50/40 dark:from-[#170E12]/40 dark:via-[#22131A]/30 dark:to-[#170E12]/40 border-t border-rose-100/60 dark:border-white/5 overflow-hidden">
       <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8 space-y-10">
-        
         {/* Section Header */}
         <div className="text-center space-y-2 max-w-2xl mx-auto">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-300 bg-rose-100/70 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/40 shadow-2xs">
@@ -91,7 +92,7 @@ export default function Testimonials() {
           </p>
         </div>
 
-        {/* Swiper Interactive Slider with Fixed Uniform Card Sizes */}
+        {/* Swiper Interactive Slider with 100% Uniform Equal Height Cards */}
         <div className="pb-8">
           <Swiper
             modules={[Autoplay, Pagination]}
@@ -113,16 +114,23 @@ export default function Testimonials() {
             className="w-full !pb-14 testimonials-swiper"
           >
             {reviews.map((item, idx) => {
-              const avatar = item.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.userName || idx}`;
-              const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+              const avatar =
+                item.userAvatar ||
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.userName || idx}`;
+              const dateStr = item.createdAt
+                ? new Date(item.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "";
 
               return (
-                <SwiperSlide key={item._id || idx} className="!h-auto flex">
-                  <div className="w-full h-full min-h-[220px] flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-[#1C1014] border border-stone-200/90 dark:border-rose-900/40 shadow-xs hover:shadow-md transition-all duration-300 relative group">
-                    
-                    <Quote className="absolute top-5 right-5 h-7 w-7 text-rose-200/60 dark:text-rose-950/80 pointer-events-none group-hover:text-rose-300 transition-colors" />
+                <SwiperSlide key={item._id || idx} className="!h-auto flex flex-col">
+                  <div className="w-full h-full min-h-[240px] flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-[#201318] border border-stone-200/90 dark:border-rose-900/50 shadow-xs hover:shadow-md transition-all duration-300 relative group flex-1">
+                    <Quote className="absolute top-5 right-5 h-7 w-7 text-rose-200/60 dark:text-rose-900/40 pointer-events-none group-hover:text-rose-400 transition-colors" />
 
-                    <div className="space-y-3.5">
+                    <div className="space-y-3.5 flex-1 flex flex-col justify-start">
                       {/* User Info Header */}
                       <div className="flex items-center gap-3">
                         <div className="relative h-11 w-11 rounded-full overflow-hidden border-2 border-rose-100 dark:border-rose-900/60 shrink-0 bg-rose-50 dark:bg-slate-900 shadow-2xs">
@@ -132,7 +140,9 @@ export default function Testimonials() {
                             alt={item.userName || "Customer"}
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.userName || "Customer")}&background=f43f5e&color=fff`;
+                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                item.userName || "Customer"
+                              )}&background=f43f5e&color=fff`;
                             }}
                           />
                         </div>
@@ -146,20 +156,23 @@ export default function Testimonials() {
                               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                             </span>
                           </div>
-                          <p className="text-[10px] text-stone-400 font-medium truncate">
-                            {dateStr || "Verified Buyer"} {item.productName ? `• ${item.productName}` : ""}
+                          <p className="text-[10px] text-stone-400 dark:text-rose-200/50 font-medium truncate">
+                            {dateStr || "Verified Buyer"}{" "}
+                            {item.productName ? `• ${item.productName}` : ""}
                           </p>
                         </div>
                       </div>
 
-                      {/* Comment (Strict 3 lines for exact uniform card height across all slides) */}
-                      <p className="text-xs text-stone-600 dark:text-rose-100/80 leading-relaxed font-sans line-clamp-3 min-h-[54px]">
-                        “{item.comment}”
-                      </p>
+                      {/* Comment */}
+                      <div className="flex-1 flex flex-col justify-start pt-1">
+                        <p className="text-xs text-stone-600 dark:text-rose-100/90 leading-relaxed font-sans line-clamp-3">
+                          “{item.comment}”
+                        </p>
+                      </div>
                     </div>
 
                     {/* Star Rating & Verified Order Badge */}
-                    <div className="mt-4 pt-3 border-t border-stone-100 dark:border-white/5 flex items-center justify-between">
+                    <div className="mt-4 pt-3 border-t border-stone-100 dark:border-rose-900/30 flex items-center justify-between shrink-0">
                       <div className="flex items-center gap-1">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star
@@ -178,14 +191,12 @@ export default function Testimonials() {
                         Verified Order
                       </span>
                     </div>
-
                   </div>
                 </SwiperSlide>
               );
             })}
           </Swiper>
         </div>
-
       </div>
     </section>
   );

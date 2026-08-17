@@ -169,6 +169,19 @@ export default function CheckoutPage() {
     return baseCharge;
   }, [storeSettings, deliveryArea, subtotal]);
 
+  // Auto-sync delivery area (dhaka vs outside) with district selection
+  useEffect(() => {
+    const selectedDist = isCustomDistrict || district === "OTHER" ? customDistrictInput : district;
+    if (selectedDist && selectedDist.trim().length > 0) {
+      const lower = selectedDist.toLowerCase();
+      if (lower.includes("dhaka") || selectedDist.includes("ঢাকা")) {
+        setDeliveryArea("dhaka");
+      } else {
+        setDeliveryArea("outside");
+      }
+    }
+  }, [district, customDistrictInput, isCustomDistrict]);
+
   // Discount computation
   const discount = useMemo(() => {
     if (!appliedCoupon) return 0;
@@ -292,6 +305,9 @@ export default function CheckoutPage() {
       note,
       paymentMethod: paymentMethod === "cod" ? "Cash On Delivery" : "bKash/Nagad",
       shippingCost: deliveryCharge,
+      shipping: deliveryCharge,
+      subtotal,
+      total,
       discount,
       couponCode: appliedCoupon?.code || "",
     };
@@ -778,34 +794,40 @@ export default function CheckoutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                   {[
-                    { id: "dhaka", label: t("insideDhaka"), price: 70, timeKey: "deliveryTime12", chargeKey: "charge70" },
-                    { id: "outside", label: t("outsideDhaka"), price: 120, timeKey: "deliveryTime24", chargeKey: "charge120" },
-                  ].map((area) => (
-                    <button
-                      key={area.id}
-                      type="button"
-                      onClick={() => setDeliveryArea(area.id)}
-                      className={`relative p-3.5 sm:p-4 rounded-xl border-2 text-left transition duration-200 cursor-pointer ${
-                        deliveryArea === area.id
-                          ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/20 shadow-xs"
-                          : "border-stone-200 dark:border-white/10 bg-stone-50/40 dark:bg-white/5 hover:border-stone-300"
-                      }`}
-                    >
-                      {deliveryArea === area.id && (
-                        <div className="absolute top-3 right-3 w-4 h-4 bg-pink-500 rounded-full flex items-center justify-center text-white text-[10px]">
-                          ✓
+                    { id: "dhaka", label: t("insideDhaka"), price: Number(storeSettings?.shipping?.insideDhaka ?? 60), timeKey: "deliveryTime12" },
+                    { id: "outside", label: t("outsideDhaka"), price: Number(storeSettings?.shipping?.outsideDhaka ?? 120), timeKey: "deliveryTime24" },
+                  ].map((area) => {
+                    const freeThreshold = Number(storeSettings?.shipping?.freeShippingThreshold ?? 3000);
+                    const isFree = freeThreshold > 0 && subtotal >= freeThreshold;
+                    return (
+                      <button
+                        key={area.id}
+                        type="button"
+                        onClick={() => setDeliveryArea(area.id)}
+                        className={`relative p-3.5 sm:p-4 rounded-xl border-2 text-left transition duration-200 cursor-pointer ${
+                          deliveryArea === area.id
+                            ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/20 shadow-xs"
+                            : "border-stone-200 dark:border-white/10 bg-stone-50/40 dark:bg-white/5 hover:border-stone-300"
+                        }`}
+                      >
+                        {deliveryArea === area.id && (
+                          <div className="absolute top-3 right-3 w-4 h-4 bg-pink-500 rounded-full flex items-center justify-center text-white text-[10px]">
+                            ✓
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 mb-1">
+                          <MapPin size={15} className={deliveryArea === area.id ? "text-pink-500" : "text-stone-400"} />
+                          <span className={`text-xs font-bold ${deliveryArea === area.id ? "text-pink-600 dark:text-pink-300" : "text-stone-700 dark:text-rose-100/70"}`}>
+                            {area.label}
+                          </span>
                         </div>
-                      )}
-                      <div className="flex items-center gap-2 mb-1">
-                        <MapPin size={15} className={deliveryArea === area.id ? "text-pink-500" : "text-stone-400"} />
-                        <span className={`text-xs font-bold ${deliveryArea === area.id ? "text-pink-600 dark:text-pink-300" : "text-stone-700 dark:text-rose-100/70"}`}>
-                          {area.label}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-stone-400 dark:text-rose-100/40">{t(area.timeKey)}</p>
-                      <p className="text-xs font-extrabold text-pink-500 mt-1">{t(area.chargeKey)}</p>
-                    </button>
-                  ))}
+                        <p className="text-[11px] text-stone-400 dark:text-rose-100/40">{t(area.timeKey)}</p>
+                        <p className={`text-xs font-extrabold mt-1 ${isFree ? "text-emerald-600 dark:text-emerald-400" : "text-pink-500"}`}>
+                          {isFree ? "🎉 FREE Shipping" : `৳${area.price} Charge`}
+                        </p>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1059,9 +1081,17 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <div className="flex justify-between text-stone-600 dark:text-rose-100/60">
+                <div className="flex justify-between text-stone-600 dark:text-rose-100/60 items-center">
                   <span>{t("deliveryFee")}</span>
-                  <span className="font-semibold text-stone-800 dark:text-rose-100">৳{deliveryCharge}</span>
+                  <span className="font-semibold text-stone-800 dark:text-rose-100">
+                    {deliveryCharge === 0 ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-[11px] bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/40">
+                        FREE
+                      </span>
+                    ) : (
+                      `৳${deliveryCharge}`
+                    )}
+                  </span>
                 </div>
 
                 <div className="border-t border-dashed border-stone-200 dark:border-white/10 my-2" />

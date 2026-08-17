@@ -304,17 +304,24 @@ export default function Navbar() {
                 <nav className="flex flex-col gap-1.5">
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 px-3">Navigation</p>
                   {navLinks.map((link) => {
-                    const isActive = pathname === link.href;
+                    const isActive =
+                      pathname === link.href ||
+                      (link.href !== "/" && pathname?.startsWith(link.href));
+
                     return (
                       <Link
                         key={link.href}
                         href={link.href}
-                        className={`text-sm font-bold px-3 py-2.5 rounded-xl transition-all flex items-center justify-between ${isActive
-                            ? "bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-300"
+                        className={`text-sm font-bold px-3 py-2.5 rounded-xl transition-all flex items-center justify-between ${
+                          isActive
+                            ? "bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/40"
                             : "text-stone-700 dark:text-rose-100/80 hover:bg-stone-100 dark:hover:bg-white/5"
-                          }`}
+                        }`}
                       >
-                        <span>{link.name}</span>
+                        <span className="flex items-center gap-2">
+                          {isActive && <span className="h-2 w-2 rounded-full bg-rose-500" />}
+                          {link.name}
+                        </span>
                         <ChevronRight size={14} className="opacity-40" />
                       </Link>
                     );
@@ -357,17 +364,24 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-[1536px] items-center justify-between text-sm font-semibold">
           <nav className="flex items-center gap-7">
             {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive =
+                pathname === link.href ||
+                (link.href !== "/" && pathname?.startsWith(link.href));
+
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-[14px] font-bold transition-colors hover:text-rose-600 dark:hover:text-rose-300 ${isActive
-                      ? "text-rose-600 dark:text-rose-400"
+                  className={`relative text-[14px] font-bold transition-all hover:text-rose-600 dark:hover:text-rose-300 py-1 ${
+                    isActive
+                      ? "text-rose-600 dark:text-rose-400 font-extrabold"
                       : "text-stone-800 dark:text-rose-100/90"
-                    }`}
+                  }`}
                 >
                   {link.name}
+                  {isActive && (
+                    <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] rounded-full bg-rose-500 dark:bg-rose-400 shadow-xs" />
+                  )}
                 </Link>
               );
             })}

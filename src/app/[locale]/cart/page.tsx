@@ -140,9 +140,15 @@ export default function CartPage() {
                     </div>
                   )}
 
-                  <div className="flex justify-between items-center text-stone-400 dark:text-rose-100/40 text-[11px]">
+                  <div className="flex justify-between items-center text-stone-500 dark:text-rose-100/50 text-[11px]">
                     <span>Shipping Fee</span>
-                    <span className="italic">Calculated at checkout</span>
+                    <span className="font-semibold text-stone-700 dark:text-rose-100">
+                      {subtotal >= 3000 ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">FREE (Over ৳3,000)</span>
+                      ) : (
+                        <span className="italic text-stone-400 dark:text-rose-100/40">Calculated at checkout (From ৳60)</span>
+                      )}
+                    </span>
                   </div>
 
                   <div className="border-t border-dashed border-rose-100/60 dark:border-white/8 my-1" />
@@ -150,7 +156,7 @@ export default function CartPage() {
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-sm text-stone-900 dark:text-white">Estimated Total</span>
                     <span className="font-extrabold text-lg text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">
-                      ৳{Math.max(0, subtotal - discount).toLocaleString()}
+                      ৳{Math.max(0, subtotal - discount + (subtotal >= 3000 ? 0 : 60)).toLocaleString()}
                     </span>
                   </div>
                 </div>
