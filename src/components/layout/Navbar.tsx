@@ -57,6 +57,23 @@ export default function Navbar() {
     }
   };
 
+  const handleBestSellersClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/" || pathname === "" || pathname === "/en" || pathname === "/bn") {
+      const el = document.getElementById("best-sellers");
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/" || pathname === "" || pathname === "/en" || pathname === "/bn") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-rose-100/80 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-[#1C1417]/95 transition-colors shadow-xs">
 
@@ -91,7 +108,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-[1536px] items-center justify-between px-3 sm:px-6 lg:px-8 gap-3 sm:gap-6">
 
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2 group shrink-0 min-w-0">
+        <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 group shrink-0 min-w-0">
           <Image
             src="/logo.png"
             alt="Cherry Glow Korea"
@@ -328,6 +345,44 @@ export default function Navbar() {
                   })}
                 </nav>
 
+                {/* Quick Featured Collections (Mobile) */}
+                <div className="space-y-1.5 pt-2 border-t border-stone-100 dark:border-white/10">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 px-3">Featured Collections</p>
+                  <Link
+                    href="/#best-sellers"
+                    onClick={handleBestSellersClick}
+                    className="text-xs font-bold px-3 py-2 rounded-xl transition-all flex items-center justify-between text-stone-800 dark:text-rose-100 hover:bg-rose-50 dark:hover:bg-white/5"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Flame size={15} className="text-amber-500 fill-amber-500/20" />
+                      Best Sellers
+                    </span>
+                    <ChevronRight size={14} className="opacity-40" />
+                  </Link>
+
+                  <Link
+                    href="/products?category=Serum"
+                    className="text-xs font-bold px-3 py-2 rounded-xl transition-all flex items-center justify-between text-stone-800 dark:text-rose-100 hover:bg-rose-50 dark:hover:bg-white/5"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Sparkles size={14} className="text-rose-400" />
+                      Serums & Essence
+                    </span>
+                    <ChevronRight size={14} className="opacity-40" />
+                  </Link>
+
+                  <Link
+                    href="/products?category=Sunscreen"
+                    className="text-xs font-bold px-3 py-2 rounded-xl transition-all flex items-center justify-between text-stone-800 dark:text-rose-100 hover:bg-rose-50 dark:hover:bg-white/5"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Sun size={15} className="text-amber-400" />
+                      Sun Protection
+                    </span>
+                    <ChevronRight size={14} className="opacity-40" />
+                  </Link>
+                </div>
+
                 {/* Mobile App Settings (Language & Theme) */}
                 <div className="space-y-2 pt-2 border-t border-stone-100 dark:border-white/10">
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 px-3">Preferences</p>
@@ -388,7 +443,11 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-4 text-stone-700 dark:text-stone-200 text-xs sm:text-[13px] font-semibold">
-            <Link href="/products?sort=popular" className="hover:text-rose-600 dark:hover:text-rose-300 transition flex items-center gap-1.5">
+            <Link
+              href="/#best-sellers"
+              onClick={handleBestSellersClick}
+              className="hover:text-rose-600 dark:hover:text-rose-300 transition flex items-center gap-1.5 cursor-pointer"
+            >
               <Flame size={15} className="text-amber-500 fill-amber-500/20 shrink-0" />
               <span>Best Sellers</span>
             </Link>

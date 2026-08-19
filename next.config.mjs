@@ -14,7 +14,7 @@ const cspHeader = `
   frame-src 'self' https://accounts.google.com https://www.google.com https://connect.facebook.net https://www.facebook.com;
   object-src 'none';
   base-uri 'self';
-  form-action 'self';
+  form-action 'self' https://www.facebook.com https://connect.facebook.net;
   frame-ancestors 'none';
   ${isProd ? "upgrade-insecure-requests;" : ""}
 `.replace(/\s{2,}/g, " ").trim();

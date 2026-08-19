@@ -411,7 +411,7 @@ export default function UserProfilePage() {
         className="hidden"
       />
 
-      <div className="mx-auto max-w-[1280px] space-y-8">
+      <div className="mx-auto max-w-[1536px] space-y-8">
         
         {/* Profile Banner & Header Card */}
         <div className="relative rounded-3xl bg-white dark:bg-[#1C1417] border border-stone-200/80 dark:border-white/10 p-6 sm:p-8 shadow-sm overflow-hidden">

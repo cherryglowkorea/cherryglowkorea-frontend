@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Heart, ShoppingBag } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 import AnimatedDiscountBorder from "../shared/AnimatedDiscountBorder";
+import { cleanProductName } from "@/lib/utils";
 
 export default function ProductCard({ product, onAddToCart, index = 0, viewMode = "grid" }) {
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -159,7 +160,7 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
           <div>
             <Link href={`/products/${productId}`} className="block">
               <h3 className="font-bold text-stone-900 dark:text-rose-50 text-base line-clamp-1 hover:text-rose-600 dark:hover:text-rose-400 hover:underline transition cursor-pointer">
-                {name}
+                {cleanProductName(name)}
               </h3>
             </Link>
 
@@ -287,7 +288,7 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
         <div>
           <Link href={`/products/${productId}`} className="block">
             <h3 className="font-semibold text-stone-900 dark:text-rose-50 text-xs sm:text-sm line-clamp-2 leading-snug hover:text-rose-600 dark:hover:text-rose-400 hover:underline transition cursor-pointer">
-              {name}
+              {cleanProductName(name)}
             </h3>
           </Link>
 

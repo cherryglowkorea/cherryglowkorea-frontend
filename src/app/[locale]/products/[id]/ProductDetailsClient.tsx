@@ -26,8 +26,10 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import { cleanProductName } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 import { trackViewContent } from "@/lib/metaPixel";
 import ProductCard from "@/components/products/ProductCard";
 
@@ -388,28 +390,33 @@ export default function ProductDetailsClient({
   return (
     <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 pb-28 md:pb-12 space-y-12">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
-        {/* LEFT COLUMN: IMAGES */}
-        <div className="md:col-span-6 space-y-4 md:sticky md:top-24">
-          <ProductImagePanel selectedImage={selectedImage} altText={name} />
-
-          {/* Multi-Image Thumbnails Gallery Strip */}
-          {imageList.length > 1 && (
-            <div className="space-y-1.5">
-              <p className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">
-                Photo Gallery ({imageList.length} views)
-              </p>
-              <div className="flex gap-2.5 overflow-x-auto py-1.5 scrollbar-thin">
-                {imageList.map((img: any, idx: number) => (
-                  <ThumbnailButton
-                    key={idx}
-                    imgSrc={img}
-                    active={selectedImage === img}
-                    onClick={() => setSelectedImage(img)}
-                  />
-                ))}
+        {/* LEFT COLUMN: IMAGES (Vertical Thumbnail Strip on Left + Big Main Image) */}
+        <div className="md:col-span-6 md:sticky md:top-24">
+          <div className="flex flex-col-reverse md:flex-row gap-3.5 items-start">
+            {/* Left Vertical Thumbnails Bar (Desktop: Left Column, Mobile: Bottom Horizontal Row) */}
+            {imageList.length > 1 && (
+              <div className="w-full md:w-20 lg:w-22 shrink-0">
+                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 md:hidden">
+                  Photo Gallery ({imageList.length} views)
+                </p>
+                <div className="flex md:flex-col flex-row gap-2.5 overflow-x-auto md:overflow-y-auto md:max-h-[520px] p-1 scrollbar-thin shrink-0">
+                  {imageList.map((img: any, idx: number) => (
+                    <ThumbnailButton
+                      key={idx}
+                      imgSrc={img}
+                      active={selectedImage === img}
+                      onClick={() => setSelectedImage(img)}
+                    />
+                  ))}
+                </div>
               </div>
+            )}
+
+            {/* Main Big Image Preview Panel */}
+            <div className="flex-1 w-full min-w-0">
+              <ProductImagePanel selectedImage={selectedImage} altText={name} />
             </div>
-          )}
+          </div>
         </div>
 
         {/* RIGHT COLUMN: BUY BOX & DETAILS */}
@@ -426,7 +433,7 @@ export default function ProductDetailsClient({
             </div>
 
             <h1 className="text-2xl md:text-3xl font-serif font-extrabold text-stone-900 dark:text-rose-50 leading-tight">
-              {name}
+              {cleanProductName(name)}
             </h1>
 
             {/* Rating Summary Bar */}
@@ -861,15 +868,22 @@ export default function ProductDetailsClient({
 
 function ProductImagePanel({ selectedImage, altText }: { selectedImage: string; altText?: string }) {
   const displaySrc = selectedImage || FALLBACK_IMAGE;
+  const [src, setSrc] = useState(displaySrc);
+
+  useEffect(() => {
+    setSrc(displaySrc);
+  }, [displaySrc]);
+
   return (
-    <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-stone-100 dark:bg-rose-950/30 border border-stone-200/60 dark:border-rose-900/30 group">
+    <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-stone-100 dark:bg-rose-950/30 border border-stone-200/60 dark:border-rose-900/30 group shadow-sm hover:shadow-md transition">
       <Image
-        src={displaySrc}
+        src={src || FALLBACK_IMAGE}
         alt={altText || "Authentic Korean Skincare Product"}
         fill
         priority
         sizes="(max-width: 768px) 100vw, 50vw"
         className="object-cover group-hover:scale-105 transition-transform duration-500"
+        onError={() => setSrc(FALLBACK_IMAGE)}
       />
     </div>
   );
@@ -884,16 +898,29 @@ function ThumbnailButton({
   active: boolean;
   onClick: () => void;
 }) {
+  const [src, setSrc] = useState(imgSrc);
+
+  useEffect(() => {
+    setSrc(imgSrc);
+  }, [imgSrc]);
+
   return (
     <button
       onClick={onClick}
-      className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+      className={`relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden shrink-0 border-2 transition-all duration-300 cursor-pointer ${
         active
-          ? "border-rose-600 scale-105 shadow-md"
-          : "border-stone-200 dark:border-rose-900/30 opacity-70 hover:opacity-100"
+          ? "border-rose-500 scale-105 shadow-md ring-2 ring-rose-200/50 dark:ring-rose-900/40"
+          : "border-stone-200/80 dark:border-rose-900/30 opacity-75 hover:opacity-100 hover:border-rose-300"
       }`}
     >
-      <Image src={imgSrc} alt="Thumbnail" fill sizes="64px" className="object-cover" />
+      <Image
+        src={src || FALLBACK_IMAGE}
+        alt="Thumbnail"
+        fill
+        sizes="72px"
+        className="object-cover"
+        onError={() => setSrc(FALLBACK_IMAGE)}
+      />
     </button>
   );
 }

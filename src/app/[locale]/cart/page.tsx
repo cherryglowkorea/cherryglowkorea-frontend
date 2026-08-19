@@ -10,7 +10,7 @@ import { toast } from "sonner";
 const FALLBACK_IMAGE = "/placeholder.jpg";
 
 export default function CartPage() {
-  const { cart, selectVariant, updateQuantity, removeFromCart, coupon } = useCart();
+  const { cart, isLoaded: isCartLoaded, selectVariant, updateQuantity, removeFromCart, coupon } = useCart();
   const router = useRouter();
 
   const [couponInput, setCouponInput] = useState("");
@@ -38,7 +38,7 @@ export default function CartPage() {
     router.push("/checkout");
   };
 
-  if (!mounted) return null;
+  if (!mounted || !isCartLoaded) return null;
 
   return (
     <>

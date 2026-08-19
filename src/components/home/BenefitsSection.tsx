@@ -74,7 +74,7 @@ export default function BenefitsSection() {
       {/* Background glow orb */}
       <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-200/20 blur-3xl dark:bg-rose-600/10" />
 
-      <div className="mx-auto max-w-7xl px-4">
+      <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-xl mx-auto mb-12 sm:mb-16">
           <motion.div

@@ -40,6 +40,13 @@ export default function Footer() {
     setEmail("");
   };
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/" || pathname === "" || pathname === "/en" || pathname === "/bn") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <footer className="bg-stone-900 text-stone-200 dark:bg-[#120a0d] dark:text-rose-100 border-t border-rose-950/40 relative z-10 transition-colors">
       {/* 1. Top Trust & Service Feature Pillars */}
@@ -139,7 +146,7 @@ export default function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2 group">
+            <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 group cursor-pointer">
               <Image src="/logo.png" alt="Cherry Glow Korea" width={38} height={38} className="transition-transform group-hover:scale-105" />
               <div className="flex items-baseline gap-1 font-serif">
                 <span className="text-xl font-bold text-white">Cherry Glow</span>

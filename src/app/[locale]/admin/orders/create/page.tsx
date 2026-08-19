@@ -100,15 +100,16 @@ export default function CreateOrderPage() {
   // Add Item to Order Cart
   const addItem = () => {
     if (!selectedProduct) return toast.error("Please select a product first");
-    if (!variant) return toast.error("Please select a product variant");
+    if (selectedProduct.variants?.length > 0 && !variant) {
+      return toast.error("Please select a product variant");
+    }
 
-    const itemPrice = Number(variant.price) || Number(selectedProduct.price) || 0;
+    const itemPrice = Number(variant?.price) || Number(selectedProduct.price) || Number(selectedProduct.salePrice) || 0;
 
     const exists = items.find(
       (i) =>
         i.productId === selectedProduct._id &&
-        i.variant?.weight === variant.weight &&
-        i.variant?.unit === variant.unit
+        (variant ? i.variant?.weight === variant.weight && i.variant?.unit === variant.unit : true)
     );
 
     if (exists) {
@@ -126,11 +127,13 @@ export default function CreateOrderPage() {
           name: selectedProduct.name,
           brand: selectedProduct.brand || "",
           image: selectedProduct.images?.[0]?.url || selectedProduct.thumbnail || "",
-          variant: {
-            weight: Number(variant.weight),
-            unit: variant.unit,
-            size: variant.size || "",
-          },
+          variant: variant
+            ? {
+                weight: variant.weight || "",
+                unit: variant.unit || "",
+                size: variant.size || "",
+              }
+            : null,
           price: itemPrice,
           quantity: qty,
         },
@@ -549,9 +552,13 @@ export default function CreateOrderPage() {
                         <p className="font-bold text-xs text-stone-900 dark:text-rose-100 truncate">
                           {item.name}
                         </p>
-                        {item.variant && (
+                        {item.variant ? (
                           <p className="text-[11px] text-stone-500 dark:text-rose-300/70">
-                            {item.variant.weight} {item.variant.unit} • ৳{item.price}
+                            {[item.variant.weight, item.variant.unit, item.variant.size].filter((val) => Boolean(val) && String(val) !== "NaN").join(" ")} • ৳{item.price}
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-stone-500 dark:text-rose-300/70">
+                            ৳{item.price}
                           </p>
                         )}
                       </div>

@@ -35,6 +35,7 @@ export interface CouponType {
 
 interface CartContextType {
   cart: CartItemType[];
+  isLoaded: boolean;
   addToCart: (product: any) => void;
   selectVariant: (productId: string, variant: VariantType | null) => void;
   updateQuantity: (productId: string, type: "inc" | "dec") => void;
@@ -50,37 +51,43 @@ const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItemType[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [coupon, setCoupon] = useState<CouponType | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // Load
+  // Load from localStorage on mount
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      try {
-        const parsed = JSON.parse(storedCart);
-        const normalized = parsed.map((item: CartItemType) => {
-          if (!item.selectedVariant && item.variants && item.variants.length > 0) {
-            const firstVariant = item.variants[0];
-            return {
-              ...item,
-              selectedVariant: firstVariant,
-              price: firstVariant?.price || item.price || 0,
-            };
-          }
-          return item;
-        });
-        setCart(normalized);
-      } catch {
-        setCart([]);
+    if (typeof window !== "undefined") {
+      const storedCart = localStorage.getItem("cart");
+      if (storedCart) {
+        try {
+          const parsed = JSON.parse(storedCart);
+          const normalized = parsed.map((item: CartItemType) => {
+            if (!item.selectedVariant && item.variants && item.variants.length > 0) {
+              const firstVariant = item.variants[0];
+              return {
+                ...item,
+                selectedVariant: firstVariant,
+                price: firstVariant?.price || item.price || 0,
+              };
+            }
+            return item;
+          });
+          setCart(normalized);
+        } catch {
+          setCart([]);
+        }
       }
+      setIsLoaded(true);
     }
   }, []);
 
-  // Save
+  // Save to localStorage ONLY AFTER initial load has completed
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    if (isLoaded && typeof window !== "undefined") {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+  }, [cart, isLoaded]);
 
   const addToCart = (product: any) => {
     setCart((prev) => {
@@ -213,6 +220,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     <CartContext.Provider
       value={{
         cart,
+        isLoaded,
         addToCart,
         selectVariant,
         updateQuantity,

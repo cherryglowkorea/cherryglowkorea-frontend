@@ -116,11 +116,10 @@ export default function RegisterPage() {
                 type="button"
                 key={key}
                 onClick={() => setAvatar(key)}
-                className={`relative rounded-full p-0.5 transition cursor-pointer bg-white dark:bg-white/10 ${
-                  avatar === key
+                className={`relative rounded-full p-0.5 transition cursor-pointer bg-white dark:bg-white/10 ${avatar === key
                     ? "ring-2 ring-rose-500 scale-105 opacity-100"
                     : "opacity-80 hover:opacity-100 ring-1 ring-stone-200 dark:ring-white/20"
-                }`}
+                  }`}
               >
                 <Image
                   src={src}

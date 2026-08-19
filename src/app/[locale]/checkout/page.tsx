@@ -36,6 +36,10 @@ import {
   X,
   AlertCircle,
   ArrowRight,
+  Lock,
+  Wallet,
+  Clock,
+  Headphones,
 } from "lucide-react";
 
 const FALLBACK_IMAGE = "/placeholder.jpg";
@@ -62,7 +66,7 @@ const BANGLADESH_DISTRICTS = [
 ];
 
 export default function CheckoutPage() {
-  const { cart, clearCart, coupon: contextCoupon } = useCart();
+  const { cart, isLoaded: isCartLoaded, clearCart, coupon: contextCoupon } = useCart();
   const { setAuthData } = useAuth();
   const router = useRouter();
   const t = useTranslations("checkout");
@@ -423,7 +427,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (!mounted) return null;
+  if (!mounted || !isCartLoaded) return null;
 
   // -------------------------------------------------------------
   // SUCCESS SCREEN
@@ -620,7 +624,7 @@ export default function CheckoutPage() {
         <div className="absolute bottom-10 left-5 w-80 h-80 bg-rose-300/10 dark:bg-rose-900/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-[1536px] mx-auto px-3.5 sm:px-6 lg:px-8">
         
         {/* Streamlined Distraction-Free Header Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 sm:mb-8 sm:pb-4 border-b border-stone-200/80 dark:border-white/10">
@@ -670,13 +674,17 @@ export default function CheckoutPage() {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Stepper indicator */}
             <div className="hidden lg:flex items-center gap-2 text-xs font-semibold mr-1">
-              <span className="text-stone-400 dark:text-rose-100/40">1. {t("stepCart")}</span>
-              <ChevronRight size={13} className="text-stone-300" />
-              <span className="font-bold text-pink-500 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/40 px-3 py-1 rounded-xl border border-pink-200 dark:border-pink-900/30">
-                2. {t("stepCheckout")}
+              <span className="text-stone-400 dark:text-rose-100/40 flex items-center gap-1">
+                <ShoppingBag size={12} /> 1. {t("stepCart")}
               </span>
               <ChevronRight size={13} className="text-stone-300" />
-              <span className="text-stone-400 dark:text-rose-100/40">3. {t("stepConfirmation")}</span>
+              <span className="font-bold text-pink-500 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/40 px-3 py-1 rounded-xl border border-pink-200 dark:border-pink-900/30 flex items-center gap-1">
+                <CreditCard size={12} /> 2. {t("stepCheckout")}
+              </span>
+              <ChevronRight size={13} className="text-stone-300" />
+              <span className="text-stone-400 dark:text-rose-100/40 flex items-center gap-1">
+                <Sparkles size={12} /> 3. {t("stepConfirmation")}
+              </span>
             </div>
 
             {/* Language & Theme Controls */}
@@ -812,7 +820,7 @@ export default function CheckoutPage() {
                       >
                         {deliveryArea === area.id && (
                           <div className="absolute top-3 right-3 w-4 h-4 bg-pink-500 rounded-full flex items-center justify-center text-white text-[10px]">
-                            ✓
+                            <CheckCircle2 size={12} />
                           </div>
                         )}
                         <div className="flex items-center gap-2 mb-1">
@@ -821,9 +829,22 @@ export default function CheckoutPage() {
                             {area.label}
                           </span>
                         </div>
-                        <p className="text-[11px] text-stone-400 dark:text-rose-100/40">{t(area.timeKey)}</p>
-                        <p className={`text-xs font-extrabold mt-1 ${isFree ? "text-emerald-600 dark:text-emerald-400" : "text-pink-500"}`}>
-                          {isFree ? "🎉 FREE Shipping" : `৳${area.price} Charge`}
+                        <p className="text-[11px] text-stone-400 dark:text-rose-100/40 flex items-center gap-1">
+                          <Clock size={11} className="text-stone-400 shrink-0" />
+                          <span>{t(area.timeKey)}</span>
+                        </p>
+                        <p className={`text-xs font-extrabold mt-1 flex items-center gap-1 ${isFree ? "text-emerald-600 dark:text-emerald-400" : "text-pink-500"}`}>
+                          {isFree ? (
+                            <>
+                              <Sparkles size={12} className="text-emerald-500" />
+                              <span>FREE Shipping</span>
+                            </>
+                          ) : (
+                            <>
+                              <Truck size={12} className="text-pink-500" />
+                              <span>৳{area.price} Charge</span>
+                            </>
+                          )}
                         </p>
                       </button>
                     );
@@ -976,8 +997,9 @@ export default function CheckoutPage() {
                       type="button"
                       onClick={handleApplyCoupon}
                       disabled={couponLoading}
-                      className="px-4 py-2 bg-stone-800 dark:bg-white/10 hover:bg-stone-900 text-white rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
+                      className="px-4 py-2 bg-stone-800 dark:bg-white/10 hover:bg-stone-900 text-white rounded-xl text-xs font-bold transition cursor-pointer shrink-0 flex items-center gap-1.5"
                     >
+                      <Sparkles size={12} className="text-pink-400" />
                       {couponLoading ? "..." : t("apply")}
                     </button>
                   </div>
@@ -1025,10 +1047,10 @@ export default function CheckoutPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-xs text-stone-800 dark:text-rose-50 flex items-center gap-1.5">
-                          <Banknote size={13} className="text-pink-500" /> {t("cod")}
+                          <Banknote size={14} className="text-emerald-500" /> {t("cod")}
                         </span>
-                        <span className="text-[9px] font-bold uppercase bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded">
-                          {t("recommended")}
+                        <span className="text-[9px] font-bold uppercase bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded flex items-center gap-1">
+                          <Sparkles size={10} /> {t("recommended")}
                         </span>
                       </div>
                       <p className="text-[10px] text-stone-500 dark:text-rose-100/50 mt-0.5 leading-tight">
@@ -1053,10 +1075,10 @@ export default function CheckoutPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-xs text-stone-800 dark:text-rose-50 flex items-center gap-1.5">
-                          <CreditCard size={13} className="text-pink-500" /> {t("bkash")}
+                          <Wallet size={14} className="text-pink-500" /> {t("bkash")}
                         </span>
-                        <span className="text-[9px] font-bold text-stone-400">
-                          {t("digitalWallet")}
+                        <span className="text-[9px] font-bold text-stone-400 flex items-center gap-1">
+                          <CreditCard size={10} /> {t("digitalWallet")}
                         </span>
                       </div>
                       <p className="text-[10px] text-stone-500 dark:text-rose-100/50 mt-0.5 leading-tight">
@@ -1069,24 +1091,33 @@ export default function CheckoutPage() {
 
               {/* Cost Calculations */}
               <div className="space-y-2.5 text-xs border-t border-stone-100 dark:border-white/5 pt-3.5 sm:pt-4">
-                <div className="flex justify-between text-stone-600 dark:text-rose-100/60">
-                  <span>{t("subtotal")}</span>
+                <div className="flex justify-between text-stone-600 dark:text-rose-100/60 items-center">
+                  <span className="flex items-center gap-1.5">
+                    <ShoppingBag size={13} className="text-stone-400" />
+                    {t("subtotal")}
+                  </span>
                   <span className="font-semibold text-stone-800 dark:text-rose-100">৳{subtotal.toLocaleString()}</span>
                 </div>
 
                 {discount > 0 && (
-                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
-                    <span>{t("discount")}</span>
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold items-center">
+                    <span className="flex items-center gap-1.5">
+                      <Tag size={13} className="text-emerald-500" />
+                      {t("discount")}
+                    </span>
                     <span>-৳{discount.toLocaleString()}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between text-stone-600 dark:text-rose-100/60 items-center">
-                  <span>{t("deliveryFee")}</span>
+                  <span className="flex items-center gap-1.5">
+                    <Truck size={13} className="text-pink-500" />
+                    {t("deliveryFee")}
+                  </span>
                   <span className="font-semibold text-stone-800 dark:text-rose-100">
                     {deliveryCharge === 0 ? (
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-[11px] bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/40">
-                        FREE
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-[11px] bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/40 flex items-center gap-1">
+                        <Sparkles size={10} /> FREE
                       </span>
                     ) : (
                       `৳${deliveryCharge}`
@@ -1097,7 +1128,10 @@ export default function CheckoutPage() {
                 <div className="border-t border-dashed border-stone-200 dark:border-white/10 my-2" />
 
                 <div className="flex justify-between items-center text-sm sm:text-base">
-                  <span className="font-extrabold text-stone-900 dark:text-white">{t("totalPayable")}</span>
+                  <span className="font-extrabold text-stone-900 dark:text-white flex items-center gap-1.5">
+                    <Banknote size={16} className="text-rose-500" />
+                    {t("totalPayable")}
+                  </span>
                   <span className="font-black text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">
                     ৳{total.toLocaleString()}
                   </span>
@@ -1124,14 +1158,22 @@ export default function CheckoutPage() {
               </button>
 
               {/* Trust Badges */}
-              <div className="pt-2 grid grid-cols-2 gap-2 text-[10px] text-stone-400 dark:text-rose-100/40">
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck size={12} className="text-pink-500 shrink-0" />
-                  <span>{t("originalProduct")}</span>
+              <div className="pt-2 grid grid-cols-2 gap-2.5 text-[11px] font-medium text-stone-500 dark:text-rose-100/50">
+                <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 p-2 rounded-xl border border-stone-100 dark:border-white/5">
+                  <ShieldCheck size={14} className="text-pink-500 shrink-0" />
+                  <span className="truncate">{t("originalProduct")}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Truck size={12} className="text-pink-500 shrink-0" />
-                  <span>{t("codTag")}</span>
+                <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 p-2 rounded-xl border border-stone-100 dark:border-white/5">
+                  <Truck size={14} className="text-pink-500 shrink-0" />
+                  <span className="truncate">{t("codTag")}</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 p-2 rounded-xl border border-stone-100 dark:border-white/5">
+                  <Lock size={14} className="text-pink-500 shrink-0" />
+                  <span className="truncate">100% Safe Checkout</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 p-2 rounded-xl border border-stone-100 dark:border-white/5">
+                  <Headphones size={14} className="text-pink-500 shrink-0" />
+                  <span className="truncate">24/7 Support Care</span>
                 </div>
               </div>
 

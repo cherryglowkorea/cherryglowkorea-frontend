@@ -89,7 +89,12 @@ export default function DashboardOverviewPage() {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem("token");
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      
+      if (!token) {
+        throw new Error("Authentication token not found. Please log in to access the admin dashboard.");
+      }
+
       const activeRange = rangeOverride !== undefined ? rangeOverride : dateRange;
       const activeStart = startOverride !== undefined ? startOverride : startDate;
       const activeEnd = endOverride !== undefined ? endOverride : endDate;
@@ -124,15 +129,26 @@ export default function DashboardOverviewPage() {
         }
       }
 
-      if (!res || !res.ok) {
-        throw new Error("Failed to fetch dashboard statistics");
+      if (!res) {
+        throw new Error("No response received from backend server.");
+      }
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        if (res.status === 401) {
+          throw new Error(errorData?.message || "Session expired or invalid token. Please log in as Admin again.");
+        }
+        if (res.status === 403) {
+          throw new Error(errorData?.message || "Access denied. Admin, Super Admin, or Manager privileges required.");
+        }
+        throw new Error(errorData?.message || `Server error (${res.status}). Failed to fetch dashboard statistics.`);
       }
 
       const data = await res.json();
       if (data.success) {
         setStats(data.data);
       } else {
-        throw new Error(data.message || "Failed to load dashboard");
+        throw new Error(data.message || "Failed to load dashboard statistics.");
       }
     } catch (err: any) {
       console.error("Dashboard fetch error:", err);

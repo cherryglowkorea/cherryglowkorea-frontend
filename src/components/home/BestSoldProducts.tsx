@@ -91,7 +91,7 @@ export default function BestSoldProducts() {
   if (!loading && products.length === 0) return null;
 
   return (
-    <section className="py-12 sm:py-16 bg-stone-50/50 dark:bg-[#1A1014]/40 border-b border-rose-100/60 dark:border-white/5">
+    <section id="best-sellers" className="scroll-mt-24 py-12 sm:py-16 bg-stone-50/50 dark:bg-[#1A1014]/40 border-b border-rose-100/60 dark:border-white/5">
       <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
