@@ -36,7 +36,7 @@ const getPriceRange = (variants = [], basePrice, type) => {
 };
 
 const getThumbnail = (p) => {
-  return p.thumbnail || p.images?.[0]?.url || p.image || "/placeholder.png";
+  return p.thumbnail || p.images?.[0]?.url || p.image || "/placeholder.jpg";
 };
 
 const getTotalStock = (p) => {

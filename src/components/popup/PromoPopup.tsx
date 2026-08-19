@@ -70,6 +70,7 @@ export default function PromoPopup() {
               src={banner.image}
               alt="Promo"
               fill
+              sizes="36px"
               className="object-cover"
             />
           </div>
@@ -125,6 +126,7 @@ export default function PromoPopup() {
               src={banner.image}
               alt={banner.title || "Promo"}
               fill
+              sizes="(max-width: 640px) 320px, 384px"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               priority
             />

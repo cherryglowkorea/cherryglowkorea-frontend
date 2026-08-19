@@ -31,7 +31,7 @@ import { useAuth } from "@/context/AuthContext";
 import { trackViewContent } from "@/lib/metaPixel";
 import ProductCard from "@/components/products/ProductCard";
 
-const FALLBACK_IMAGE = "/placeholder.png";
+const FALLBACK_IMAGE = "/placeholder.jpg";
 
 export default function ProductDetailsClient({
   initialProduct,

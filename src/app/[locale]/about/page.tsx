@@ -141,17 +141,35 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Right Column: High Quality Skincare Brand Showcase */}
-            <div className="relative w-full">
-              <div className="relative w-full h-[380px] sm:h-[440px] rounded-3xl overflow-hidden border border-stone-200/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] group">
+            {/* Right Column: Layered 50% Overlapping Skincare Image Showcase */}
+            <div className="relative w-full min-h-[420px] sm:min-h-[460px] lg:min-h-[480px] flex items-center justify-start lg:pl-4 my-4 lg:my-0">
+              {/* Background Glow Ambient Light */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-tr from-rose-500/25 via-pink-400/20 to-amber-200/10 rounded-full blur-3xl opacity-70 pointer-events-none" />
+
+              {/* Main Back Image (about 2) */}
+              <div className="relative w-[72%] sm:w-[68%] h-[320px] sm:h-[370px] rounded-3xl overflow-hidden border-2 border-white/80 dark:border-white/10 shadow-2xl transition-transform duration-500 hover:scale-[1.02] z-10 group">
                 <Image
-                  src="https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1200&auto=format&fit=crop"
-                  alt="Cherry Glow Korean Skincare Essence"
+                  src="/about/about (2).avif"
+                  alt="Cherry Glow Skincare Product"
                   fill
                   priority
-                  sizes="(max-width: 768px) 100vw, 600px"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 768px) 75vw, 450px"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-60" />
+              </div>
+
+              {/* Overlapping Front Image (about 3) - 50% Offset Layering */}
+              <div className="absolute bottom-0 right-0 sm:right-2 lg:-right-2 w-[62%] sm:w-[58%] h-[240px] sm:h-[290px] rounded-3xl overflow-hidden border-4 border-white dark:border-[#1e1215] shadow-[0_20px_50px_rgba(244,63,94,0.18)] transition-all duration-500 hover:scale-[1.04] z-20 group">
+                <Image
+                  src="/about/about (3).avif"
+                  alt="Cherry Glow Organic Formulas"
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 60vw, 380px"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-rose-950/20 via-transparent to-transparent" />
               </div>
             </div>
           </section>

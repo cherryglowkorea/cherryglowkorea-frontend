@@ -91,12 +91,14 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
     }
   };
 
-  const displayImage = thumbnail || image || images?.[0]?.url || "/placeholder.png";
+  const displayImage = thumbnail || image || images?.[0]?.url || "/placeholder.jpg";
 
   const optimizedImage =
     displayImage && typeof displayImage === "string" && displayImage.includes("/upload/")
       ? displayImage.replace("/upload/", "/upload/w_600,f_auto,q_auto:good/")
       : displayImage;
+
+  const [imgSrc, setImgSrc] = useState(optimizedImage);
 
   /* ---------------- LIST VIEW LAYOUT ---------------- */
   if (viewMode === "list") {
@@ -106,11 +108,12 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
         <div className="relative w-full sm:w-48 h-44 shrink-0 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden">
           <Link href={`/products/${productId}`} className="block w-full h-full relative group/img cursor-pointer">
             <Image
-              src={optimizedImage}
+              src={imgSrc || "/placeholder.jpg"}
               alt={name}
               fill
               sizes="(max-width: 768px) 100vw, 220px"
               priority={index < 4}
+              onError={() => setImgSrc("/placeholder.jpg")}
               className="object-cover transition-transform duration-500 group-hover/img:scale-105"
             />
 
@@ -233,11 +236,12 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
       <div className="relative w-full h-40 sm:h-52 md:h-56 mb-2.5 sm:mb-3 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden group/img">
         <Link href={`/products/${productId}`} className="block w-full h-full relative cursor-pointer">
           <Image
-            src={optimizedImage}
+            src={imgSrc || "/placeholder.jpg"}
             alt={name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={index < 4}
+            onError={() => setImgSrc("/placeholder.jpg")}
             className="object-cover transition-transform duration-500 group-hover/img:scale-105"
           />
 
