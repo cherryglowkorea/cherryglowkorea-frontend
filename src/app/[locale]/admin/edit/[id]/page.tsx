@@ -283,10 +283,12 @@ export default function EditProductPage() {
         formData.append(
           "comboProducts",
           JSON.stringify(
-            selectedComboProducts.map((p) => ({
-              productId: p.productId,
-              quantity: p.quantity,
-            }))
+            selectedComboProducts
+              .map((p) => ({
+                productId: String(p.productId || p._id || p.id || "").trim(),
+                quantity: Number(p.quantity) || 1,
+              }))
+              .filter((p) => p.productId && p.productId.length === 24)
           )
         );
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -35,6 +37,20 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const tNav = useTranslations("nav");
+
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(2000);
+
+  useEffect(() => {
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    axios
+      .get(`${API_BASE}/settings`)
+      .then((res) => {
+        if (res.data?.freeShippingThreshold) {
+          setFreeShippingThreshold(Number(res.data.freeShippingThreshold));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Do not render public Navbar on Admin or Checkout pages
   if (pathname?.startsWith("/admin") || pathname?.startsWith("/checkout")) {
@@ -95,7 +111,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-rose-300 font-semibold text-xs sm:text-[13px]">
               <Truck size={15} className="text-rose-400 shrink-0" />
-              <span>Free Delivery Over ৳2000</span>
+              <span>Free Delivery Over ৳{freeShippingThreshold.toLocaleString()}</span>
             </span>
             <div className="flex items-center gap-2">
               <LanguageSwitcher variant="dark" />
