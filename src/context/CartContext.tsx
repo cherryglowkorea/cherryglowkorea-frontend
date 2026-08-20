@@ -93,11 +93,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart((prev) => {
       const pId = product._id || product.productId;
       const exists = prev.find((i) => i.productId === pId || i._id === pId);
+      const addedQty = Math.max(1, Number(product.quantity) || 1);
 
       if (exists) {
         return prev.map((i) =>
           (i.productId === pId || i._id === pId)
-            ? { ...i, quantity: i.quantity + 1 }
+            ? { ...i, quantity: i.quantity + addedQty }
             : i
         );
       }
@@ -107,6 +108,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         : null;
 
       const resolvedVariant = product.selectedVariant || firstVariant;
+      const itemPrice = Number(resolvedVariant?.price || product.price || product.salePrice || 0);
 
       return [
         ...prev,
@@ -117,8 +119,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
           image: product.image || null,
           variants: product.variants || [],
           selectedVariant: resolvedVariant,
-          price: resolvedVariant?.price || product.price || product.salePrice || 0,
-          quantity: 1,
+          price: isNaN(itemPrice) ? 0 : itemPrice,
+          quantity: addedQty,
           type: product.type || "single",
           comboProducts: product.comboProducts || [],
         },
@@ -126,12 +128,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
 
     const pId = product._id || product.productId;
-    const price = product.selectedVariant?.price || product.price || product.salePrice || 0;
+    const price = Number(product.selectedVariant?.price || product.price || product.salePrice || 0);
+    const addedQty = Math.max(1, Number(product.quantity) || 1);
     trackAddToCart({
       id: pId,
       name: product.name || "Product",
-      price: Number(price),
-      quantity: 1,
+      price: isNaN(price) ? 0 : price,
+      quantity: addedQty,
     });
 
     toast.success("Added to cart");
@@ -144,8 +147,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           ? {
               ...item,
               selectedVariant: variant,
-              price: variant?.price || item.price,
-              quantity: 1,
+              price: Number(variant?.price || item.price || 0),
             }
           : item,
       ),
@@ -173,9 +175,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       prev.map((item) => {
         if (item.productId !== productId && item._id !== productId) return item;
 
-        if (!item.selectedVariant) return item;
-
-        const stock = item.selectedVariant.stock || 999;
+        const stock = Number(item.selectedVariant?.stock ?? item.stock ?? 999);
 
         const qty =
           type === "inc"

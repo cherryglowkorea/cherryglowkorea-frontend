@@ -187,3 +187,34 @@
   scrollbar-color: rgba(236, 72, 153, 0.4) transparent;
 }
 
+/* Strip unwanted focus borders and outlines from Recharts SVGs */
+.recharts-surface,
+.recharts-wrapper,
+.recharts-responsive-container,
+.recharts-cartesian-grid,
+.recharts-wrapper *,
+.recharts-surface *,
+.recharts-sector,
+.recharts-bar-rectangle,
+.recharts-pie,
+.recharts-layer,
+.recharts-tooltip-wrapper,
+.recharts-wrapper *:focus,
+.recharts-surface *:focus {
+  outline: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+.recharts-responsive-container:focus,
+.recharts-tooltip-wrapper:focus,
+svg:focus,
+g:focus,
+path:focus {
+  outline: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+

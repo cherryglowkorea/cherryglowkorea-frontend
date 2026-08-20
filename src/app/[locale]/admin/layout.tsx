@@ -13,7 +13,7 @@ export default function AdminLayout({ children }) {
   const ALLOWED_ROLES = ["admin", "super_admin", "manager"];
 
   useEffect(() => {
-    if (loading) return; // ⛔ wait until auth state resolves
+    if (loading) return;
 
     // Allow 'admin', 'super_admin', and 'manager'
     if (!user || !ALLOWED_ROLES.includes(user.role)) {

@@ -62,6 +62,7 @@ export default function Sidebar() {
     {
       group: "MARKETING & MEDIA",
       items: [
+        { name: "Coupons & Discounts", href: "/admin/coupons", icon: Tag },
         { name: "Customer Reviews", href: "/admin/reviews", icon: Star },
         { name: "Hero Banners", href: "/admin/banner", icon: ImageIcon },
       ],

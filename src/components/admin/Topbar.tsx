@@ -12,7 +12,7 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Topbar({ title = "Super Admin Dashboard" }) {
@@ -56,7 +56,6 @@ export default function Topbar({ title = "Super Admin Dashboard" }) {
         {/* Visit Store Link */}
         <Link
           href="/"
-          target="_blank"
           className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-stone-700 dark:text-rose-200 hover:text-stone-900 dark:hover:text-white bg-stone-100 dark:bg-rose-900/50 hover:bg-stone-200 dark:hover:bg-rose-800/60 border border-stone-200 dark:border-rose-800/50 px-3 py-1.5 rounded-full transition-all"
         >
           <span>Live Store</span>

@@ -437,7 +437,7 @@ export default function DashboardOverviewPage() {
           </div>
 
           {/* Recharts Area Chart Container */}
-          <div className="h-[280px] w-full pt-2">
+          <div className="h-[280px] w-full pt-2 [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none [&_*]:outline-none focus:outline-none">
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
@@ -503,7 +503,7 @@ export default function DashboardOverviewPage() {
           </div>
 
           {/* Donut Chart */}
-          <div className="h-[200px] w-full relative flex items-center justify-center">
+          <div className="h-[200px] w-full relative flex items-center justify-center [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none [&_*]:outline-none focus:outline-none">
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -558,7 +558,7 @@ export default function DashboardOverviewPage() {
             <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">Single items vs Combo Deals in inventory</p>
           </div>
 
-          <div className="h-[200px] w-full">
+          <div className="h-[200px] w-full [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none [&_*]:outline-none focus:outline-none">
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={productTypeData} margin={{ top: 20, right: 20, left: -20, bottom: 5 }}>

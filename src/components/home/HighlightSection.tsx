@@ -1,8 +1,27 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ShieldCheck, Leaf, Heart, Truck, Sparkles, Award } from "lucide-react";
 
 export default function HighlightsSection() {
+  const [freeThreshold, setFreeThreshold] = useState<number>(3000);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const res = await fetch(`${apiHost}/api/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data?.shipping?.freeShippingThreshold) {
+            setFreeThreshold(Number(data.data.shipping.freeShippingThreshold));
+          }
+        }
+      } catch (e) {}
+    };
+    fetchSettings();
+  }, []);
+
   const highlights = [
     {
       icon: ShieldCheck,
@@ -22,7 +41,7 @@ export default function HighlightsSection() {
     {
       icon: Truck,
       title: "Fast Nationwide Delivery",
-      subtitle: "Free shipping on orders over ৳2,000",
+      subtitle: `Free shipping on orders over ৳${freeThreshold.toLocaleString()}`,
     },
   ];
 

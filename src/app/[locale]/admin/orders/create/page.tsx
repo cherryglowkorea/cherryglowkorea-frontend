@@ -56,8 +56,24 @@ export default function CreateOrderPage() {
   // Price Adjustments
   const [discount, setDiscount] = useState(0);
   const [shipping, setShipping] = useState(60); // Default Dhaka shipping
+  const [storeSettings, setStoreSettings] = useState<any>(null);
 
   const debouncedSearch = useDebounce(search, 300);
+
+  // Fetch store settings for dynamic shipping
+  useEffect(() => {
+    axios
+      .get(`${API}/settings`)
+      .then((res) => {
+        if (res.data?.success && res.data?.data) {
+          setStoreSettings(res.data.data);
+          if (res.data.data.shipping?.insideDhaka) {
+            setShipping(Number(res.data.data.shipping.insideDhaka));
+          }
+        }
+      })
+      .catch(() => {});
+  }, [API]);
 
   // Fetch all products for admin
   useEffect(() => {
@@ -637,8 +653,14 @@ export default function CreateOrderPage() {
                 {/* Presets */}
                 <div className="flex items-center gap-1.5 justify-end">
                   {[
-                    { label: "Inside Dhaka (৳60)", val: 60 },
-                    { label: "Outside Dhaka (৳120)", val: 120 },
+                    {
+                      label: `Inside Dhaka (৳${storeSettings?.shipping?.insideDhaka ?? 60})`,
+                      val: Number(storeSettings?.shipping?.insideDhaka ?? 60),
+                    },
+                    {
+                      label: `Outside Dhaka (৳${storeSettings?.shipping?.outsideDhaka ?? 120})`,
+                      val: Number(storeSettings?.shipping?.outsideDhaka ?? 120),
+                    },
                     { label: "Free (৳0)", val: 0 },
                   ].map((preset) => (
                     <button

@@ -27,7 +27,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useWishlist } from "@/context/WishlistContext";
-import { cleanProductName } from "@/lib/utils";
+import { cleanProductName, getVariantLabel } from "@/lib/utils";
+import StockBadge from "@/components/shared/StockBadge";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { trackViewContent } from "@/lib/metaPixel";
@@ -465,74 +466,160 @@ export default function ProductDetailsClient({
           {/* Pricing Row */}
           <div className="flex items-baseline gap-3.5 border-b border-stone-200/80 dark:border-white/10 pb-4">
             <span className="text-2xl md:text-3xl font-extrabold text-rose-600 dark:text-rose-400 font-mono">
-              ৳{finalPrice.toLocaleString()}
+              ৳{(finalPrice * quantity).toLocaleString()}
             </span>
             {originalPrice > finalPrice && (
               <div className="flex items-center gap-2">
                 <span className="line-through text-xs md:text-sm text-stone-400 font-mono">
-                  ৳{originalPrice.toLocaleString()}
+                  ৳{(originalPrice * quantity).toLocaleString()}
                 </span>
                 <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-200 uppercase tracking-wider">
-                  Save ৳{discountAmount.toFixed(0)} ({discountPercent}% OFF)
+                  Save ৳{((originalPrice - finalPrice) * quantity).toFixed(0)} ({discountPercent}% OFF)
                 </span>
               </div>
             )}
           </div>
 
-          {/* Stock Indicator Status Badge */}
-          <div className="flex items-center gap-2">
-            <span
-              className={`inline-block w-2.5 h-2.5 rounded-full ${
-                stock > 0 ? "bg-emerald-500 animate-pulse" : "bg-red-500"
-              }`}
-            ></span>
-            <span
-              className={`text-xs font-bold ${
-                stock > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"
-              }`}
-            >
-              {stock > 0 ? `In Stock (${stock} units ready to ship)` : "Out of Stock"}
-            </span>
+          {/* Stock Indicator Status Badge (Reusable Component) */}
+          <div>
+            <StockBadge stock={stock} product={product} selectedVariant={selectedVariant} size="md" />
           </div>
 
           {/* WHAT'S INSIDE THIS SET Breakdown Card (For Combo Bundles) */}
           {isCombo && comboProducts && comboProducts.length > 0 && (
             <div className="p-5 rounded-2xl bg-gradient-to-br from-rose-50/80 via-white to-pink-50/80 dark:from-[#24151a] dark:via-[#1c1115] dark:to-[#24151a] border border-rose-200/80 dark:border-rose-900/50 space-y-4 shadow-xs">
-              <div className="flex items-center gap-2">
-                <Layers className="w-5 h-5 text-rose-500" />
-                <h3 className="font-serif font-bold text-stone-900 dark:text-rose-50 text-sm uppercase tracking-wider">
-                  What's Inside This Set ({comboProducts.length} Full-Size Products)
-                </h3>
+              <div className="flex items-center justify-between border-b border-rose-200/60 dark:border-rose-900/40 pb-3">
+                <div className="flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-rose-500" />
+                  <h3 className="font-serif font-bold text-stone-900 dark:text-rose-50 text-sm uppercase tracking-wider">
+                    What's Inside This Set ({comboProducts.length} Full-Size Products)
+                  </h3>
+                </div>
+                <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-950 px-2.5 py-0.5 rounded-full">
+                  Special Bundle Deal
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {comboProducts.map((item: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="p-3.5 rounded-xl bg-white/90 dark:bg-zinc-900/90 border border-stone-200/70 dark:border-rose-900/40 space-y-1.5 shadow-2xs hover:border-rose-300 transition-colors"
-                  >
-                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-300">
-                      {item.step || `Step ${idx + 1}`}
-                    </span>
-                    <h4 className="font-bold text-xs text-stone-800 dark:text-rose-100 line-clamp-1">
-                      {item.name || item.title}
-                    </h4>
-                    <p className="text-[11px] text-stone-500 dark:text-rose-200/60 font-medium">
-                      {item.type || "Skincare Essential"} • {item.volume || "Full Size"}
-                    </p>
-                  </div>
-                ))}
+              {/* Component Products Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {comboProducts.map((item: any, idx: number) => {
+                  const itemImg =
+                    item.image ||
+                    item.thumbnail ||
+                    (Array.isArray(item.images)
+                      ? typeof item.images[0] === "string"
+                        ? item.images[0]
+                        : item.images[0]?.url
+                      : null) ||
+                    "/placeholder.jpg";
+                  const itemPrice =
+                    Number(item.price) ||
+                    Number(item.salePrice) ||
+                    Number(item.variants?.[0]?.price) ||
+                    0;
+                  const itemQty = Number(item.quantity || 1);
+                  const fullName = cleanProductName(item.name || item.title || "");
+
+                  return (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-2xl bg-white dark:bg-[#180f14] border border-stone-200/80 dark:border-rose-900/40 flex items-center gap-3 shadow-2xs hover:border-rose-300 transition-colors"
+                    >
+                      <img
+                        src={itemImg}
+                        alt={fullName}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "/placeholder.jpg";
+                        }}
+                        className="w-14 h-14 object-cover rounded-xl border border-stone-200 dark:border-rose-900/40 shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-300">
+                            Item {idx + 1}
+                          </span>
+                          {item.brand && (
+                            <span className="text-[10px] text-stone-400 dark:text-rose-300/60 font-semibold truncate">
+                              {item.brand}
+                            </span>
+                          )}
+                        </div>
+                        <h4
+                          className="font-bold text-xs text-stone-900 dark:text-rose-100 line-clamp-1 cursor-help"
+                          title={fullName}
+                        >
+                          {fullName}
+                        </h4>
+                        <div className="flex items-center justify-between text-[11px] mt-1 font-mono">
+                          <span className="text-stone-600 dark:text-rose-200/80 font-bold">
+                            Regular: ৳{itemPrice.toLocaleString()}
+                          </span>
+                          <span className="font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-1.5 py-0.5 rounded">
+                            Qty: {itemQty}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+
+              {/* Total Value & Instant Bundle Savings Box */}
+              {(() => {
+                const totalReg = comboProducts.reduce((sum: number, it: any) => {
+                  const p =
+                    Number(it.price) ||
+                    Number(it.salePrice) ||
+                    Number(it.variants?.[0]?.price) ||
+                    0;
+                  return sum + p * (Number(it.quantity) || 1);
+                }, 0) * quantity;
+
+                const currentComboPrice = finalPrice * quantity;
+                const savings = Math.max(0, totalReg - currentComboPrice);
+                const savingsPercent = totalReg > 0 ? Math.round((savings / totalReg) * 100) : 0;
+
+                return (
+                  <div className="p-4 rounded-2xl bg-white dark:bg-[#180f14] border border-rose-200 dark:border-rose-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+                    <div>
+                      <span className="text-stone-500 dark:text-rose-300/70">Total Value: </span>
+                      <span className="line-through font-mono font-bold text-stone-400">
+                        ৳{totalReg.toLocaleString()}
+                      </span>
+                      <span className="mx-2 font-extrabold text-stone-400">→</span>
+                      <span className="text-stone-700 dark:text-rose-200 font-bold">Combo Price: </span>
+                      <span className="font-mono font-extrabold text-rose-600 dark:text-rose-400 text-sm">
+                        ৳{currentComboPrice.toLocaleString()}
+                      </span>
+                    </div>
+                    {savings > 0 && (
+                      <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 font-extrabold text-xs shrink-0 w-fit border border-emerald-300 dark:border-emerald-800">
+                        🎉 Save ৳{savings.toLocaleString()} ({savingsPercent}% OFF)
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
-          {/* Variants (Only for Single Products) */}
+          {/* Variants (Only for Single Products) - Amazon & Daraz Style Pickers */}
           {!isCombo && product.variants?.length > 0 && (
-            <div className="space-y-2.5 pt-1">
-              <h3 className="font-serif font-bold text-stone-800 dark:text-rose-100 text-xs uppercase tracking-wider">
-                Select Size / Option:
-              </h3>
-              <div className="flex flex-wrap gap-2">
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-stone-900 dark:text-rose-100 text-xs uppercase tracking-wider flex items-center gap-2">
+                  <span>Select Size / Option:</span>
+                  {selectedVariant && (
+                    <span className="font-mono font-extrabold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-200/60 dark:border-rose-900/40">
+                      {getVariantLabel(selectedVariant)}
+                    </span>
+                  )}
+                </h3>
+                <span className="text-[11px] text-stone-400 font-semibold">
+                  {product.variants.length} options
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2.5">
                 {product.variants.map((v: any, idx: number) => {
                   const isSelected =
                     selectedVariant === v ||
@@ -548,18 +635,29 @@ export default function ProductDetailsClient({
                     ? `${v.weight}-${v.unit || ""}-${idx}`
                     : `variant-${idx}`;
 
+                  const label = getVariantLabel(v, idx);
+
                   return (
                     <button
                       key={key}
                       onClick={() => setSelectedVariant(v)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer ${
+                      className={`px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all border flex items-center gap-2.5 cursor-pointer shadow-2xs ${
                         isSelected
-                          ? "bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/20"
-                          : "bg-stone-50 dark:bg-rose-950/30 text-stone-700 dark:text-rose-200 border-stone-200 dark:border-rose-900/40 hover:border-rose-300"
+                          ? "bg-rose-600 text-white border-rose-600 ring-2 ring-rose-500/30 shadow-md shadow-rose-600/20 scale-[1.02]"
+                          : "bg-white dark:bg-[#180f14] text-stone-700 dark:text-rose-200 border-stone-200/90 dark:border-rose-900/40 hover:border-rose-400 hover:bg-rose-50/50 dark:hover:bg-rose-950/40"
                       }`}
                     >
-                      <span>{v.size || `${v.weight} ${v.unit || "ml"}`}</span>
-                      <span className="opacity-80 font-mono text-[11px]">৳{v.price}</span>
+                      <span>{label}</span>
+                      {v.price && (
+                        <span
+                          className={`font-mono text-[11px] ${
+                            isSelected ? "text-white/90 font-bold" : "text-stone-500 dark:text-rose-300/70 font-semibold"
+                          }`}
+                        >
+                          ৳{Number(v.price).toLocaleString()}
+                        </span>
+                      )}
+                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </button>
                   );
                 })}
@@ -698,7 +796,7 @@ export default function ProductDetailsClient({
 
                     <button
                       onClick={() => setShowReviewForm(!showReviewForm)}
-                      className="px-4 py-2 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-colors"
+                      className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white dark:bg-rose-600 dark:hover:bg-rose-500 text-xs font-bold transition-all shadow-sm cursor-pointer"
                     >
                       {showReviewForm ? "Cancel Review" : "Write a Review"}
                     </button>

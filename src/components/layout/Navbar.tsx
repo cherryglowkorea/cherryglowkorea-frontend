@@ -44,6 +44,7 @@ export default function Navbar() {
   const navLinks = [
     { name: tNav("home"), href: "/" },
     { name: tNav("products"), href: "/products" },
+    { name: "Build Combo 🎁", href: "/combo" },
     { name: tNav("about"), href: "/about" },
     { name: tNav("contact"), href: "/contact" },
   ];

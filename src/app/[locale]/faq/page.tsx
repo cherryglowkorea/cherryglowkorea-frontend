@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   HelpCircle,
@@ -35,6 +35,9 @@ export default function FAQPage() {
       question: "Are Cherry Glow products 100% authentic and safe for sensitive skin?",
       answer:
         "Yes, absolutely. All Cherry Glow products are 100% authentic and directly imported from certified skincare laboratories in South Korea. They are dermatologically tested, cruelty-free, and formulated to be gentle on all skin types, including sensitive skin.",
+      question: "Are all Cherry Glow products 100% authentic?",
+      answer:
+        "Yes, absolutely. We source all our cosmetics directly from authorized distributors and brand headquarters in South Korea. Every product comes with a 100% authenticity guarantee.",
     },
     {
       category: "products",
@@ -58,7 +61,7 @@ export default function FAQPage() {
       category: "shipping",
       question: "What are the shipping charges?",
       answer:
-        "Standard shipping inside Dhaka is ৳70, and outside Dhaka is ৳130. We offer FREE shipping on all orders over ৳2,000!",
+        `Standard shipping inside Dhaka is ৳${insideCost}, and outside Dhaka is ৳${outsideCost}. We offer FREE shipping on all qualifying orders over ৳${Number(freeThreshold).toLocaleString()}!`,
     },
     {
       category: "returns",

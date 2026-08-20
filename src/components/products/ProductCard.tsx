@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Heart, ShoppingBag } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 import AnimatedDiscountBorder from "../shared/AnimatedDiscountBorder";
-import { cleanProductName } from "@/lib/utils";
+import { cleanProductName, getVariantLabel } from "@/lib/utils";
 
 export default function ProductCard({ product, onAddToCart, index = 0, viewMode = "grid" }) {
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -65,8 +65,8 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
     }
     // If variants array has stock defined
     if (variants && variants.length > 0) {
-      const sumStock = variants.reduce((sum, v) => sum + (typeof v.stock === "number" ? v.stock : 10), 0);
-      return sumStock > 0;
+      const anyStockPositive = variants.some((v) => (typeof v.stock === "number" ? v.stock > 0 : true));
+      return anyStockPositive;
     }
     // Default to in stock if not explicitly set to 0
     return true;
@@ -177,7 +177,7 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
                         : "bg-stone-50 dark:bg-white/5 text-stone-600 dark:text-rose-100/70 border-stone-200 dark:border-white/10 hover:bg-rose-50"
                     }`}
                   >
-                    {v.size || `${v.weight || ""}${v.unit || ""}`}
+                    {getVariantLabel(v, i)}
                   </button>
                 ))}
               </div>
@@ -266,6 +266,25 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
               </span>
             )}
           </div>
+
+          {/* Combo Bundle Component Product Image Collage Stack */}
+          {type === "combo" && product.comboProducts && product.comboProducts.length > 0 && (
+            <div className="absolute bottom-2 left-2 z-20 flex items-center bg-white/90 dark:bg-black/80 backdrop-blur-md px-2 py-1 rounded-full shadow-md border border-stone-200/80 dark:border-rose-900/50">
+              <div className="flex -space-x-2 overflow-hidden">
+                {product.comboProducts.slice(0, 3).map((cp: any, i: number) => (
+                  <img
+                    key={i}
+                    src={cp.image || "/placeholder.jpg"}
+                    alt={cp.name || "Item"}
+                    className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-rose-950 object-cover"
+                  />
+                ))}
+              </div>
+              <span className="ml-1.5 text-[9px] font-extrabold text-rose-600 dark:text-rose-400">
+                +{product.comboProducts.length} Items
+              </span>
+            </div>
+          )}
         </Link>
 
         {/* Floating Wishlist Love Heart Button */}
@@ -305,7 +324,7 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
                       : "bg-stone-50 dark:bg-white/5 text-stone-600 dark:text-rose-100/70 border-stone-200 dark:border-white/10 hover:bg-rose-50"
                   }`}
                 >
-                  {v.size || `${v.weight || ""}${v.unit || ""}`}
+                  {getVariantLabel(v, i)}
                 </button>
               ))}
             </div>

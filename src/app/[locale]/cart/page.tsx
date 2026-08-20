@@ -2,7 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
-import { Minus, Plus, Trash2, ShoppingBag, Tag, Truck, MapPin, ChevronRight, Package } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, Tag, Truck, MapPin, ChevronRight, Package, Sparkles } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
@@ -15,9 +15,23 @@ export default function CartPage() {
 
   const [couponInput, setCouponInput] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [storeSettings, setStoreSettings] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
+    const fetchSettings = async () => {
+      try {
+        const apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const res = await fetch(`${apiHost}/api/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data) {
+            setStoreSettings(data.data);
+          }
+        }
+      } catch (e) {}
+    };
+    fetchSettings();
   }, []);
 
   const subtotal = useMemo(() => {
@@ -26,6 +40,11 @@ export default function CartPage() {
       return sum + price * item.quantity;
     }, 0);
   }, [cart]);
+
+  const insideDhakaCost = Number(storeSettings?.shipping?.insideDhaka ?? 60);
+  const freeThreshold = Number(storeSettings?.shipping?.freeShippingThreshold ?? 3000);
+  const isFreeShipping = freeThreshold > 0 && subtotal >= freeThreshold;
+  const shippingFee = isFreeShipping ? 0 : insideDhakaCost;
 
   const discount = useMemo(() => {
     if (!coupon) return 0;
@@ -122,6 +141,36 @@ export default function CartPage() {
                   </h2>
                 </div>
 
+                {/* 🚚 DYNAMIC FREE SHIPPING PROGRESS BAR */}
+                {freeThreshold > 0 && (
+                  <div className="bg-gradient-to-r from-pink-50/80 to-rose-50/80 dark:from-pink-950/30 dark:to-rose-950/20 border border-pink-100 dark:border-rose-900/30 p-3 rounded-2xl mb-4 text-xs">
+                    {subtotal >= freeThreshold ? (
+                      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
+                        <Sparkles size={14} className="shrink-0 animate-pulse text-amber-400" />
+                        <span>You unlocked FREE Nationwide Shipping!</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-stone-700 dark:text-rose-200 font-semibold">
+                          <span className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 text-[11.5px]">
+                            <Truck size={13} />
+                            Add ৳{(freeThreshold - subtotal).toLocaleString()} more for FREE shipping
+                          </span>
+                          <span className="text-[10px] text-stone-400 font-mono">
+                            {Math.round((subtotal / freeThreshold) * 100)}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-stone-200/60 dark:bg-stone-800 h-2 rounded-full overflow-hidden">
+                          <div
+                            className="bg-gradient-to-r from-pink-500 to-rose-500 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(100, (subtotal / freeThreshold) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="space-y-3 text-xs">
                   <div className="flex justify-between items-center">
                     <span className="text-stone-500 dark:text-rose-100/50">
@@ -143,10 +192,14 @@ export default function CartPage() {
                   <div className="flex justify-between items-center text-stone-500 dark:text-rose-100/50 text-[11px]">
                     <span>Shipping Fee</span>
                     <span className="font-semibold text-stone-700 dark:text-rose-100">
-                      {subtotal >= 3000 ? (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">FREE (Over ৳3,000)</span>
+                      {isFreeShipping ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                          FREE (Over ৳{freeThreshold.toLocaleString()})
+                        </span>
                       ) : (
-                        <span className="italic text-stone-400 dark:text-rose-100/40">Calculated at checkout (From ৳60)</span>
+                        <span className="italic text-stone-400 dark:text-rose-100/40">
+                          Calculated at checkout (From ৳{insideDhakaCost})
+                        </span>
                       )}
                     </span>
                   </div>
@@ -156,7 +209,7 @@ export default function CartPage() {
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-sm text-stone-900 dark:text-white">Estimated Total</span>
                     <span className="font-extrabold text-lg text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">
-                      ৳{Math.max(0, subtotal - discount + (subtotal >= 3000 ? 0 : 60)).toLocaleString()}
+                      ৳{Math.max(0, subtotal - discount + shippingFee).toLocaleString()}
                     </span>
                   </div>
                 </div>
