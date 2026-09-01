@@ -153,17 +153,17 @@ export default function AdminReviewsPage() {
   return (
     <div className="w-full space-y-8">
       {/* 1. Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-transparent p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 bg-white/70 dark:bg-[#160E12]/80 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113]">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-rose-50 flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-2">
               Customer Reviews & Feedback
             </h1>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-xs">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-xs">
               {reviews.length} Total
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-300/70 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
             Approve, reject, or manage customer testimonials shown on storefront and product details pages.
           </p>
         </div>
@@ -171,9 +171,9 @@ export default function AdminReviewsPage() {
         <button
           onClick={fetchReviews}
           disabled={loading}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-stone-200 dark:border-rose-800/60 bg-white dark:bg-rose-950/60 text-xs font-semibold text-stone-700 dark:text-rose-200 hover:bg-stone-100 dark:hover:bg-rose-900/50 transition-all shadow-2xs self-start sm:self-auto cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#0d0709] text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all shadow-2xs self-start sm:self-auto cursor-pointer"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-rose-500" : ""}`} />
+          <RefreshCw className={`h-3.5 w-3.5 text-stone-400 ${loading ? "animate-spin text-rose-500" : ""}`} />
           <span>Refresh Reviews</span>
         </button>
       </div>
@@ -181,21 +181,21 @@ export default function AdminReviewsPage() {
       {/* 2. Metrics & Average Rating Analytics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {/* Rating Analytics Card */}
-        <div className="col-span-2 sm:col-span-1 p-4 rounded-2xl border border-amber-200 dark:border-amber-950 bg-gradient-to-br from-amber-500/10 to-amber-500/5 dark:from-amber-950/40 dark:to-transparent flex flex-col justify-between">
+        <div className="col-span-2 sm:col-span-1 p-4 rounded-2xl border border-amber-500/30 dark:border-stone-800/80 bg-white dark:bg-[#161113] flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
               Avg Rating
             </span>
-            <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-300">
+            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20">
               <Star className="h-4 w-4 fill-amber-400" />
             </div>
           </div>
 
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
+            <span className="text-3xl font-black text-amber-500 font-mono">
               {metrics.avgRating}
             </span>
-            <span className="text-xs text-amber-700/80 dark:text-amber-300/80 font-medium">
+            <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
               out of 5.0
             </span>
           </div>
@@ -207,7 +207,7 @@ export default function AdminReviewsPage() {
                 className={`h-3.5 w-3.5 ${
                   i < Math.round(Number(metrics.avgRating))
                     ? "fill-amber-400 text-amber-400"
-                    : "text-amber-200 dark:text-amber-950"
+                    : "text-stone-300 dark:text-stone-700"
                 }`}
               />
             ))}
@@ -219,22 +219,22 @@ export default function AdminReviewsPage() {
           onClick={() => setStatusFilter("all")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             statusFilter === "all"
-              ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/40"
-              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-rose-300"
+              ? "border-rose-500 ring-1 ring-rose-500/20 bg-white dark:bg-[#161113]"
+              : "border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] hover:border-stone-700"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500 dark:text-rose-300/70">
+            <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
               Total Reviews
             </span>
-            <div className="p-2 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">
+            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
               <MessageSquare className="h-4 w-4" />
             </div>
           </div>
-          <div className="text-2xl font-black text-stone-900 dark:text-rose-100 mt-2">
+          <div className="text-2xl font-black text-stone-900 dark:text-stone-100 mt-2">
             {metrics.total}
           </div>
-          <div className="text-[11px] text-stone-400 dark:text-rose-300/50 mt-1">
+          <div className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">
             Submitted feedback
           </div>
         </div>
@@ -244,15 +244,15 @@ export default function AdminReviewsPage() {
           onClick={() => setStatusFilter("pending")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             statusFilter === "pending"
-              ? "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/50 dark:bg-amber-950/40"
-              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-amber-300"
+              ? "border-amber-500 ring-1 ring-amber-500/20 bg-white dark:bg-[#161113]"
+              : "border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] hover:border-amber-500/50"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
               Pending Approval
             </span>
-            <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
+            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
               <Clock className="h-4 w-4" />
             </div>
           </div>

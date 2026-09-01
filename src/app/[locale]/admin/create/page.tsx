@@ -297,24 +297,24 @@ export default function CreateProductPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-24">
       {/* Top Banner Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-rose-900/30 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-stone-800/80 pb-5">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.back()}
-            className="p-2.5 rounded-xl bg-white dark:bg-rose-950/60 border border-stone-200 dark:border-rose-800/40 text-stone-700 dark:text-rose-200 hover:bg-stone-50 cursor-pointer shadow-xs"
+            className="p-2.5 rounded-xl bg-white dark:bg-[#161113] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer shadow-xs transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100">
                 Add New Product / Combo
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
                 Skincare Catalog Form
               </span>
             </div>
-            <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
               Fill out product info, select category, upload Cloudinary images, set pricing, and publish.
             </p>
           </div>
@@ -326,7 +326,7 @@ export default function CreateProductPage() {
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="rounded-xl px-4 py-2 font-semibold text-xs cursor-pointer"
+            className="rounded-xl px-4 py-2 font-semibold text-xs cursor-pointer border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
           >
             Discard
           </Button>
@@ -334,7 +334,7 @@ export default function CreateProductPage() {
           <Button
             onClick={handleSubmit}
             disabled={submitting}
-            className="gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl px-6 py-2 text-xs shadow-md hover:shadow-rose-500/30 cursor-pointer"
+            className="gap-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl px-6 py-2 text-xs shadow-md transition-all cursor-pointer"
           >
             {submitting ? (
               <>
@@ -360,27 +360,27 @@ export default function CreateProductPage() {
         <div className="lg:col-span-2 space-y-6">
 
           {/* STEP 1: PRODUCT TYPE SELECTION */}
-          <div className="p-5 rounded-3xl border border-rose-200/80 dark:border-rose-900/40 bg-gradient-to-r from-pink-50/60 to-rose-50/40 dark:from-rose-950/20 dark:to-stone-900/40 space-y-3">
-            <label className="text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-              <Package size={15} />
+          <div className="p-5 rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] space-y-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
+              <Package size={15} className="text-rose-500" />
               <span>Product Type Selection</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-bold">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-medium">
               <button
                 type="button"
                 onClick={() => setForm({ ...form, type: "single" })}
                 className={`p-3.5 rounded-2xl border transition-all text-left flex items-center justify-between cursor-pointer ${
                   form.type === "single"
-                    ? "bg-white dark:bg-rose-900/80 border-rose-500 text-rose-700 dark:text-white shadow-sm ring-1 ring-rose-400"
-                    : "bg-white/60 dark:bg-stone-900/40 border-stone-200 dark:border-slate-800 text-stone-600 dark:text-slate-300 hover:border-rose-300"
+                    ? "bg-white dark:bg-[#181215] border-rose-500 text-stone-900 dark:text-stone-100 shadow-sm ring-1 ring-rose-500/30"
+                    : "bg-stone-50 dark:bg-[#0d0709] border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-700"
                 }`}
               >
                 <div>
-                  <div className="font-extrabold text-sm flex items-center gap-1.5">
+                  <div className="font-bold text-sm flex items-center gap-1.5 text-stone-900 dark:text-stone-100">
                     <Droplets size={16} className="text-rose-500" />
                     <span>Single Product</span>
                   </div>
-                  <p className="text-[11px] font-normal text-stone-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
                     Standard skincare item
                   </p>
                 </div>
@@ -392,16 +392,16 @@ export default function CreateProductPage() {
                 onClick={() => setForm({ ...form, type: "combo" })}
                 className={`p-3.5 rounded-2xl border transition-all text-left flex items-center justify-between cursor-pointer ${
                   form.type === "combo"
-                    ? "bg-white dark:bg-rose-900/80 border-rose-500 text-rose-700 dark:text-white shadow-sm ring-1 ring-rose-400"
-                    : "bg-white/60 dark:bg-stone-900/40 border-stone-200 dark:border-slate-800 text-stone-600 dark:text-slate-300 hover:border-rose-300"
+                    ? "bg-white dark:bg-[#181215] border-rose-500 text-stone-900 dark:text-stone-100 shadow-sm ring-1 ring-rose-500/30"
+                    : "bg-stone-50 dark:bg-[#0d0709] border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-700"
                 }`}
               >
                 <div>
-                  <div className="font-extrabold text-sm flex items-center gap-1.5">
-                    <Gift size={16} className="text-pink-500" />
+                  <div className="font-bold text-sm flex items-center gap-1.5 text-stone-900 dark:text-stone-100">
+                    <Gift size={16} className="text-rose-500" />
                     <span>Combo Bundle</span>
                   </div>
-                  <p className="text-[11px] font-normal text-stone-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
                     Set / Kit of multiple items
                   </p>
                 </div>
@@ -413,16 +413,16 @@ export default function CreateProductPage() {
                 onClick={() => setForm({ ...form, type: "free", price: "0", salePrice: "0" })}
                 className={`p-3.5 rounded-2xl border transition-all text-left flex items-center justify-between cursor-pointer ${
                   form.type === "free"
-                    ? "bg-white dark:bg-rose-900/80 border-emerald-500 text-emerald-700 dark:text-white shadow-sm ring-1 ring-emerald-400"
-                    : "bg-white/60 dark:bg-stone-900/40 border-stone-200 dark:border-slate-800 text-stone-600 dark:text-slate-300 hover:border-emerald-300"
+                    ? "bg-white dark:bg-[#181215] border-emerald-500 text-stone-900 dark:text-stone-100 shadow-sm ring-1 ring-emerald-500/30"
+                    : "bg-stone-50 dark:bg-[#0d0709] border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:border-emerald-500/50"
                 }`}
               >
                 <div>
-                  <div className="font-extrabold text-sm flex items-center gap-1.5">
+                  <div className="font-bold text-sm flex items-center gap-1.5 text-stone-900 dark:text-stone-100">
                     <Sparkles size={16} className="text-emerald-500" />
                     <span>Free Order Product</span>
                   </div>
-                  <p className="text-[11px] font-normal text-stone-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
                     Free sample / ৳ 0 promotion item
                   </p>
                 </div>
@@ -431,12 +431,12 @@ export default function CreateProductPage() {
             </div>
 
             {/* Pre-Order Toggle Setting */}
-            <div className="pt-2 border-t border-rose-200/40 dark:border-rose-900/40 flex items-center justify-between">
+            <div className="pt-3 border-t border-stone-100 dark:border-stone-800/60 flex items-center justify-between">
               <div>
-                <span className="font-extrabold text-xs text-stone-800 dark:text-rose-100 flex items-center gap-1.5">
+                <span className="font-bold text-xs text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
                   <Clock size={14} className="text-amber-500" /> Enable Pre-Order / Backorder
                 </span>
-                <p className="text-[11px] text-stone-500 dark:text-slate-400">
+                <p className="text-[11px] text-stone-500 dark:text-stone-400">
                   Allow customers to order this product even when stock is 0
                 </p>
               </div>
@@ -447,7 +447,7 @@ export default function CreateProductPage() {
                   onChange={(e) => setForm({ ...form, allowPreOrder: e.target.checked })}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer dark:bg-stone-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
               </label>
             </div>
           </div>

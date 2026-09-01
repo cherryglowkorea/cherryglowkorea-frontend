@@ -219,18 +219,18 @@ export default function DashboardOverviewPage() {
   return (
     <div className="space-y-8">
       {/* Top Banner Header */}
-      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 border-b border-stone-200 dark:border-rose-900/30 pb-5">
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 border-b border-stone-200 dark:border-stone-800/80 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-2">
               <span>Dashboard Overview</span>
-              <Sparkles className="h-5 w-5 text-rose-500 dark:text-rose-400 animate-pulse" />
+              <Sparkles className="h-5 w-5 text-rose-500 animate-pulse" />
             </h1>
-            <span className="rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-bold text-rose-600 dark:text-rose-400">
+            <span className="rounded-full bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-3 py-1 text-xs font-semibold text-stone-700 dark:text-stone-300">
               Live Real-Time
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
             Filter revenue, order statistics, inventory alerts & print executive PDF reports.
           </p>
         </div>
@@ -239,7 +239,7 @@ export default function DashboardOverviewPage() {
           {/* Export PDF Button */}
           <button
             onClick={handleExportPDF}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white px-4 py-2 text-xs font-bold transition-all shadow-md hover:shadow-lg cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer"
           >
             <Printer className="h-4 w-4" />
             <span>Export PDF Report</span>
@@ -248,18 +248,18 @@ export default function DashboardOverviewPage() {
           {/* Refresh Data Button */}
           <button
             onClick={() => fetchStats()}
-            className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-rose-950/60 hover:bg-stone-50 dark:hover:bg-rose-900/60 border border-stone-200 dark:border-rose-800/40 px-4 py-2 text-xs font-semibold text-stone-700 dark:text-rose-200 transition-all shadow-xs hover:shadow-md cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-[#161113] hover:bg-stone-50 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-800 px-4 py-2 text-xs font-medium text-stone-700 dark:text-stone-300 transition-all shadow-xs cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 text-rose-500 dark:text-rose-400 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 text-stone-400 ${loading ? "animate-spin" : ""}`} />
             <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* 🗓️ DATE RANGE FILTER BAR */}
-      <div className="rounded-2xl border border-stone-200/80 dark:border-rose-900/40 bg-white/80 dark:bg-[#180E13]/90 p-4 shadow-sm backdrop-blur-md">
+      <div className="rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-4 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs font-bold text-stone-700 dark:text-rose-200">
+          <div className="flex items-center gap-2 text-xs font-bold text-stone-700 dark:text-stone-300">
             <Filter className="h-4 w-4 text-rose-500" />
             <span>Filter Analytics Period:</span>
           </div>
@@ -278,8 +278,8 @@ export default function DashboardOverviewPage() {
                 onClick={() => handleRangeChange(tab.id)}
                 className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                   dateRange === tab.id
-                    ? "bg-rose-600 text-white shadow-md shadow-rose-500/20"
-                    : "bg-stone-100 dark:bg-rose-950/50 text-stone-600 dark:text-rose-300 hover:bg-stone-200 dark:hover:bg-rose-900/40"
+                    ? "bg-rose-600 text-white shadow-xs"
+                    : "bg-stone-100 dark:bg-[#0d0709] text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-800 border border-transparent dark:border-stone-800"
                 }`}
               >
                 {tab.label}
@@ -290,28 +290,28 @@ export default function DashboardOverviewPage() {
 
         {/* Custom Date Selector inputs */}
         {dateRange === "custom" && (
-          <form onSubmit={handleCustomDateSubmit} className="mt-3 pt-3 border-t border-stone-200 dark:border-rose-900/30 flex flex-wrap items-center gap-3">
+          <form onSubmit={handleCustomDateSubmit} className="mt-3 pt-3 border-t border-stone-200 dark:border-stone-800/60 flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-stone-600 dark:text-slate-400">From:</span>
+              <span className="text-xs font-medium text-stone-600 dark:text-stone-400">From:</span>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="rounded-xl border border-stone-300 dark:border-rose-800/60 bg-stone-50 dark:bg-[#251219] px-3 py-1.5 text-xs font-mono text-stone-900 dark:text-white outline-none focus:border-rose-500"
+                className="rounded-xl border border-stone-300 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] px-3 py-1.5 text-xs font-mono text-stone-900 dark:text-stone-100 outline-none focus:border-rose-500"
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-stone-600 dark:text-slate-400">To:</span>
+              <span className="text-xs font-medium text-stone-600 dark:text-stone-400">To:</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="rounded-xl border border-stone-300 dark:border-rose-800/60 bg-stone-50 dark:bg-[#251219] px-3 py-1.5 text-xs font-mono text-stone-900 dark:text-white outline-none focus:border-rose-500"
+                className="rounded-xl border border-stone-300 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] px-3 py-1.5 text-xs font-mono text-stone-900 dark:text-stone-100 outline-none focus:border-rose-500"
               />
             </div>
             <button
               type="submit"
-              className="rounded-xl bg-stone-900 dark:bg-rose-900 hover:bg-stone-800 dark:hover:bg-rose-800 text-white px-4 py-1.5 text-xs font-bold transition-all cursor-pointer"
+              className="rounded-xl bg-stone-900 dark:bg-stone-800 hover:bg-stone-800 dark:hover:bg-stone-700 text-white px-4 py-1.5 text-xs font-bold transition-all cursor-pointer"
             >
               Apply Filter
             </button>
@@ -322,82 +322,82 @@ export default function DashboardOverviewPage() {
       {/* 1. TOP SUMMARY STATS CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Total Revenue */}
-        <div className="relative overflow-hidden rounded-2xl border border-rose-200 dark:border-rose-500/30 bg-gradient-to-br from-rose-500/5 via-rose-500/10 to-rose-500/5 dark:from-[#1C1014] dark:via-[#2A121A] dark:to-[#1C1014] p-5 shadow-xs transition-all duration-300 hover:border-rose-400 dark:hover:border-rose-500/50">
+        <div className="relative overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-5 shadow-xs transition-all duration-300 hover:border-stone-700">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Total Revenue</span>
-            <div className="rounded-xl bg-rose-500/15 p-2.5 text-rose-600 dark:text-rose-300 border border-rose-500/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-rose-500">Total Revenue</span>
+            <div className="rounded-xl bg-rose-500/10 p-2.5 text-rose-500 border border-rose-500/20">
               <DollarSign className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-stone-100">
             ৳{rev.total.toLocaleString()}
           </p>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-600 dark:text-slate-400 border-t border-rose-200/60 dark:border-rose-900/40 pt-2">
-            <span>Today: <strong className="text-rose-600 dark:text-rose-300">৳{rev.today.toLocaleString()}</strong></span>
-            <span>Month: <strong className="text-rose-600 dark:text-rose-300">৳{rev.thisMonth.toLocaleString()}</strong></span>
+          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-600 dark:text-stone-400 border-t border-stone-100 dark:border-stone-800/60 pt-2">
+            <span>Today: <strong className="text-rose-500">৳{rev.today.toLocaleString()}</strong></span>
+            <span>Month: <strong className="text-rose-500">৳{rev.thisMonth.toLocaleString()}</strong></span>
           </div>
         </div>
 
         {/* Total Orders */}
-        <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-slate-800 bg-white dark:bg-[#160E12]/90 p-5 shadow-xs transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-500/40">
+        <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-5 shadow-xs transition-all duration-300 hover:border-blue-500/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-slate-400">Total Orders</span>
-            <div className="rounded-xl bg-blue-500/15 p-2.5 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">Total Orders</span>
+            <div className="rounded-xl bg-blue-500/10 p-2.5 text-blue-500 border border-blue-500/20">
               <ShoppingBag className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-stone-100">
             {ord.total.toLocaleString()}
           </p>
-          <div className="mt-3 flex items-center gap-2 text-[11px] border-t border-stone-100 dark:border-slate-800/80 pt-2">
-            <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/20">
+          <div className="mt-3 flex items-center gap-2 text-[11px] border-t border-stone-100 dark:border-stone-800/60 pt-2">
+            <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20">
               Pending: {ord.pending}
             </span>
-            <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/20">
+            <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/20">
               Delivered: {ord.delivered}
             </span>
           </div>
         </div>
 
         {/* Total Products */}
-        <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-slate-800 bg-white dark:bg-[#160E12]/90 p-5 shadow-xs transition-all duration-300 hover:border-purple-400 dark:hover:border-purple-500/40">
+        <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-5 shadow-xs transition-all duration-300 hover:border-purple-500/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-slate-400">Total Products</span>
-            <div className="rounded-xl bg-purple-500/15 p-2.5 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">Total Products</span>
+            <div className="rounded-xl bg-purple-500/10 p-2.5 text-purple-500 border border-purple-500/20">
               <Package className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-stone-100">
             {prod.total}
           </p>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-500 dark:text-slate-400 border-t border-stone-100 dark:border-slate-800/80 pt-2">
-            <span>Single: <strong className="text-stone-800 dark:text-slate-200">{prod.singleCount}</strong></span>
-            <span>Combo Deals: <strong className="text-rose-600 dark:text-rose-400">{prod.comboCount}</strong></span>
+          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400 border-t border-stone-100 dark:border-stone-800/60 pt-2">
+            <span>Single: <strong className="text-stone-800 dark:text-stone-200">{prod.singleCount}</strong></span>
+            <span>Combo Deals: <strong className="text-rose-500">{prod.comboCount}</strong></span>
           </div>
         </div>
 
         {/* Total Customers */}
-        <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-slate-800 bg-white dark:bg-[#160E12]/90 p-5 shadow-xs transition-all duration-300 hover:border-emerald-400 dark:hover:border-emerald-500/40">
+        <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-5 shadow-xs transition-all duration-300 hover:border-emerald-500/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-slate-400">Total Users</span>
-            <div className="rounded-xl bg-emerald-500/15 p-2.5 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">Total Users</span>
+            <div className="rounded-xl bg-emerald-500/10 p-2.5 text-emerald-500 border border-emerald-500/20">
               <Users className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-stone-100">
             {cust.totalUsers}
           </p>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-500 dark:text-slate-400 border-t border-stone-100 dark:border-slate-800/80 pt-2">
-            <span>Customers: <strong className="text-stone-800 dark:text-slate-200">{cust.customerCount}</strong></span>
-            <span>Admins: <strong className="text-amber-600 dark:text-amber-400">{cust.adminCount}</strong></span>
+          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400 border-t border-stone-100 dark:border-stone-800/60 pt-2">
+            <span>Customers: <strong className="text-stone-800 dark:text-stone-200">{cust.customerCount}</strong></span>
+            <span>Admins: <strong className="text-amber-500">{cust.adminCount}</strong></span>
           </div>
         </div>
 
         {/* Low Stock Warning Card */}
         <div className={`relative overflow-hidden rounded-2xl border p-5 shadow-xs transition-all duration-300 ${
           prod.lowStockCount > 0
-            ? "border-amber-400/60 dark:border-amber-500/50 bg-amber-50/50 dark:bg-gradient-to-br dark:from-[#1E1510] dark:via-amber-950/30 dark:to-[#160E12]"
-            : "border-stone-200/80 dark:border-slate-800 bg-white dark:bg-[#160E12]/90"
+            ? "border-amber-400/60 dark:border-amber-800/60 bg-amber-50/50 dark:bg-amber-950/30"
+            : "border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113]"
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Low Stock Alert</span>
@@ -405,8 +405,8 @@ export default function DashboardOverviewPage() {
               <AlertTriangle className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-white">
-            {prod.lowStockCount} <span className="text-xs font-medium text-stone-500 dark:text-slate-400">items</span>
+          <p className="mt-3 text-2xl font-black tracking-tight text-stone-900 dark:text-stone-100">
+            {prod.lowStockCount} <span className="text-xs font-medium text-stone-500 dark:text-stone-400">items</span>
           </p>
           <div className="mt-3 text-[11px] text-amber-700 dark:text-amber-300/80 font-bold border-t border-amber-200/60 dark:border-amber-950/60 pt-2">
             {prod.lowStockCount > 0 ? "Requires restock action" : "Inventory stock optimal"}
@@ -417,20 +417,20 @@ export default function DashboardOverviewPage() {
       {/* 2. RECHARTS ANALYTICS CHARTS SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sales & Revenue Trend Area Chart (2 Cols) */}
-        <div className="lg:col-span-2 rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
+        <div className="lg:col-span-2 rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800/60 pb-3">
             <div>
-              <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
-                <TrendingUp className="h-4.5 w-4.5 text-rose-500 dark:text-rose-400" />
+              <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                <TrendingUp className="h-4.5 w-4.5 text-rose-500" />
                 Sales & Revenue Analytics (7 Days)
               </h3>
-              <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">Daily revenue trend (৳) and total orders placed</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Daily revenue trend (৳) and total orders placed</p>
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
+              <span className="flex items-center gap-1.5 text-rose-500 font-semibold">
                 <span className="h-2.5 w-2.5 rounded-full bg-rose-500" /> Revenue (৳)
               </span>
-              <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold">
+              <span className="flex items-center gap-1.5 text-blue-500 font-semibold">
                 <span className="h-2.5 w-2.5 rounded-full bg-blue-500" /> Orders
               </span>
             </div>
@@ -454,17 +454,17 @@ export default function DashboardOverviewPage() {
                       <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#CBD5E1" strokeOpacity={0.4} vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#332A2E" strokeOpacity={0.5} vertical={false} />
                   <XAxis
                     dataKey="day"
-                    stroke="#64748B"
-                    tick={{ fill: "#64748B", fontSize: 11 }}
-                    axisLine={{ stroke: "#E2E8F0" }}
+                    stroke="#78716C"
+                    tick={{ fill: "#A8A29E", fontSize: 11 }}
+                    axisLine={{ stroke: "#292524" }}
                   />
                   <YAxis
-                    stroke="#64748B"
-                    tick={{ fill: "#64748B", fontSize: 11 }}
-                    axisLine={{ stroke: "#E2E8F0" }}
+                    stroke="#78716C"
+                    tick={{ fill: "#A8A29E", fontSize: 11 }}
+                    axisLine={{ stroke: "#292524" }}
                     tickFormatter={(val) => `৳${val}`}
                   />
                   <Tooltip content={(props: any) => <CustomTooltip {...props} />} />
@@ -493,13 +493,13 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* Order Status Distribution Donut Chart */}
-        <div className="rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4 flex flex-col justify-between">
-          <div className="border-b border-stone-100 dark:border-rose-950/60 pb-3">
-            <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
-              <PieChartIcon className="h-4.5 w-4.5 text-rose-500 dark:text-rose-400" />
+        <div className="rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-6 shadow-xs space-y-4 flex flex-col justify-between">
+          <div className="border-b border-stone-100 dark:border-stone-800/60 pb-3">
+            <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              <PieChartIcon className="h-4.5 w-4.5 text-rose-500" />
               Order Fulfillment Breakdown
             </h3>
-            <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">Live distribution by order status</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Live distribution by order status</p>
           </div>
 
           {/* Donut Chart */}
@@ -517,7 +517,7 @@ export default function DashboardOverviewPage() {
                     dataKey="value"
                   >
                     {formattedOrderDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#161113" strokeWidth={2} />
                     ))}
                   </Pie>
                   <Tooltip content={(props: any) => <CustomTooltip {...props} />} />
@@ -526,20 +526,20 @@ export default function DashboardOverviewPage() {
             )}
             {/* Center Summary */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black text-stone-900 dark:text-white">{ord.total}</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400">Total Orders</span>
+              <span className="text-2xl font-black text-stone-900 dark:text-stone-100">{ord.total}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">Total Orders</span>
             </div>
           </div>
 
           {/* Status Pills */}
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100 dark:border-rose-950/60">
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100 dark:border-stone-800/60">
             {formattedOrderDistribution.map((st, idx) => (
-              <div key={idx} className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-lg bg-stone-50 dark:bg-slate-900/60 border border-stone-200/60 dark:border-slate-800">
-                <span className="flex items-center gap-1.5 text-stone-700 dark:text-slate-300 font-medium text-[11px]">
+              <div key={idx} className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-lg bg-stone-50 dark:bg-[#0d0709] border border-stone-200/60 dark:border-stone-800">
+                <span className="flex items-center gap-1.5 text-stone-700 dark:text-stone-300 font-medium text-[11px]">
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: st.color }} />
                   {st.name}
                 </span>
-                <span className="font-mono font-bold text-stone-900 dark:text-white text-[11px]">{st.value}</span>
+                <span className="font-mono font-bold text-stone-900 dark:text-stone-100 text-[11px]">{st.value}</span>
               </div>
             ))}
           </div>
@@ -549,22 +549,22 @@ export default function DashboardOverviewPage() {
       {/* 3. PRODUCT TYPE BREAKDOWN & TOP REVENUE PRODUCTS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Product Type Breakdown (Single vs Combo Deals) */}
-        <div className="rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4">
-          <div className="border-b border-stone-100 dark:border-rose-950/60 pb-3">
-            <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
-              <Gift className="h-4.5 w-4.5 text-rose-500 dark:text-rose-400" />
+        <div className="rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-6 shadow-xs space-y-4">
+          <div className="border-b border-stone-100 dark:border-stone-800/60 pb-3">
+            <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              <Gift className="h-4.5 w-4.5 text-rose-500" />
               Catalog Composition
             </h3>
-            <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">Single items vs Combo Deals in inventory</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Single items vs Combo Deals in inventory</p>
           </div>
 
           <div className="h-[200px] w-full [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none [&_*]:outline-none focus:outline-none">
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={productTypeData} margin={{ top: 20, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#CBD5E1" strokeOpacity={0.4} vertical={false} />
-                  <XAxis dataKey="name" stroke="#64748B" tick={{ fill: "#64748B", fontSize: 11 }} />
-                  <YAxis stroke="#64748B" tick={{ fill: "#64748B", fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#332A2E" strokeOpacity={0.5} vertical={false} />
+                  <XAxis dataKey="name" stroke="#78716C" tick={{ fill: "#A8A29E", fontSize: 11 }} />
+                  <YAxis stroke="#78716C" tick={{ fill: "#A8A29E", fontSize: 11 }} />
                   <Tooltip content={(props: any) => <CustomTooltip {...props} />} />
                   <Bar dataKey="count" name="Products Count" radius={[8, 8, 0, 0]}>
                     {productTypeData.map((entry, index) => (
@@ -578,27 +578,27 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* Recent Orders Table (2 cols) */}
-        <div className="lg:col-span-2 rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
-            <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
-              <Clock className="h-4.5 w-4.5 text-rose-500 dark:text-rose-400" />
+        <div className="lg:col-span-2 rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800/60 pb-3">
+            <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              <Clock className="h-4.5 w-4.5 text-rose-500" />
               Recent Customer Orders
             </h3>
             <Link
               href="/admin/orders"
-              className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 flex items-center gap-1 transition-colors"
+              className="text-xs font-bold text-rose-500 hover:text-rose-400 flex items-center gap-1 transition-colors"
             >
               View All Orders <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
           {recent.recentOrders.length === 0 ? (
-            <p className="text-xs text-stone-400 dark:text-slate-500 py-8 text-center">No recent orders recorded.</p>
+            <p className="text-xs text-stone-400 dark:text-stone-500 py-8 text-center">No recent orders recorded.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-stone-200 dark:border-rose-950/80 text-stone-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+                  <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 font-semibold uppercase tracking-wider text-[10px]">
                     <th className="pb-3">Order #</th>
                     <th className="pb-3">Customer</th>
                     <th className="pb-3">Total</th>
@@ -606,26 +606,26 @@ export default function DashboardOverviewPage() {
                     <th className="pb-3 text-right">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100 dark:divide-rose-950/40">
+                <tbody className="divide-y divide-stone-100 dark:divide-stone-800/60">
                   {recent.recentOrders.map((o) => (
-                    <tr key={o._id} className="hover:bg-stone-50 dark:hover:bg-rose-950/20 transition-colors">
-                      <td className="py-3 font-mono font-bold text-rose-600 dark:text-rose-400">{o.orderNumber}</td>
-                      <td className="py-3 text-stone-800 dark:text-slate-200 font-medium">{o.customer?.name || "Guest User"}</td>
-                      <td className="py-3 font-bold text-stone-900 dark:text-white">৳{(o.pricing?.total || 0).toLocaleString()}</td>
+                    <tr key={o._id} className="hover:bg-stone-50 dark:hover:bg-white/5 transition-colors">
+                      <td className="py-3 font-mono font-bold text-rose-500">{o.orderNumber}</td>
+                      <td className="py-3 text-stone-800 dark:text-stone-200 font-medium">{o.customer?.name || "Guest User"}</td>
+                      <td className="py-3 font-bold text-stone-900 dark:text-stone-100">৳{(o.pricing?.total || 0).toLocaleString()}</td>
                       <td className="py-3">
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                             o.status === "delivered"
-                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
+                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
                               : o.status === "pending"
-                              ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20"
-                              : "bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20"
+                              ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20"
+                              : "bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20"
                           }`}
                         >
                           {o.status}
                         </span>
                       </td>
-                      <td className="py-3 text-right text-stone-500 dark:text-slate-400 font-mono">
+                      <td className="py-3 text-right text-stone-500 dark:text-stone-400 font-mono">
                         {new Date(o.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
@@ -638,15 +638,15 @@ export default function DashboardOverviewPage() {
       </div>
 
       {/* 4. LOW STOCK INVENTORY WARNINGS */}
-      <div className="rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#170E12] p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
-          <h3 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
-            <AlertTriangle className="h-4.5 w-4.5 text-amber-500 dark:text-amber-400" />
+      <div className="rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800/60 pb-3">
+          <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+            <AlertTriangle className="h-4.5 w-4.5 text-amber-500" />
             Low Stock Inventory Alerts
           </h3>
           <Link
             href="/admin/products"
-            className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 flex items-center gap-1 transition-colors"
+            className="text-xs font-bold text-rose-500 hover:text-rose-400 flex items-center gap-1 transition-colors"
           >
             Manage Product Stock <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
@@ -655,26 +655,26 @@ export default function DashboardOverviewPage() {
         {recent.lowStockAlerts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center space-y-2">
             <CheckCircle2 className="h-8 w-8 text-emerald-500" />
-            <p className="text-xs font-medium text-stone-500 dark:text-slate-400">All inventory stock levels are optimal!</p>
+            <p className="text-xs font-medium text-stone-500 dark:text-stone-400">All inventory stock levels are optimal!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {recent.lowStockAlerts.map((item) => (
               <div
                 key={item._id}
-                className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50 dark:bg-slate-900/70 border border-stone-200/70 dark:border-amber-500/20 hover:border-amber-400 dark:hover:border-amber-500/40 transition-colors"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50 dark:bg-[#0d0709] border border-stone-200/70 dark:border-stone-800 hover:border-amber-500/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   {item.thumbnail && (
                     <img
                       src={item.thumbnail}
                       alt={item.name}
-                      className="h-10 w-10 rounded-lg object-cover border border-stone-200 dark:border-slate-800 shrink-0"
+                      className="h-10 w-10 rounded-lg object-cover border border-stone-200 dark:border-stone-800 shrink-0"
                     />
                   )}
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-stone-800 dark:text-slate-200 truncate">{item.name}</p>
-                    <p className="text-[11px] font-mono text-rose-600 dark:text-rose-300">৳{item.price?.toLocaleString()}</p>
+                    <p className="text-xs font-bold text-stone-800 dark:text-stone-200 truncate">{item.name}</p>
+                    <p className="text-[11px] font-mono text-rose-500">৳{item.price?.toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -688,37 +688,37 @@ export default function DashboardOverviewPage() {
       </div>
 
       {/* 📄 PDF PRINT REPORT CONTAINER (Visible during window.print()) */}
-        <div id="printable-pdf-report" className="mt-8 border-t border-stone-200 dark:border-rose-900/30 pt-6 space-y-6">
-          <div className="flex items-center justify-between border-b-2 border-rose-600 pb-3">
-            <div>
-              <h2 className="text-xl font-black text-rose-600 uppercase tracking-wide">CHERRY GLOW K-BEAUTY STORE</h2>
-              <p className="text-xs text-stone-500">Executive Admin Analytics & Sales Performance PDF Summary</p>
-            </div>
-            <div className="text-right text-xs text-stone-500">
-              <p className="font-bold text-stone-900 dark:text-white">Period: <span className="uppercase text-rose-600 font-extrabold">{dateRange}</span></p>
-              <p className="font-mono">Generated: {new Date().toLocaleDateString()}</p>
-            </div>
+      <div id="printable-pdf-report" className="mt-8 border-t border-stone-200 dark:border-stone-800/80 pt-6 space-y-6">
+        <div className="flex items-center justify-between border-b-2 border-rose-600 pb-3">
+          <div>
+            <h2 className="text-xl font-black text-rose-600 uppercase tracking-wide">CHERRY GLOW K-BEAUTY STORE</h2>
+            <p className="text-xs text-stone-500">Executive Admin Analytics & Sales Performance PDF Summary</p>
           </div>
+          <div className="text-right text-xs text-stone-500">
+            <p className="font-bold text-stone-900 dark:text-stone-100">Period: <span className="uppercase text-rose-600 font-extrabold">{dateRange}</span></p>
+            <p className="font-mono">Generated: {new Date().toLocaleDateString()}</p>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div className="p-3 rounded-xl bg-stone-50 dark:bg-rose-950/30 border border-stone-200 dark:border-rose-900/30">
-              <p className="text-stone-500 uppercase font-bold text-[10px]">Total Store Revenue</p>
-              <p className="text-lg font-black text-stone-900 dark:text-white mt-0.5">{"৳"}{rev.total.toLocaleString()}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/40">
-              <p className="text-rose-600 uppercase font-bold text-[10px]">Period Filtered Sales</p>
-              <p className="text-lg font-black text-rose-700 dark:text-rose-300 mt-0.5">{"৳"}{(rev.rangeFiltered || rev.total).toLocaleString()}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-stone-50 dark:bg-rose-950/30 border border-stone-200 dark:border-rose-900/30">
-              <p className="text-stone-500 uppercase font-bold text-[10px]">Total Orders</p>
-              <p className="text-lg font-black text-stone-900 dark:text-white mt-0.5">{ord.total.toLocaleString()}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-stone-50 dark:bg-rose-950/30 border border-stone-200 dark:border-rose-900/30">
-              <p className="text-stone-500 uppercase font-bold text-[10px]">Average Order Value (AOV)</p>
-              <p className="text-lg font-black text-stone-900 dark:text-white mt-0.5">{"৳"}{ord.aov?.toLocaleString() || 0}</p>
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#0d0709] border border-stone-200 dark:border-stone-800">
+            <p className="text-stone-500 uppercase font-bold text-[10px]">Total Store Revenue</p>
+            <p className="text-lg font-black text-stone-900 dark:text-stone-100 mt-0.5">{"৳"}{rev.total.toLocaleString()}</p>
+          </div>
+          <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#0d0709] border border-stone-200 dark:border-stone-800">
+            <p className="text-rose-600 uppercase font-bold text-[10px]">Period Filtered Sales</p>
+            <p className="text-lg font-black text-rose-500 mt-0.5">{"৳"}{(rev.rangeFiltered || rev.total).toLocaleString()}</p>
+          </div>
+          <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#0d0709] border border-stone-200 dark:border-stone-800">
+            <p className="text-stone-500 uppercase font-bold text-[10px]">Total Orders</p>
+            <p className="text-lg font-black text-stone-900 dark:text-stone-100 mt-0.5">{ord.total.toLocaleString()}</p>
+          </div>
+          <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#0d0709] border border-stone-200 dark:border-stone-800">
+            <p className="text-stone-500 uppercase font-bold text-[10px]">Average Order Value (AOV)</p>
+            <p className="text-lg font-black text-stone-900 dark:text-stone-100 mt-0.5">{"৳"}{ord.aov?.toLocaleString() || 0}</p>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}

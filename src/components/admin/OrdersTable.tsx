@@ -68,40 +68,40 @@ export default function OrdersTable({
 
   return (
     <>
-      <div className="w-full overflow-hidden rounded-2xl border border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14]/90 shadow-sm backdrop-blur-md transition-all">
+      <div className="w-full overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] shadow-sm transition-all">
         <Table>
-          <TableHeader className="bg-stone-50 dark:bg-rose-950/40 border-b border-stone-200 dark:border-rose-900/40">
+          <TableHeader className="bg-stone-50 dark:bg-[#0d0709] border-b border-stone-200 dark:border-stone-800">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-rose-200">
+              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-stone-400">
                 Order ID
               </TableHead>
-              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-rose-200">
+              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-stone-400">
                 Customer Info
               </TableHead>
-              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-rose-200">
+              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-stone-400">
                 Items Summary
               </TableHead>
-              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-rose-200">
+              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-stone-400">
                 Total & Payment
               </TableHead>
-              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-rose-200">
+              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-stone-400">
                 Status
               </TableHead>
-              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-rose-200">
+              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-stone-400">
                 Date
               </TableHead>
-              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-right text-stone-600 dark:text-rose-200">
+              <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-right text-stone-600 dark:text-stone-400">
                 Actions
               </TableHead>
             </TableRow>
           </TableHeader>
 
-          <TableBody className="divide-y divide-stone-100 dark:divide-rose-900/30">
+          <TableBody className="divide-y divide-stone-100 dark:divide-stone-800/60">
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell colSpan={7} className="py-4 px-4">
-                    <Skeleton className="h-12 w-full rounded-xl" />
+                    <Skeleton className="h-12 w-full rounded-xl bg-stone-100 dark:bg-stone-800/40" />
                   </TableCell>
                 </TableRow>
               ))
@@ -109,11 +109,11 @@ export default function OrdersTable({
               <TableRow>
                 <TableCell
                   colSpan={7}
-                  className="py-12 text-center text-stone-400 dark:text-rose-300/60"
+                  className="py-12 text-center text-stone-400 dark:text-stone-500"
                 >
                   <div className="flex flex-col items-center justify-center gap-2">
-                    <ShoppingBag className="h-10 w-10 text-stone-300 dark:text-rose-950" />
-                    <p className="font-semibold text-base">No orders found</p>
+                    <ShoppingBag className="h-10 w-10 text-stone-300 dark:text-stone-700" />
+                    <p className="font-semibold text-base text-stone-800 dark:text-stone-200">No orders found</p>
                     <p className="text-xs">Try adjusting your filters or search term.</p>
                   </div>
                 </TableCell>
@@ -131,18 +131,18 @@ export default function OrdersTable({
                 return (
                   <TableRow
                     key={o._id}
-                    className="hover:bg-rose-500/5 dark:hover:bg-rose-900/20 transition-colors group cursor-pointer"
+                    className="hover:bg-stone-50/80 dark:hover:bg-white/5 transition-colors group cursor-pointer"
                     onClick={() => setSelectedOrder(o)}
                   >
                     {/* Order ID */}
                     <TableCell className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-xs font-bold px-2 py-1 rounded-lg bg-stone-100 dark:bg-rose-950 border border-stone-200 dark:border-rose-900/50 text-stone-900 dark:text-rose-100 group-hover:border-rose-400/50 transition-colors">
+                        <span className="font-mono text-xs font-bold px-2 py-1 rounded-lg bg-stone-100 dark:bg-[#0d0709] border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 group-hover:border-rose-500/50 transition-colors">
                           {orderNo}
                         </span>
                         <button
                           onClick={(e) => handleCopyId(e, orderNo)}
-                          className="p-1 rounded hover:bg-stone-200 dark:hover:bg-rose-900/60 text-stone-400 hover:text-stone-700 dark:hover:text-rose-200 transition-colors"
+                          className="p-1 rounded hover:bg-stone-200 dark:hover:bg-white/10 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors"
                           title="Copy ID"
                         >
                           {copiedId === orderNo ? (
@@ -165,14 +165,14 @@ export default function OrdersTable({
                           {getCustomerInitial(customer.name)}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-sm text-stone-900 dark:text-rose-100 truncate">
+                          <p className="font-semibold text-sm text-stone-900 dark:text-stone-100 truncate">
                             {customer.name || "Guest"}
                           </p>
                           {customer.phone && (
                             <a
                               href={`tel:${customer.phone}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="text-xs text-stone-500 dark:text-rose-300/70 hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 font-mono transition-colors"
+                              className="text-xs text-stone-500 dark:text-stone-400 hover:text-rose-500 flex items-center gap-1 font-mono transition-colors"
                             >
                               <Phone className="h-3 w-3 shrink-0" />
                               {customer.phone}
@@ -186,19 +186,19 @@ export default function OrdersTable({
                     <TableCell className="py-3.5 px-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40">
+                          <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
                             {items.length} {items.length === 1 ? "item" : "items"}
                           </span>
                           {(o.orderType === "pre-order" || o.fulfillmentStatus === "awaiting-stock" || items.some((i: any) => i.isPreOrder)) && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800/60 flex items-center gap-1">
                               ⏳ Pre-Order
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-stone-600 dark:text-rose-200/80 truncate max-w-[200px]" title={items.map((i) => i.name).join(", ")}>
+                        <p className="text-xs text-stone-600 dark:text-stone-300 truncate max-w-[200px]" title={items.map((i) => i.name).join(", ")}>
                           {items[0]?.name || "N/A"}
                           {items.length > 1 && (
-                            <span className="text-stone-400 dark:text-rose-300/50 font-normal">
+                            <span className="text-stone-400 dark:text-stone-500 font-normal">
                               {" "}
                               +{items.length - 1} more
                             </span>
@@ -210,11 +210,11 @@ export default function OrdersTable({
                     {/* Total & Payment */}
                     <TableCell className="py-3.5 px-4">
                       <div className="space-y-1">
-                        <div className="font-bold text-sm text-stone-900 dark:text-rose-100">
+                        <div className="font-bold text-sm text-stone-900 dark:text-stone-100">
                           ৳ {(pricing.total || 0).toLocaleString()}
                         </div>
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-stone-100 dark:bg-rose-950 text-stone-600 dark:text-rose-300 border border-stone-200 dark:border-rose-900/40">
+                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
                             {payment.method || "COD"}
                           </span>
                           <span

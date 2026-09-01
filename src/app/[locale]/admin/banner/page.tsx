@@ -208,29 +208,29 @@ export default function AdminBannerPage() {
   return (
     <div className="w-full space-y-8">
       {/* 1. Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-transparent p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 bg-white/70 dark:bg-[#160E12]/80 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113]">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-rose-50 flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-2">
               Banner & Hero Management
             </h1>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-xs">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-xs">
               {heroBanners.length + promoBanners.length} Total
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-300/70 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
             Manage homepage Hero slider carousels, promotional popups, and deal banners.
           </p>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex items-center bg-stone-100 dark:bg-rose-950 p-1.5 rounded-2xl border border-stone-200 dark:border-rose-900/40 self-start sm:self-auto">
+        <div className="flex items-center bg-stone-100 dark:bg-[#0d0709] p-1.5 rounded-2xl border border-stone-200 dark:border-stone-800 self-start sm:self-auto">
           <button
             onClick={() => setTab("hero")}
             className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
               tab === "hero"
                 ? "bg-rose-600 text-white shadow-xs"
-                : "text-stone-600 dark:text-rose-300 hover:text-stone-900"
+                : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
             }`}
           >
             <Sparkles size={14} /> Hero Slider ({heroBanners.length})
@@ -240,7 +240,7 @@ export default function AdminBannerPage() {
             className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
               tab === "promo"
                 ? "bg-rose-600 text-white shadow-xs"
-                : "text-stone-600 dark:text-rose-300 hover:text-stone-900"
+                : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
             }`}
           >
             <Tag size={14} /> Promo Popups ({promoBanners.length})
@@ -252,12 +252,12 @@ export default function AdminBannerPage() {
       {tab === "hero" && (
         <div className="space-y-8">
           {/* Add Hero Banner Form + Live Preview */}
-          <div className="bg-white dark:bg-[#180f14] p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 shadow-xs space-y-6">
-            <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-900/30 pb-3">
-              <h2 className="font-bold text-base text-stone-900 dark:text-rose-100 flex items-center gap-2">
+          <div className="bg-white dark:bg-[#161113] p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 shadow-xs space-y-6">
+            <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800/60 pb-3">
+              <h2 className="font-bold text-base text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Plus className="text-rose-500" size={18} /> Add New Hero Slider Banner
               </h2>
-              <span className="text-xs text-stone-400 dark:text-rose-300/60 font-mono">
+              <span className="text-xs text-stone-400 dark:text-stone-500 font-mono">
                 Homepage Hero Carousel
               </span>
             </div>

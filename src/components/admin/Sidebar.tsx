@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
@@ -12,23 +12,31 @@ import {
   Image as ImageIcon,
   Menu,
   X,
-  Sparkles,
   Layers,
   Star,
   Tag,
+  Ticket,
   Settings,
   LogOut,
   ChevronRight,
-  ShieldCheck,
+  ChevronDown,
+  User,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user, logout } = useAuth();
 
-  const isSuperAdmin = user?.role === "super_admin";
+  const toggleGroup = (groupName: string) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupName]: !prev[groupName],
+    }));
+  };
 
   const navigation = [
     {
@@ -62,7 +70,7 @@ export default function Sidebar() {
     {
       group: "MARKETING & MEDIA",
       items: [
-        { name: "Coupons & Discounts", href: "/admin/coupons", icon: Tag },
+        { name: "Coupons & Discounts", href: "/admin/coupons", icon: Ticket },
         { name: "Customer Reviews", href: "/admin/reviews", icon: Star },
         { name: "Hero Banners", href: "/admin/banner", icon: ImageIcon },
       ],
@@ -75,12 +83,50 @@ export default function Sidebar() {
     },
   ];
 
+  const isItemActive = (href: string) => {
+    if (!pathname) return false;
+
+    const currentType = searchParams?.get("type");
+
+    if (href === "/admin") {
+      return (
+        pathname === "/admin" ||
+        pathname === "/en/admin" ||
+        pathname === "/bn/admin" ||
+        pathname === "/ko/admin"
+      );
+    }
+
+    if (href.includes("?")) {
+      const [basePath, search] = href.split("?");
+      const params = new URLSearchParams(search);
+      const targetType = params.get("type");
+      const matchesPath = pathname.endsWith(basePath) || pathname.includes(basePath);
+      return matchesPath && currentType === targetType;
+    }
+
+    if (href === "/admin/products") {
+      const matchesPath = pathname.endsWith("/admin/products") || pathname.includes("/admin/products");
+      return matchesPath && currentType !== "combo";
+    }
+
+    if (href === "/admin/orders") {
+      return (
+        (pathname.endsWith("/admin/orders") || pathname.includes("/admin/orders")) &&
+        !pathname.includes("/create")
+      );
+    }
+
+    return pathname.endsWith(href) || pathname.includes(href);
+  };
+
   return (
     <>
       {/* Mobile Menu Toggle Button */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-3 left-3 z-50 rounded-xl border border-stone-200 dark:border-rose-800 bg-white dark:bg-rose-950 p-2.5 shadow-xl sm:hidden text-stone-800 dark:text-rose-100 hover:bg-stone-100 dark:hover:bg-rose-900 transition-colors"
+        className="fixed top-3 left-3 z-50 rounded-xl border border-rose-900/60 bg-[#140A0D] p-2.5 shadow-xl sm:hidden text-stone-200 hover:bg-rose-950 transition-colors cursor-pointer"
+        aria-label="Open Sidebar"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -88,7 +134,7 @@ export default function Sidebar() {
       {/* Backdrop (mobile) */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm sm:hidden"
+          className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm sm:hidden"
           onClick={() => setOpen(false)}
         />
       )}
@@ -96,24 +142,24 @@ export default function Sidebar() {
       {/* Sidebar Container */}
       <aside
         className={`
-          fixed top-0 left-0 z-40 h-screen w-64 transform bg-white dark:bg-[#180E12] border-r border-stone-200 dark:border-rose-900/60 p-4 text-stone-700 dark:text-rose-100 flex flex-col justify-between
-          transition-all duration-300 ease-in-out shadow-lg dark:shadow-2xl
+          fixed top-0 left-0 z-40 h-screen w-64 transform bg-[#140A0D] border-r border-rose-950/60 p-4 text-stone-300 flex flex-col justify-between
+          transition-all duration-300 ease-in-out shadow-2xl
           sm:sticky sm:top-0 sm:translate-x-0 shrink-0
           ${open ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        <div>
+        <div className="flex flex-col min-h-0 flex-1">
           {/* Brand Header */}
-          <div className="mb-6 flex items-center justify-between border-b border-stone-200 dark:border-rose-900/60 pb-4 pt-1 px-2">
-            <Link href="/admin" className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-rose-600 to-rose-400 flex items-center justify-center text-white font-extrabold text-lg shadow-md">
+          <div className="mb-5 flex items-center justify-between border-b border-rose-950/60 pb-4 pt-1 px-2 shrink-0">
+            <Link href="/admin" className="flex items-center gap-2.5 group">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-rose-600 to-rose-400 flex items-center justify-center text-white font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform shrink-0">
                 C
               </div>
               <div>
-                <h2 className="text-base font-extrabold tracking-tight text-stone-900 dark:text-white leading-tight">
+                <h2 className="text-base font-extrabold tracking-tight text-stone-100 leading-tight">
                   CHERRY GLOW
                 </h2>
-                <p className="text-[10px] uppercase font-bold text-rose-500 dark:text-rose-300/80 tracking-widest">
+                <p className="text-[10px] uppercase font-bold text-rose-400/90 tracking-widest">
                   Admin Panel
                 </p>
               </div>
@@ -122,65 +168,109 @@ export default function Sidebar() {
             {/* Mobile Close Button */}
             <button
               onClick={() => setOpen(false)}
-              className="sm:hidden rounded-lg p-1.5 text-stone-500 dark:text-rose-300 hover:bg-stone-100 dark:hover:bg-rose-900 hover:text-stone-900 dark:hover:text-white"
+              className="sm:hidden rounded-lg p-1.5 text-stone-400 hover:bg-rose-950 hover:text-white transition-colors cursor-pointer"
+              aria-label="Close Sidebar"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Nav Group List */}
-          <nav className="space-y-5 overflow-y-auto max-h-[calc(100vh-220px)] pr-1 scrollbar-thin scrollbar-thumb-stone-200 dark:scrollbar-thumb-rose-800">
-            {navigation.map((group, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <h3 className="px-3 text-[10px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-400/70">
-                  {group.group}
-                </h3>
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive =
-                    item.href === "/admin"
-                      ? pathname === "/admin"
-                      : pathname.startsWith(item.href);
+          <nav className="flex-1 space-y-4 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-stone-800 scrollbar-track-transparent">
+            {navigation.map((group, idx) => {
+              const isCollapsed = !!collapsedGroups[group.group];
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className={`
-                        group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200
-                        ${
-                          isActive
-                            ? "bg-rose-500 text-white font-bold shadow-md dark:bg-rose-800 dark:text-white border border-rose-600/40 dark:border-rose-700/60"
-                            : "text-stone-600 dark:text-rose-200/80 hover:bg-rose-50 dark:hover:bg-rose-900/60 hover:text-rose-600 dark:hover:text-white"
-                        }
-                      `}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Icon
-                          className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${
-                            isActive ? "text-white dark:text-rose-200" : "text-rose-500 dark:text-rose-400"
-                          }`}
-                        />
-                        <span>{item.name}</span>
-                      </div>
-                      {isActive && <ChevronRight className="h-3.5 w-3.5 text-white/80 dark:text-rose-300" />}
-                    </Link>
-                  );
-                })}
-              </div>
-            ))}
+              return (
+                <div key={idx} className="space-y-1">
+                  {/* Collapsible Section Header */}
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.group)}
+                    className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-stone-400 hover:text-stone-200 transition-colors group cursor-pointer select-none"
+                  >
+                    <span>{group.group}</span>
+                    <span className="text-stone-500 group-hover:text-stone-300 transition-colors">
+                      {isCollapsed ? (
+                        <ChevronRight className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      )}
+                    </span>
+                  </button>
+
+                  {/* Nav Items */}
+                  {!isCollapsed && (
+                    <div className="space-y-1 pt-0.5">
+                      {group.items.map((item) => {
+                        const Icon = item.icon;
+                        const active = isItemActive(item.href);
+
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setOpen(false)}
+                            className={`
+                              relative group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-150 overflow-hidden
+                              ${
+                                active
+                                  ? "bg-rose-950/70 text-rose-300 font-semibold border border-rose-500/20 shadow-sm before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-rose-500 before:rounded-r-full"
+                                  : "text-stone-300 hover:text-stone-100 hover:bg-white/5"
+                              }
+                            `}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <Icon
+                                className={`h-4 w-4 shrink-0 transition-transform duration-150 group-hover:scale-105 ${
+                                  active
+                                    ? "text-rose-400"
+                                    : "text-stone-400 group-hover:text-rose-400 transition-colors"
+                                }`}
+                                strokeWidth={1.75}
+                              />
+                              <span className="truncate">{item.name}</span>
+                            </div>
+                            {active && (
+                              <div className="h-1.5 w-1.5 rounded-full bg-rose-500 shrink-0 shadow-[0_0_8px_#f43f5e]" />
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </div>
 
-        {/* Footer / User Sign Out */}
-        <div className="border-t border-stone-200 dark:border-rose-900/60 pt-3">
+        {/* Footer / User & Sign Out */}
+        <div className="border-t border-rose-950/60 pt-3 mt-3 shrink-0 space-y-2">
+          {/* User Info Card */}
+          <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 border border-white/5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
+                {user?.name ? user.name[0].toUpperCase() : <User className="h-4 w-4" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-stone-200 truncate leading-tight">
+                  {user?.name || "Admin User"}
+                </p>
+                <p className="text-[10px] uppercase font-semibold text-rose-400/90 tracking-wider truncate mt-0.5">
+                  {user?.role || "Admin"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sign Out Button */}
           <button
+            type="button"
             onClick={logout}
-            className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium text-stone-600 dark:text-rose-300 hover:bg-stone-100 dark:hover:bg-rose-900/70 hover:text-rose-600 dark:hover:text-white transition-colors"
+            className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-stone-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-900/40 transition-all duration-150 cursor-pointer group"
           >
             <div className="flex items-center gap-2.5">
-              <LogOut className="h-4 w-4 text-rose-500 dark:text-rose-400" />
+              <LogOut className="h-4 w-4 text-stone-400 group-hover:text-rose-400 transition-colors" strokeWidth={1.75} />
               <span>Sign Out</span>
             </div>
           </button>
@@ -189,3 +279,4 @@ export default function Sidebar() {
     </>
   );
 }
+

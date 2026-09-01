@@ -48,7 +48,7 @@ export default function ProductMobileCard({
     return (
       <div className="grid gap-4 sm:hidden">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-44 rounded-2xl bg-stone-100 dark:bg-rose-950/40" />
+          <Skeleton key={i} className="h-44 rounded-2xl bg-stone-100 dark:bg-stone-800/40" />
         ))}
       </div>
     );
@@ -56,10 +56,10 @@ export default function ProductMobileCard({
 
   if (!products || products.length === 0) {
     return (
-      <div className="flex sm:hidden flex-col items-center justify-center p-8 mt-4 rounded-2xl border border-stone-200 dark:border-rose-900/30 bg-white dark:bg-[#160E12] text-center space-y-2">
-        <Package className="h-10 w-10 text-stone-300 dark:text-rose-900/50" />
-        <h3 className="text-sm font-bold text-stone-800 dark:text-rose-100">No products found</h3>
-        <p className="text-xs text-stone-500 dark:text-slate-400">
+      <div className="flex sm:hidden flex-col items-center justify-center p-8 mt-4 rounded-2xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] text-center space-y-2">
+        <Package className="h-10 w-10 text-stone-300 dark:text-stone-700" />
+        <h3 className="text-sm font-bold text-stone-800 dark:text-stone-100">No products found</h3>
+        <p className="text-xs text-stone-500 dark:text-stone-400">
           Try adjusting your search query or filters.
         </p>
       </div>
@@ -76,11 +76,11 @@ export default function ProductMobileCard({
         return (
           <div
             key={p.id || p._id}
-            className="rounded-2xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] p-4 shadow-xs space-y-3"
+            className="rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-4 shadow-xs space-y-3"
           >
             <div className="flex items-start gap-3">
               {/* Image */}
-              <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-stone-200 dark:border-slate-800 bg-stone-100 dark:bg-slate-900 shrink-0 shadow-xs">
+              <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 shrink-0 shadow-xs">
                 <Image
                   src={getThumbnail(p)}
                   alt={p.name}
@@ -92,11 +92,11 @@ export default function ProductMobileCard({
 
               {/* Title & Brand */}
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-xs text-stone-900 dark:text-white line-clamp-2">
+                <p className="font-bold text-xs text-stone-900 dark:text-stone-100 line-clamp-2">
                   {p.name}
                 </p>
-                <div className="flex items-center gap-2 text-[10px] text-stone-500 dark:text-slate-400 mt-0.5">
-                  <span className="font-semibold text-rose-600 dark:text-rose-300">{p.category || "General"}</span>
+                <div className="flex items-center gap-2 text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">
+                  <span className="font-semibold text-rose-500 dark:text-rose-400">{p.category || "General"}</span>
                   {p.brand && <span>• {p.brand}</span>}
                 </div>
                 <p className="font-mono font-extrabold text-xs text-stone-900 dark:text-white mt-1">

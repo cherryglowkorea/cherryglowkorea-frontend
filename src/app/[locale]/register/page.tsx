@@ -35,15 +35,14 @@ export default function RegisterPage() {
   const [googleLoading, setGoogleLoading] = React.useState(false);
 
   const handleGoogleRegister = useGoogleLogin({
-    flow: "auth-code",
-    onSuccess: async (codeResponse) => {
+    onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
       setFormError("");
       try {
         const res = await fetch(`${API_BASE}/api/auth/google`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: codeResponse.code }),
+          body: JSON.stringify({ access_token: tokenResponse.access_token }),
         });
         const data = await res.json();
         if (!res.ok) {

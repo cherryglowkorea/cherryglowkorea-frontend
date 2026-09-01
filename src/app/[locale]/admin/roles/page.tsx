@@ -204,19 +204,19 @@ export default function AdminRolesPage() {
   return (
     <div className="w-full space-y-8">
       {/* 1. Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-transparent p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 bg-white/70 dark:bg-[#160E12]/80 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113]">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-rose-50 flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-2">
               User Authority & Roles
             </h1>
             {isSuperAdmin && (
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20 flex items-center gap-1">
                 <Sparkles className="h-3.5 w-3.5" /> Super Admin Mode
               </span>
             )}
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-300/70 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
             Manage user accounts, assign admin privileges, and block suspicious accounts.
           </p>
         </div>
@@ -224,9 +224,9 @@ export default function AdminRolesPage() {
         <button
           onClick={fetchUsers}
           disabled={loading}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-stone-200 dark:border-rose-800/60 bg-white dark:bg-rose-950/60 text-xs font-semibold text-stone-700 dark:text-rose-200 hover:bg-stone-100 dark:hover:bg-rose-900/50 transition-all shadow-2xs self-start sm:self-auto cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#0d0709] text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all shadow-2xs self-start sm:self-auto cursor-pointer"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-rose-500" : ""}`} />
+          <RefreshCw className={`h-3.5 w-3.5 text-stone-400 ${loading ? "animate-spin text-rose-500" : ""}`} />
           <span>Refresh Users</span>
         </button>
       </div>
@@ -238,22 +238,22 @@ export default function AdminRolesPage() {
           onClick={() => setRoleFilter("all")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             roleFilter === "all"
-              ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/40"
-              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-rose-300"
+              ? "border-rose-500 ring-1 ring-rose-500/20 bg-white dark:bg-[#161113]"
+              : "border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] hover:border-stone-700"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500 dark:text-rose-300/70">
+            <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
               Total Accounts
             </span>
-            <div className="p-2 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">
+            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
               <Users className="h-4 w-4" />
             </div>
           </div>
-          <div className="text-2xl font-black text-stone-900 dark:text-rose-100 mt-2">
+          <div className="text-2xl font-black text-stone-900 dark:text-stone-100 mt-2">
             {metrics.total}
           </div>
-          <div className="text-[11px] text-stone-400 dark:text-rose-300/50 mt-1">
+          <div className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">
             Registered accounts
           </div>
         </div>

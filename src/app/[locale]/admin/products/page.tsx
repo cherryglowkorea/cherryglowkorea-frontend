@@ -212,18 +212,18 @@ export default function ProductManagement() {
   return (
     <div className="space-y-6">
       {/* Top Banner Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-rose-900/30 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-stone-800/80 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-2">
               <span>Product Catalog</span>
-              <Sparkles className="h-5 w-5 text-rose-500 dark:text-rose-400" />
+              <Sparkles className="h-5 w-5 text-rose-500" />
             </h1>
-            <span className="rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-bold text-rose-600 dark:text-rose-400">
+            <span className="rounded-full bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-3 py-1 text-xs font-semibold text-stone-700 dark:text-stone-300">
               {totalProducts} Total Items
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
             Manage your store inventory, pricing, variants, and combo deals with server pagination.
           </p>
         </div>
@@ -231,15 +231,15 @@ export default function ProductManagement() {
         <div className="flex items-center gap-2">
           <button
             onClick={fetchProducts}
-            className="p-2.5 rounded-xl bg-white dark:bg-rose-950/60 border border-stone-200 dark:border-rose-800/40 text-stone-700 dark:text-rose-200 hover:bg-stone-50 dark:hover:bg-rose-900/60 shadow-xs cursor-pointer"
+            className="p-2.5 rounded-xl bg-white dark:bg-[#161113] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-xs cursor-pointer"
             title="Refresh Products"
           >
-            <RefreshCw className="h-4 w-4 text-rose-500 dark:text-rose-400" />
+            <RefreshCw className="h-4 w-4 text-stone-400 hover:text-rose-500" />
           </button>
 
           <Button
             onClick={() => router.push("/admin/create")}
-            className="gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl px-4 py-2.5 shadow-md hover:shadow-rose-500/30 transition-all cursor-pointer"
+            className="gap-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl px-4 py-2.5 shadow-md transition-all cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Add New Product</span>
@@ -254,15 +254,15 @@ export default function ProductManagement() {
           onClick={() => { setTypeFilter("all"); setSelectedCategory("all"); }}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             typeFilter === "all" && selectedCategory === "all"
-              ? "bg-white dark:bg-[#160E12] border-rose-400 dark:border-rose-500/50 shadow-md ring-2 ring-rose-500/20"
-              : "bg-white dark:bg-[#160E12]/80 border-stone-200/80 dark:border-rose-900/30 hover:border-rose-300"
+              ? "bg-white dark:bg-[#161113] border-rose-500 dark:border-rose-500/50 shadow-md ring-1 ring-rose-500/20"
+              : "bg-white dark:bg-[#161113] border-stone-200/80 dark:border-stone-800/80 hover:border-stone-700"
           }`}
         >
-          <div className="flex items-center justify-between text-xs text-stone-500 dark:text-slate-400 font-medium">
+          <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400 font-medium">
             <span>Total Catalog</span>
             <Package className="h-4 w-4 text-rose-500" />
           </div>
-          <p className="text-xl font-black text-stone-900 dark:text-white mt-2">
+          <p className="text-xl font-black text-stone-900 dark:text-stone-100 mt-2">
             {counts.total} <span className="text-xs font-normal text-stone-500">items</span>
           </p>
         </div>
@@ -272,15 +272,15 @@ export default function ProductManagement() {
           onClick={() => setTypeFilter("single")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             typeFilter === "single"
-              ? "bg-white dark:bg-[#160E12] border-blue-400 dark:border-blue-500/50 shadow-md ring-2 ring-blue-500/20"
-              : "bg-white dark:bg-[#160E12]/80 border-stone-200/80 dark:border-rose-900/30 hover:border-blue-300"
+              ? "bg-white dark:bg-[#161113] border-blue-500 dark:border-blue-500/50 shadow-md ring-1 ring-blue-500/20"
+              : "bg-white dark:bg-[#161113] border-stone-200/80 dark:border-stone-800/80 hover:border-blue-500/50"
           }`}
         >
-          <div className="flex items-center justify-between text-xs text-stone-500 dark:text-slate-400 font-medium">
+          <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400 font-medium">
             <span>Single Products</span>
             <Layers className="h-4 w-4 text-blue-500" />
           </div>
-          <p className="text-xl font-black text-stone-900 dark:text-white mt-2">
+          <p className="text-xl font-black text-stone-900 dark:text-stone-100 mt-2">
             {counts.single} <span className="text-xs font-normal text-stone-500">on page</span>
           </p>
         </div>
@@ -290,15 +290,15 @@ export default function ProductManagement() {
           onClick={() => setTypeFilter("combo")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             typeFilter === "combo"
-              ? "bg-white dark:bg-[#160E12] border-rose-500 dark:border-rose-500/50 shadow-md ring-2 ring-rose-500/20"
-              : "bg-white dark:bg-[#160E12]/80 border-stone-200/80 dark:border-rose-900/30 hover:border-rose-400"
+              ? "bg-white dark:bg-[#161113] border-rose-500 dark:border-rose-500/50 shadow-md ring-1 ring-rose-500/20"
+              : "bg-white dark:bg-[#161113] border-stone-200/80 dark:border-stone-800/80 hover:border-rose-500/50"
           }`}
         >
-          <div className="flex items-center justify-between text-xs text-stone-500 dark:text-slate-400 font-medium">
+          <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400 font-medium">
             <span>Combo Deals</span>
             <Gift className="h-4 w-4 text-rose-500" />
           </div>
-          <p className="text-xl font-black text-rose-600 dark:text-rose-400 mt-2">
+          <p className="text-xl font-black text-rose-500 dark:text-rose-400 mt-2">
             {counts.combo} <span className="text-xs font-normal text-stone-500">on page</span>
           </p>
         </div>
@@ -307,35 +307,35 @@ export default function ProductManagement() {
         <div
           className={`p-4 rounded-2xl border transition-all ${
             counts.lowStock > 0
-              ? "bg-amber-50/60 dark:bg-amber-950/30 border-amber-300 dark:border-amber-500/40"
-              : "bg-white dark:bg-[#160E12]/80 border-stone-200/80 dark:border-rose-900/30"
+              ? "bg-amber-50/60 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800/60"
+              : "bg-white dark:bg-[#161113] border-stone-200/80 dark:border-stone-800/80"
           }`}
         >
           <div className="flex items-center justify-between text-xs text-amber-700 dark:text-amber-400 font-medium">
             <span>Low Stock Alert</span>
             <AlertTriangle className="h-4 w-4 text-amber-500" />
           </div>
-          <p className="text-xl font-black text-stone-900 dark:text-white mt-2">
+          <p className="text-xl font-black text-stone-900 dark:text-stone-100 mt-2">
             {counts.lowStock} <span className="text-xs font-normal text-stone-500">on page</span>
           </p>
         </div>
       </div>
 
       {/* Filter & Search Bar Controls */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-4 rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#160E12] shadow-xs">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] shadow-xs">
         {/* Search Input */}
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-slate-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500" />
           <Input
             placeholder="Search products by name, SKU or brand..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-8 py-2 bg-stone-50 dark:bg-slate-900/60 border-stone-200 dark:border-slate-800 text-xs rounded-xl focus:border-rose-400 text-stone-900 dark:text-white"
+            className="pl-10 pr-8 py-2 bg-stone-50 dark:bg-[#0d0709] border-stone-200 dark:border-stone-800 text-xs rounded-xl focus:border-rose-500 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -345,13 +345,13 @@ export default function ProductManagement() {
         {/* Filter Pills & Select */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Type Filter Pills */}
-          <div className="flex items-center gap-1 p-1 bg-stone-100 dark:bg-slate-900/80 rounded-xl border border-stone-200/70 dark:border-slate-800">
+          <div className="flex items-center gap-1 p-1 bg-stone-100 dark:bg-[#0d0709] rounded-xl border border-stone-200/70 dark:border-stone-800">
             <button
               onClick={() => setTypeFilter("all")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 typeFilter === "all"
-                  ? "bg-rose-500 text-white shadow-xs"
-                  : "text-stone-600 dark:text-slate-300 hover:text-stone-900"
+                  ? "bg-rose-600 text-white shadow-xs"
+                  : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
               }`}
             >
               All
@@ -361,7 +361,7 @@ export default function ProductManagement() {
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 typeFilter === "single"
                   ? "bg-blue-600 text-white shadow-xs"
-                  : "text-stone-600 dark:text-slate-300 hover:text-stone-900"
+                  : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
               }`}
             >
               Single
@@ -370,8 +370,8 @@ export default function ProductManagement() {
               onClick={() => setTypeFilter("combo")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 typeFilter === "combo"
-                  ? "bg-rose-500 text-white shadow-xs"
-                  : "text-stone-600 dark:text-slate-300 hover:text-stone-900"
+                  ? "bg-rose-600 text-white shadow-xs"
+                  : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
               }`}
             >
               Combos
@@ -382,7 +382,7 @@ export default function ProductManagement() {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="py-2 px-3 text-xs rounded-xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 text-stone-800 dark:text-slate-200 focus:border-rose-400 cursor-pointer font-medium"
+            className="py-2 px-3 text-xs rounded-xl bg-stone-50 dark:bg-[#0d0709] border border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-200 focus:border-rose-500 cursor-pointer font-medium"
           >
             <option value="all">All Categories</option>
             {dbCategories && dbCategories.length > 0 ? (
@@ -429,21 +429,21 @@ export default function ProductManagement() {
       {/* 📄 SERVER-SIDE PAGINATION CONTROLS BAR */}
       {/* ========================================== */}
       {totalProducts > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl border border-stone-200/80 dark:border-rose-900/30 bg-white dark:bg-[#160E12] shadow-xs text-xs text-stone-600 dark:text-slate-300">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] shadow-xs text-xs text-stone-600 dark:text-stone-300">
           {/* Left Info & Per Page Limit Select */}
           <div className="flex items-center gap-3">
             <span>
-              Showing <strong className="text-stone-900 dark:text-white font-mono">{startItem}</strong> to{" "}
-              <strong className="text-stone-900 dark:text-white font-mono">{endItem}</strong> of{" "}
-              <strong className="text-rose-600 dark:text-rose-400 font-mono">{totalProducts}</strong> products
+              Showing <strong className="text-stone-900 dark:text-stone-100 font-mono">{startItem}</strong> to{" "}
+              <strong className="text-stone-900 dark:text-stone-100 font-mono">{endItem}</strong> of{" "}
+              <strong className="text-rose-500 font-mono">{totalProducts}</strong> products
             </span>
 
-            <div className="flex items-center gap-1.5 border-l border-stone-200 dark:border-slate-800 pl-3">
+            <div className="flex items-center gap-1.5 border-l border-stone-200 dark:border-stone-800 pl-3">
               <span className="text-[11px] text-stone-500">Per page:</span>
               <select
                 value={limit}
                 onChange={(e) => setLimit(Number(e.target.value))}
-                className="py-1 px-2 text-xs rounded-lg bg-stone-50 dark:bg-slate-900 border border-stone-200 dark:border-slate-800 text-stone-900 dark:text-white font-bold cursor-pointer"
+                className="py-1 px-2 text-xs rounded-lg bg-stone-50 dark:bg-[#0d0709] border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 font-bold cursor-pointer"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>

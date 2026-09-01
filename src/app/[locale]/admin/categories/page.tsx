@@ -289,18 +289,18 @@ export default function AdminCategoriesPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-rose-900/30 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-stone-800/80 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-2">
               <span>Categories & Variant Attributes</span>
-              <Tag className="h-5 w-5 text-rose-500 dark:text-rose-400" />
+              <Tag className="h-5 w-5 text-rose-500" />
             </h1>
-            <span className="rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-bold text-rose-600 dark:text-rose-400">
+            <span className="rounded-full bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-3 py-1 text-xs font-semibold text-stone-700 dark:text-stone-300">
               {categories.length} Categories · {attributes.length} Attributes
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
             Manage Bilingual Categories (English & Bangla) and skincare product variant attributes (Size, SPF, Skin Type, etc.)
           </p>
         </div>
@@ -308,16 +308,16 @@ export default function AdminCategoriesPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={fetchCategories}
-            className="p-2.5 rounded-xl bg-white dark:bg-rose-950/60 border border-stone-200 dark:border-rose-800/40 text-stone-700 dark:text-rose-200 hover:bg-stone-50 shadow-xs cursor-pointer"
+            className="p-2.5 rounded-xl bg-white dark:bg-[#161113] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 shadow-xs cursor-pointer"
             title="Refresh"
           >
-            <RefreshCw className="h-4 w-4 text-rose-500 dark:text-rose-400" />
+            <RefreshCw className="h-4 w-4 text-stone-400 hover:text-rose-500" />
           </button>
 
           <Button
             onClick={() => setIsAttrModalOpen(true)}
             variant="outline"
-            className="gap-1.5 border-rose-300 dark:border-rose-900/50 text-rose-600 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold rounded-xl px-3.5 py-2.5 text-xs shadow-xs cursor-pointer"
+            className="gap-1.5 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-semibold rounded-xl px-3.5 py-2.5 text-xs shadow-xs cursor-pointer"
           >
             <Sliders className="h-4 w-4" />
             <span>+ Add Variant Attribute</span>
@@ -325,7 +325,7 @@ export default function AdminCategoriesPage() {
 
           <Button
             onClick={handleOpenAddModal}
-            className="gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl px-4 py-2.5 shadow-md hover:shadow-rose-500/30 cursor-pointer"
+            className="gap-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl px-4 py-2.5 shadow-md transition-all cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Add New Category</span>
@@ -334,13 +334,13 @@ export default function AdminCategoriesPage() {
       </div>
 
       {/* Tabs: Categories vs Variant Attributes */}
-      <div className="flex items-center gap-2 border-b border-stone-200 dark:border-white/10 pb-1">
+      <div className="flex items-center gap-2 border-b border-stone-200 dark:border-stone-800/80 pb-1">
         <button
           onClick={() => setActiveTab("categories")}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-t-xl transition cursor-pointer border-b-2 ${
             activeTab === "categories"
-              ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20"
-              : "border-transparent text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-white"
+              ? "border-rose-500 text-rose-500 bg-white dark:bg-[#161113]"
+              : "border-transparent text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200"
           }`}
         >
           <Layers size={15} />
@@ -351,8 +351,8 @@ export default function AdminCategoriesPage() {
           onClick={() => setActiveTab("attributes")}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-t-xl transition cursor-pointer border-b-2 ${
             activeTab === "attributes"
-              ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20"
-              : "border-transparent text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-white"
+              ? "border-rose-500 text-rose-500 bg-white dark:bg-[#161113]"
+              : "border-transparent text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200"
           }`}
         >
           <Sliders size={15} />
@@ -365,12 +365,12 @@ export default function AdminCategoriesPage() {
         <div className="space-y-6">
           {/* Search Bar */}
           <div className="relative max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-slate-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500" />
             <Input
               placeholder="Search categories in English or Bangla..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 py-2 bg-white dark:bg-[#160E12] border-stone-200 dark:border-rose-900/30 text-xs rounded-xl text-stone-900 dark:text-white shadow-xs"
+              className="pl-10 py-2 bg-white dark:bg-[#0d0709] border-stone-200 dark:border-stone-800 text-xs rounded-xl text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 shadow-xs"
             />
           </div>
 
@@ -380,21 +380,21 @@ export default function AdminCategoriesPage() {
               <RefreshCw className="h-8 w-8 animate-spin text-rose-500" />
             </div>
           ) : filteredCategories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center bg-white dark:bg-[#160E12] rounded-2xl border border-stone-200 dark:border-rose-900/30 p-8 space-y-2">
-              <Tag className="h-10 w-10 text-stone-300 dark:text-rose-900/50" />
-              <h3 className="text-sm font-bold text-stone-800 dark:text-rose-100">No Categories Found</h3>
-              <p className="text-xs text-stone-500 dark:text-slate-400">Click &quot;Add New Category&quot; to create your first category.</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center bg-white dark:bg-[#161113] rounded-2xl border border-stone-200 dark:border-stone-800/80 p-8 space-y-2">
+              <Tag className="h-10 w-10 text-stone-300 dark:text-stone-700" />
+              <h3 className="text-sm font-bold text-stone-800 dark:text-stone-100">No Categories Found</h3>
+              <p className="text-xs text-stone-500 dark:text-stone-400">Click &quot;Add New Category&quot; to create your first category.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredCategories.map((cat: any) => (
                 <div
                   key={cat._id}
-                  className="rounded-2xl border border-stone-200/80 dark:border-rose-900/40 bg-white dark:bg-[#160E12] p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
+                  className="rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-5 shadow-xs hover:border-stone-700 transition-all flex flex-col justify-between space-y-4 group"
                 >
                   <div className="flex items-start gap-3.5">
                     {/* Category Image */}
-                    <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-stone-200 dark:border-slate-800 bg-stone-100 dark:bg-slate-900 shrink-0 shadow-xs group-hover:scale-105 transition-transform duration-300">
+                    <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 shrink-0 shadow-xs group-hover:scale-105 transition-transform duration-300">
                       {cat.image ? (
                         <Image
                           src={cat.image}
@@ -412,27 +412,27 @@ export default function AdminCategoriesPage() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <h3 className="font-bold text-sm text-stone-900 dark:text-white truncate">
+                        <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100 truncate">
                           {cat.name}
                         </h3>
                         {cat.nameBn && (
-                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md border border-rose-200/60 dark:border-rose-900/30">
+                          <span className="text-xs font-semibold text-rose-500 bg-stone-100 dark:bg-[#0d0709] px-2 py-0.5 rounded-md border border-stone-200 dark:border-stone-800">
                             {cat.nameBn}
                           </span>
                         )}
                         {cat.isFeatured && (
-                          <span className="inline-flex items-center gap-0.5 text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-pink-100 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300">
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-2 py-0.5 rounded-full bg-pink-100 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300">
                             <Sparkles className="h-2.5 w-2.5 text-pink-500" /> Featured
                           </span>
                         )}
                       </div>
 
-                      <p className="text-[11px] font-mono text-stone-400 dark:text-rose-300/70 mt-0.5">
+                      <p className="text-[11px] font-mono text-stone-400 dark:text-stone-500 mt-0.5">
                         /{cat.slug}
                       </p>
 
                       {cat.description && (
-                        <p className="text-xs text-stone-500 dark:text-slate-400 line-clamp-2 mt-1.5 leading-relaxed">
+                        <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 mt-1.5 leading-relaxed">
                           {cat.description}
                         </p>
                       )}
@@ -445,7 +445,7 @@ export default function AdminCategoriesPage() {
                             return (
                               <span
                                 key={idx}
-                                className="text-[10px] font-bold text-stone-600 dark:text-rose-200 bg-stone-100 dark:bg-white/5 px-2 py-0.5 rounded-full border border-stone-200 dark:border-white/10"
+                                className="text-[10px] font-medium text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-[#0d0709] px-2 py-0.5 rounded-full border border-stone-200 dark:border-stone-800"
                               >
                                 🏷️ {attrName}
                               </span>
@@ -457,11 +457,11 @@ export default function AdminCategoriesPage() {
                   </div>
 
                   {/* Card Footer */}
-                  <div className="flex items-center justify-between pt-3 border-t border-stone-100 dark:border-rose-950/50 text-xs">
+                  <div className="flex items-center justify-between pt-3 border-t border-stone-100 dark:border-stone-800/60 text-xs">
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                         cat.status === "active"
-                          ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200"
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60"
                           : "bg-stone-100 text-stone-500"
                       }`}
                     >
@@ -472,7 +472,7 @@ export default function AdminCategoriesPage() {
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => handleOpenEditModal(cat)}
-                        className="p-1.5 rounded-lg border border-stone-200 dark:border-rose-900/50 text-stone-600 dark:text-rose-300 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"
                         title="Edit Category"
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -480,7 +480,7 @@ export default function AdminCategoriesPage() {
 
                       <button
                         onClick={() => handleDeleteCategory(cat._id, cat.name)}
-                        className="p-1.5 rounded-lg border border-stone-200 dark:border-rose-900/50 text-rose-500 hover:bg-rose-600 hover:text-white transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-800 text-rose-500 hover:bg-rose-600 hover:text-white transition-colors cursor-pointer"
                         title="Delete Category"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -497,20 +497,20 @@ export default function AdminCategoriesPage() {
       {/* ================= TAB 2: VARIANT ATTRIBUTES LIST ================= */}
       {activeTab === "attributes" && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-2xl p-4">
+          <div className="flex items-center justify-between bg-white dark:bg-[#161113] border border-stone-200 dark:border-stone-800/80 rounded-2xl p-4">
             <div>
-              <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2">
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Sliders className="h-4 w-4 text-rose-500" />
                 <span>Skincare Product Variant Attributes</span>
               </h3>
-              <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                 Define variant options like Size (30ml, 50ml), SPF (30, 50), Skin Type, Concern, etc. to attach to categories and products.
               </p>
             </div>
 
             <Button
               onClick={() => setIsAttrModalOpen(true)}
-              className="bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl px-4 py-2 shrink-0 cursor-pointer shadow-sm"
+              className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl px-4 py-2 shrink-0 cursor-pointer shadow-sm"
             >
               + Create Attribute
             </Button>
@@ -520,27 +520,27 @@ export default function AdminCategoriesPage() {
             {attributes.map((attr: any) => (
               <div
                 key={attr._id}
-                className="bg-white dark:bg-[#160E12] border border-stone-200/80 dark:border-rose-900/40 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between"
+                className="bg-white dark:bg-[#161113] border border-stone-200/80 dark:border-stone-800/80 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-rose-950/60">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800/60">
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="font-extrabold text-stone-900 dark:text-white text-base">
+                        <h4 className="font-bold text-stone-900 dark:text-stone-100 text-base">
                           {attr.name}
                         </h4>
                         {attr.nameBn && (
-                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md border border-rose-200/60 dark:border-rose-900/30">
+                          <span className="text-xs font-semibold text-rose-500 bg-stone-100 dark:bg-[#0d0709] px-2 py-0.5 rounded-md border border-stone-200 dark:border-stone-800">
                             {attr.nameBn}
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] font-mono text-stone-400 mt-0.5">/{attr.slug}</p>
+                      <p className="text-[11px] font-mono text-stone-400 dark:text-stone-500 mt-0.5">/{attr.slug}</p>
                     </div>
 
                     <button
                       onClick={() => handleDeleteAttribute(attr._id, attr.name)}
-                      className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition"
+                      className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-stone-100 dark:hover:bg-red-950/30 rounded-lg transition"
                       title="Delete attribute"
                     >
                       <Trash2 size={16} />
@@ -549,19 +549,19 @@ export default function AdminCategoriesPage() {
 
                   {/* Values List Pills */}
                   <div className="pt-3">
-                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-stone-500 dark:text-slate-400 block mb-2">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block mb-2">
                       Available Options ({attr.values?.length || 0})
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {attr.values?.map((val: string, idx: number) => (
                         <span
                           key={idx}
-                          className="inline-flex items-center gap-1.5 bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 px-3 py-1 rounded-xl text-xs font-semibold text-stone-700 dark:text-rose-100 group"
+                          className="inline-flex items-center gap-1.5 bg-stone-100 dark:bg-[#0d0709] border border-stone-200 dark:border-stone-800 px-3 py-1 rounded-xl text-xs font-semibold text-stone-700 dark:text-stone-200 group"
                         >
                           <span>{val}</span>
                           <button
                             onClick={() => handleRemoveValueFromAttr(attr._id, val)}
-                            className="text-stone-400 hover:text-red-500 transition"
+                            className="text-stone-400 hover:text-red-500 transition cursor-pointer"
                             title="Remove value"
                           >
                             <X size={12} />
@@ -573,7 +573,7 @@ export default function AdminCategoriesPage() {
                 </div>
 
                 {/* Add New Option Value Input Form */}
-                <div className="pt-3 border-t border-stone-100 dark:border-rose-950/60 flex items-center gap-2">
+                <div className="pt-3 border-t border-stone-100 dark:border-stone-800/60 flex items-center gap-2">
                   <Input
                     placeholder="Add option (e.g. 250ml or SPF 100)..."
                     value={newValInputs[attr._id] || ""}
@@ -586,12 +586,12 @@ export default function AdminCategoriesPage() {
                         handleAddValueToAttr(attr._id);
                       }
                     }}
-                    className="h-9 text-xs bg-stone-50 dark:bg-slate-900 border-stone-200 dark:border-slate-800 rounded-xl"
+                    className="h-9 text-xs bg-stone-50 dark:bg-[#0d0709] border-stone-200 dark:border-stone-800 rounded-xl"
                   />
                   <Button
                     onClick={() => handleAddValueToAttr(attr._id)}
                     disabled={addingValueAttrId === attr._id}
-                    className="h-9 px-3.5 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl shrink-0 cursor-pointer shadow-xs"
+                    className="h-9 px-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shrink-0 cursor-pointer shadow-xs"
                   >
                     {addingValueAttrId === attr._id ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
                     <span>Add</span>
@@ -612,17 +612,17 @@ export default function AdminCategoriesPage() {
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="relative w-full max-w-xl rounded-3xl border border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#1C1014] text-stone-800 dark:text-rose-100 p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-xl rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] text-stone-800 dark:text-stone-100 p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-950/60 pb-3">
-              <h2 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
+            <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800/60 pb-3">
+              <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Tag className="h-4.5 w-4.5 text-rose-500" />
                 {editingCategory ? "Edit Category" : "Add New Category"}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-full p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-rose-950"
+                className="rounded-full p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800"
               >
                 <X className="h-4 w-4" />
               </button>

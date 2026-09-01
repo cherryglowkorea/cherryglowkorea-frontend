@@ -221,17 +221,17 @@ export default function OrdersPage() {
   return (
     <div className="w-full space-y-8">
       {/* 1. Header & Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-transparent p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 bg-white/70 dark:bg-[#160E12]/80 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113]">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-rose-50">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100">
               Orders Management
             </h1>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-xs">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-xs">
               {orders.length} Total
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-300/70 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
             Track, filter, update status, and manage all customer orders in real-time.
           </p>
         </div>
@@ -240,10 +240,10 @@ export default function OrdersPage() {
           <button
             onClick={fetchOrders}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border border-stone-200 dark:border-rose-800/60 bg-white dark:bg-rose-950/60 text-xs font-semibold text-stone-700 dark:text-rose-200 hover:bg-stone-100 dark:hover:bg-rose-900/50 transition-all shadow-2xs"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#0d0709] text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all shadow-2xs cursor-pointer"
             title="Refresh orders"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-rose-500" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 text-stone-400 ${loading ? "animate-spin text-rose-500" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
 
@@ -264,40 +264,40 @@ export default function OrdersPage() {
           onClick={() => setActiveTab("all")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             activeTab === "all"
-              ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/40"
-              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-rose-300"
+              ? "border-rose-500 ring-1 ring-rose-500/20 bg-white dark:bg-[#161113]"
+              : "border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] hover:border-stone-700"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500 dark:text-rose-300/70">
+            <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
               Total Orders
             </span>
-            <div className="p-2 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">
+            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
               <ShoppingBag className="h-4 w-4" />
             </div>
           </div>
-          <div className="text-2xl font-black text-stone-900 dark:text-rose-100 mt-2">
+          <div className="text-2xl font-black text-stone-900 dark:text-stone-100 mt-2">
             {metrics.totalCount}
           </div>
-          <div className="text-[11px] text-stone-400 dark:text-rose-300/50 mt-1">
+          <div className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">
             All recorded orders
           </div>
         </div>
 
         {/* Metric 2: Revenue */}
-        <div className="p-4 rounded-2xl border border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14]">
+        <div className="p-4 rounded-2xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500 dark:text-rose-300/70">
+            <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
               Total Revenue
             </span>
-            <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
               <DollarSign className="h-4 w-4" />
             </div>
           </div>
           <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-2">
             ৳ {metrics.totalRevenue.toLocaleString()}
           </div>
-          <div className="text-[11px] text-stone-400 dark:text-rose-300/50 mt-1">
+          <div className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">
             Non-cancelled sales
           </div>
         </div>
@@ -307,15 +307,15 @@ export default function OrdersPage() {
           onClick={() => setActiveTab("pending")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             activeTab === "pending"
-              ? "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/50 dark:bg-amber-950/40"
-              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-amber-300"
+              ? "border-amber-500 ring-1 ring-amber-500/20 bg-white dark:bg-[#161113]"
+              : "border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] hover:border-amber-500/50"
           }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
               Pending Orders
             </span>
-            <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
+            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
               <Clock className="h-4 w-4" />
             </div>
           </div>
@@ -332,15 +332,15 @@ export default function OrdersPage() {
           onClick={() => setActiveTab("delivered")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             activeTab === "delivered"
-              ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/40"
-              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-emerald-300"
+              ? "border-emerald-500 ring-1 ring-emerald-500/20 bg-white dark:bg-[#161113]"
+              : "border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] hover:border-emerald-500/50"
           }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
               Delivered
             </span>
-            <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
               <CheckCircle2 className="h-4 w-4" />
             </div>
           </div>
@@ -354,23 +354,23 @@ export default function OrdersPage() {
       </div>
 
       {/* 3. Search & Filter Bar */}
-      <div className="space-y-4 bg-white dark:bg-[#180f14] p-4 sm:p-5 rounded-2xl border border-stone-200 dark:border-rose-900/40 shadow-xs">
+      <div className="space-y-4 bg-white dark:bg-[#161113] p-4 sm:p-5 rounded-2xl border border-stone-200 dark:border-stone-800/80 shadow-xs">
         {/* Top Controls: Search, Payment Filter & Sort */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-rose-300/50" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by order #, customer name, phone, item..."
-              className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 pl-10 pr-10 text-xs sm:text-sm text-stone-900 dark:text-rose-100 placeholder-stone-400 dark:placeholder-rose-300/40 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all"
+              className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 pl-10 pr-10 text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500/20 transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-stone-400 hover:text-stone-600 dark:hover:text-rose-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -382,7 +382,7 @@ export default function OrdersPage() {
             <select
               value={paymentFilter}
               onChange={(e) => setPaymentFilter(e.target.value)}
-              className="rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 px-3 py-2.5 text-xs text-stone-800 dark:text-rose-200 focus:border-rose-500 focus:outline-none"
+              className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] px-3 py-2.5 text-xs text-stone-800 dark:text-stone-200 focus:border-rose-500 focus:outline-none"
             >
               <option value="all">All Payment Methods</option>
               <option value="cash">Cash On Delivery</option>
@@ -395,7 +395,7 @@ export default function OrdersPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 px-3 py-2.5 text-xs text-stone-800 dark:text-rose-200 focus:border-rose-500 focus:outline-none"
+              className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] px-3 py-2.5 text-xs text-stone-800 dark:text-stone-200 focus:border-rose-500 focus:outline-none"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -406,7 +406,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Status Filter Pill Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-stone-100 dark:border-rose-900/30">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-stone-100 dark:border-stone-800/60">
           {[
             { key: "all", label: "All Orders", count: metrics.totalCount },
             { key: "pre-order", label: "⏳ Pre-Orders", count: metrics.preOrderCount },
@@ -421,10 +421,10 @@ export default function OrdersPage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   isActive
                     ? "bg-rose-600 text-white shadow-xs"
-                    : "bg-stone-100 dark:bg-rose-950/60 text-stone-600 dark:text-rose-300 hover:bg-stone-200 dark:hover:bg-rose-900/40"
+                    : "bg-stone-100 dark:bg-[#0d0709] text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-800 border border-transparent dark:border-stone-800"
                 }`}
               >
                 <span>{tab.label}</span>
@@ -432,7 +432,7 @@ export default function OrdersPage() {
                   className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                     isActive
                       ? "bg-white/20 text-white"
-                      : "bg-stone-200 dark:bg-rose-900/60 text-stone-700 dark:text-rose-200"
+                      : "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300"
                   }`}
                 >
                   {tab.count}
@@ -444,7 +444,7 @@ export default function OrdersPage() {
           {isFiltered && (
             <button
               onClick={clearFilters}
-              className="ml-auto text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 shrink-0"
+              className="ml-auto text-xs font-semibold text-rose-500 hover:underline flex items-center gap-1 shrink-0 cursor-pointer"
             >
               <X className="h-3 w-3" /> Clear Filters
             </button>
@@ -453,9 +453,9 @@ export default function OrdersPage() {
       </div>
 
       {/* 4. Filter Results Summary */}
-      <div className="flex items-center justify-between text-xs text-stone-500 dark:text-rose-300/70">
+      <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
         <span>
-          Showing <strong>{filteredOrders.length}</strong> of {orders.length} orders
+          Showing <strong className="text-stone-900 dark:text-stone-100 font-mono">{filteredOrders.length}</strong> of {orders.length} orders
         </span>
       </div>
 

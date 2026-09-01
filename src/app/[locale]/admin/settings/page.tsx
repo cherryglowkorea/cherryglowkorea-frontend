@@ -166,17 +166,17 @@ export default function AdminSettingsPage() {
   return (
     <div className="w-full space-y-8">
       {/* 1. Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-transparent p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 bg-white/70 dark:bg-[#160E12]/80 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113]">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-rose-50 flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-2">
               Store & System Settings
             </h1>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20 flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5" /> Live Config
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-300/70 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
             Configure store branding, shipping rates, payment gateways, and SEO metadata.
           </p>
         </div>
@@ -184,7 +184,7 @@ export default function AdminSettingsPage() {
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-extrabold text-xs shadow-md hover:shadow-lg transition-all disabled:opacity-50 self-start sm:self-auto cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all disabled:opacity-50 self-start sm:self-auto cursor-pointer"
         >
           {saving ? (
             <RefreshCw className="h-4 w-4 animate-spin" />
@@ -196,7 +196,7 @@ export default function AdminSettingsPage() {
       </div>
 
       {/* 2. Navigation Tabs Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar border-b border-stone-200 dark:border-rose-900/40">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar border-b border-stone-200 dark:border-stone-800/80">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -207,7 +207,7 @@ export default function AdminSettingsPage() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 isActive
                   ? "bg-rose-600 text-white shadow-xs"
-                  : "bg-white dark:bg-rose-950/60 text-stone-700 dark:text-rose-200 border border-stone-200 dark:border-rose-900/40 hover:bg-stone-100 dark:hover:bg-rose-900/40"
+                  : "bg-white dark:bg-[#161113] text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -220,13 +220,13 @@ export default function AdminSettingsPage() {
       {/* 3. Form Content Body */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-3xl border border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] p-6 shadow-xs space-y-6"
+        className="rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] p-6 shadow-xs space-y-6"
       >
         {/* TAB 1: GENERAL PROFILE */}
         {activeTab === "general" && (
           <div className="space-y-6">
-            <div className="border-b border-stone-100 dark:border-rose-900/30 pb-3">
-              <h2 className="text-base font-bold text-stone-900 dark:text-rose-100 flex items-center gap-2">
+            <div className="border-b border-stone-100 dark:border-stone-800/60 pb-3">
+              <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Store className="h-4.5 w-4.5 text-rose-500" /> Store Branding & Contact
               </h2>
               <p className="text-xs text-stone-500 dark:text-rose-300/70 mt-0.5">
@@ -237,63 +237,63 @@ export default function AdminSettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Store Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Store Name <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.storeName || ""}
                   onChange={(e) => handleChange("storeName", e.target.value)}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                   required
                 />
               </div>
 
               {/* Currency Symbol */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Currency Symbol <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.currencySymbol || "৳"}
                   onChange={(e) => handleChange("currencySymbol", e.target.value)}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 font-bold focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 font-bold focus:border-rose-500 focus:outline-none"
                   required
                 />
               </div>
 
               {/* Support Email */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Support Email Address <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="email"
                   value={formData.storeEmail || ""}
                   onChange={(e) => handleChange("storeEmail", e.target.value)}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                   required
                 />
               </div>
 
               {/* Support Phone */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Support Phone Number <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.storePhone || ""}
                   onChange={(e) => handleChange("storePhone", e.target.value)}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 font-mono focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 font-mono focus:border-rose-500 focus:outline-none"
                   required
                 />
               </div>
 
               {/* Tagline */}
               <div className="md:col-span-2 space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Store Tagline / Slogan
                 </label>
                 <input
@@ -301,20 +301,20 @@ export default function AdminSettingsPage() {
                   value={formData.storeTagline || ""}
                   onChange={(e) => handleChange("storeTagline", e.target.value)}
                   placeholder="Premium K-Beauty Skincare & Cosmetic Products"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
               {/* Store Address */}
               <div className="md:col-span-2 space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Store Physical Address
                 </label>
                 <textarea
                   rows={2}
                   value={formData.storeAddress || ""}
                   onChange={(e) => handleChange("storeAddress", e.target.value)}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none resize-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none resize-none"
                 />
               </div>
 

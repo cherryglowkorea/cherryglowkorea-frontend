@@ -210,18 +210,18 @@ export default function OrderDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 rounded-2xl border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] text-stone-800 dark:text-rose-100 shadow-2xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 rounded-2xl border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] text-stone-800 dark:text-stone-100 shadow-2xl">
         {/* Header */}
-        <div className="bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-transparent dark:from-rose-900/40 dark:via-rose-950/20 dark:to-transparent p-6 border-b border-stone-200 dark:border-rose-900/30 relative">
+        <div className="p-6 border-b border-stone-200 dark:border-stone-800/80 relative">
           <div className="flex flex-wrap items-center justify-between gap-4 pr-6">
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-stone-900 text-white dark:bg-rose-500 dark:text-white">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-stone-900 text-white dark:bg-stone-800 dark:text-stone-100">
                   {orderNo}
                 </span>
                 <button
                   onClick={handleCopyId}
-                  className="p-1 rounded-md hover:bg-stone-200 dark:hover:bg-rose-900/60 text-stone-500 dark:text-rose-300 transition-colors"
+                  className="p-1 rounded-md hover:bg-stone-200 dark:hover:bg-white/10 text-stone-500 dark:text-stone-400 transition-colors"
                   title="Copy Order ID"
                 >
                   {copied ? (
@@ -230,7 +230,7 @@ export default function OrderDetailModal({
                     <Copy className="h-4 w-4" />
                   )}
                 </button>
-                <span className="text-xs text-stone-400 dark:text-rose-300/60 flex items-center gap-1">
+                <span className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
                   {order.createdAt
                     ? new Date(order.createdAt).toLocaleString("en-US", {
@@ -240,7 +240,7 @@ export default function OrderDetailModal({
                     : "N/A"}
                 </span>
               </div>
-              <DialogTitle className="text-xl font-bold mt-2 text-stone-900 dark:text-rose-50 flex items-center gap-2">
+              <DialogTitle className="text-xl font-bold mt-2 text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 Order Details
                 {order.source === "admin" && (
                   <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium">
@@ -254,7 +254,7 @@ export default function OrderDetailModal({
             <div className="flex items-center gap-3">
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-rose-800 bg-white dark:bg-rose-900/30 text-xs font-semibold text-stone-700 dark:text-rose-100 hover:bg-stone-100 dark:hover:bg-rose-800/50 transition-all shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-800 bg-white dark:bg-[#0d0709] text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all shadow-xs"
               >
                 <Printer className="h-4 w-4 text-rose-500" />
                 Print Invoice
