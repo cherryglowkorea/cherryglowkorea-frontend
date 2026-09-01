@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useGetProductsQuery, useGetFeaturedProductsQuery } from "@/redux/api/ecommerceApi";
 import { useCart } from "@/context/CartContext";
 import {
@@ -21,6 +21,7 @@ import {
 export default function CampaignSection() {
   const locale = useLocale();
   const isBn = locale === "bn";
+  const tCamp = useTranslations("campaignDeals");
   const { addToCart } = useCart();
 
   const { data: dbProducts = [], isLoading } = useGetProductsQuery() as any;
@@ -92,17 +93,15 @@ export default function CampaignSection() {
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-rose-500/20 to-pink-500/20 border border-rose-500/40 text-rose-300 text-xs font-extrabold uppercase tracking-wider">
                 <Zap size={14} className="text-amber-400 fill-amber-400 animate-pulse" />
-                <span>{isBn ? "⚡ সীমিত সময়ের স্পেশাল ধামাকা অফার" : "⚡ Limited Time Flash Campaign"}</span>
+                <span>{tCamp("badge")}</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-black tracking-tight text-white flex items-center gap-2">
-                <span>{isBn ? "আজকের স্পেশাল ক্যাম্পেইন ডিল" : "Special Campaign Deals"}</span>
+                <span>{tCamp("title")}</span>
                 <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-rose-500 fill-rose-500 animate-bounce" />
               </h2>
               <p className="text-xs sm:text-sm text-stone-300 max-w-xl">
-                {isBn
-                  ? "অরিজিনাল কোরিয়ান স্কিনকেয়ার কসমেটিক্সে সেরা ডিসকাউন্ট। দ্রুত স্টক শেষ হওয়ার আগেই অর্ডার নিশ্চিত করুন!"
-                  : "Authentic Korean Skincare items at unbeatable campaign prices. Claim your deals before stock runs out!"}
+                {tCamp("subtext")}
               </p>
             </div>
 
@@ -110,7 +109,7 @@ export default function CampaignSection() {
             <div className="flex items-center gap-3 bg-white/5 border border-rose-500/30 backdrop-blur-md px-4 py-3 rounded-2xl shrink-0">
               <div className="flex items-center gap-1.5 text-rose-400 text-xs font-bold mr-1">
                 <Clock size={16} className="text-rose-400 animate-spin" style={{ animationDuration: "8s" }} />
-                <span>{isBn ? "অফার শেষ হতে বাকি:" : "Ends In:"}</span>
+                <span>{tCamp("endsIn")}</span>
               </div>
 
               <div className="flex items-center gap-1.5 text-center font-mono">
@@ -118,21 +117,21 @@ export default function CampaignSection() {
                   <span className="block text-base sm:text-lg font-black text-white">
                     {String(timeLeft.hours).padStart(2, "0")}
                   </span>
-                  <span className="block text-[9px] uppercase font-sans text-stone-400">{isBn ? "ঘণ্টা" : "Hrs"}</span>
+                  <span className="block text-[9px] uppercase font-sans text-stone-400">{tCamp("hrs")}</span>
                 </div>
                 <span className="text-rose-400 font-bold text-lg">:</span>
                 <div className="bg-rose-950/80 border border-rose-500/40 rounded-xl px-2.5 py-1 min-w-[40px]">
                   <span className="block text-base sm:text-lg font-black text-white">
                     {String(timeLeft.minutes).padStart(2, "0")}
                   </span>
-                  <span className="block text-[9px] uppercase font-sans text-stone-400">{isBn ? "মিঃ" : "Min"}</span>
+                  <span className="block text-[9px] uppercase font-sans text-stone-400">{tCamp("min")}</span>
                 </div>
                 <span className="text-rose-400 font-bold text-lg">:</span>
                 <div className="bg-gradient-to-br from-rose-500 to-pink-600 rounded-xl px-2.5 py-1 min-w-[40px] shadow-sm">
                   <span className="block text-base sm:text-lg font-black text-white">
                     {String(timeLeft.seconds).padStart(2, "0")}
                   </span>
-                  <span className="block text-[9px] uppercase font-sans text-rose-100">{isBn ? "সেকেন্ড" : "Sec"}</span>
+                  <span className="block text-[9px] uppercase font-sans text-rose-100">{tCamp("sec")}</span>
                 </div>
               </div>
             </div>
@@ -211,7 +210,7 @@ export default function CampaignSection() {
                         className="w-full h-9 mt-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold text-xs shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <ShoppingBag size={14} />
-                        <span>{isBn ? "অর্ডার করুন" : "Add to Cart"}</span>
+                        <span>{tCamp("addToCart")}</span>
                       </button>
                     </div>
                   </div>
@@ -224,14 +223,14 @@ export default function CampaignSection() {
           <div className="relative z-10 pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs border-t border-rose-900/40">
             <div className="flex items-center gap-2 text-stone-300">
               <ShieldCheck className="h-4 w-4 text-emerald-400" />
-              <span>{isBn ? "১০০% অরিজিনাল সাউথ কোরিয়ান ইমপোর্টেড কসমেটিক্স" : "100% Guaranteed Authentic South Korean Imports"}</span>
+              <span>{tCamp("guarantee")}</span>
             </div>
 
             <Link
               href="/products?sort=discount"
               className="font-bold text-rose-400 hover:text-rose-300 transition flex items-center gap-1 hover:underline group"
             >
-              <span>{isBn ? "সকল অফার প্রোডাক্ট দেখুন" : "Explore All Campaign Deals"}</span>
+              <span>{tCamp("exploreAllDeals")}</span>
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>

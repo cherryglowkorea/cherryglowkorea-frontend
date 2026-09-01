@@ -3,13 +3,17 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Heart, ShoppingBag } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCart } from "@/context/CartContext";
 import AnimatedDiscountBorder from "../shared/AnimatedDiscountBorder";
-import { cleanProductName, getVariantLabel } from "@/lib/utils";
+import { cleanProductName, getVariantLabel, formatPrice } from "@/lib/utils";
 
 export default function ProductCard({ product, onAddToCart, index = 0, viewMode = "grid" }) {
+  const tCard = useTranslations("productCard");
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { addToCart: contextAddToCart } = useCart();
   const isWishlisted = isInWishlist(product._id || product.id);
 
   const {
@@ -33,13 +37,24 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
 
   /* ---------------- Price Logic ---------------- */
   const { originalPrice, finalPrice } = useMemo(() => {
-    let base = selectedVariant ? Number(selectedVariant.price) : Number(product.price || product.basePrice || product.minPrice || 0);
+    let base = Number(product.price || product.basePrice || product.minPrice || 0);
     let sale = Number(product.salePrice) || base;
+
+    if (selectedVariant && selectedVariant.price) {
+      const varP = Number(selectedVariant.price);
+      if (varP > 0) base = varP;
+    }
 
     if (discountType === "percentage" && discountValue > 0) {
       sale = Math.round(base - (base * discountValue) / 100);
     } else if (discountType === "flat" && discountValue > 0) {
       sale = Math.max(base - discountValue, 0);
+    }
+
+    // Handle products where product.price is regular and product.salePrice is offer price
+    if (product.price && product.salePrice && Number(product.price) > Number(product.salePrice)) {
+      base = Number(product.price);
+      sale = Number(product.salePrice);
     }
 
     return {
@@ -48,13 +63,16 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
     };
   }, [selectedVariant, product, discountType, discountValue]);
 
-  const hasDiscount = (discountValue > 0) || (originalPrice > finalPrice && finalPrice > 0);
-  const calculatedDiscountPercent = hasDiscount && originalPrice > finalPrice
+  const hasDiscount = originalPrice > finalPrice && finalPrice >= 0;
+  const calculatedDiscountPercent = hasDiscount
     ? Math.round(((originalPrice - finalPrice) / originalPrice) * 100)
-    : (discountValue || 0);
+    : 0;
 
   /* ---------------- Stock Calculation ---------------- */
   const inStock = useMemo(() => {
+    if (type === "combo") {
+      return (product.stock ?? 0) > 0;
+    }
     // If selected variant explicitly has stock defined
     if (selectedVariant && typeof selectedVariant.stock === "number") {
       return selectedVariant.stock > 0;
@@ -70,25 +88,35 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
     }
     // Default to in stock if not explicitly set to 0
     return true;
-  }, [selectedVariant, product.stock, variants]);
+  }, [selectedVariant, product.stock, variants, type]);
+
+  const allowPreOrder = product.allowPreOrder !== false;
+  const canPreOrder = !inStock && allowPreOrder;
+  const canAddToCart = inStock || canPreOrder;
 
   /* ---------------- Cart Payload ---------------- */
   const handleAddToCart = (e) => {
     if (e) e.stopPropagation();
-    if (!inStock) return;
+    if (!canAddToCart) return;
 
     const productForCart = {
       _id: productId,
+      productId: productId,
       name,
-      image: thumbnail || image || images?.[0]?.url || "/placeholder.png",
+      image: thumbnail || image || images?.[0]?.url || "/placeholder.jpg",
       variants,
       selectedVariant,
       price: finalPrice,
       type: type || "single",
+      isPreOrder: canPreOrder,
+      stock: product.stock,
+      quantity: 1,
     };
 
     if (onAddToCart) {
       onAddToCart(productForCart);
+    } else {
+      contextAddToCart(productForCart);
     }
   };
 
@@ -104,7 +132,13 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
   /* ---------------- LIST VIEW LAYOUT ---------------- */
   if (viewMode === "list") {
     return (
-      <div className="flex flex-col sm:flex-row items-center gap-5 rounded-2xl bg-white dark:bg-[#1e1215] p-4 border border-stone-200/80 dark:border-white/10 shadow-xs hover:shadow-md transition-all duration-300 w-full group">
+      <div
+        className={`flex flex-col sm:flex-row items-center gap-5 rounded-2xl p-4 border-2 transition-all duration-200 w-full group ${
+          canPreOrder
+            ? "bg-amber-500/5 dark:bg-amber-950/10 border-amber-500/70 dark:border-amber-500/60 hover:border-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+            : "bg-white dark:bg-[#1e1215] border-stone-200/60 dark:border-white/10 hover:border-pink-500/80 dark:hover:border-pink-500/70 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)]"
+        }`}
+      >
         {/* Full-Bleed Image Container */}
         <div className="relative w-full sm:w-48 h-44 shrink-0 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden">
           <Link href={`/products/${productId}`} className="block w-full h-full relative group/img cursor-pointer">
@@ -120,9 +154,17 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
 
             {/* Floating Badges */}
             <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
-              {type === "combo" ? (
+              {canPreOrder ? (
+                <span className="text-[10px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-amber-500 to-orange-500 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
+                  ⏳ {tCard("preOrder")}
+                </span>
+              ) : type === "free" || finalPrice === 0 ? (
+                <span className="text-[10px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-emerald-500 to-teal-600 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
+                  🎁 {tCard("freeOrder")}
+                </span>
+              ) : type === "combo" ? (
                 <span className="text-[10px] font-black uppercase tracking-wider text-white bg-rose-600/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
-                  🔥 Combo Deal
+                  🔥 {tCard("comboDeal")}
                 </span>
               ) : (
                 category && (
@@ -142,7 +184,10 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
 
           {/* Floating Wishlist Heart */}
           <button
-            onClick={(e) => toggleWishlist(product, e)}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleWishlist(product, e);
+            }}
             title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
             aria-label="Wishlist"
             className={`absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
@@ -170,7 +215,10 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
                 {variants.map((v, i) => (
                   <button
                     key={i}
-                    onClick={() => setSelectedVariant(v)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedVariant(v);
+                    }}
                     className={`px-2.5 py-0.5 text-[11px] font-bold rounded-full border transition cursor-pointer ${
                       selectedVariant === v
                         ? "bg-rose-500 text-white border-rose-500 shadow-2xs"
@@ -187,7 +235,7 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-stone-100 dark:border-white/5">
             <div className="flex items-center gap-3">
               <span className="text-lg font-extrabold text-rose-600 dark:text-rose-400 font-mono">
-                ৳ {finalPrice.toLocaleString()}
+                {finalPrice === 0 || type === "free" ? `${tCard("free")} (৳ 0)` : `৳ ${finalPrice.toLocaleString()}`}
               </span>
               {hasDiscount && (
                 <span className="text-xs line-through text-stone-400 font-mono">
@@ -196,32 +244,45 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
               )}
               <span
                 className={`text-[11px] font-bold ${
-                  inStock ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"
+                  inStock
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : canPreOrder
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-red-500"
                 }`}
               >
-                {inStock ? "In Stock" : "Out of Stock"}
+                {inStock ? tCard("inStock") : canPreOrder ? tCard("preOrderAvailable") : tCard("outOfStock")}
               </span>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Link
                 href={`/products/${productId}`}
                 className="px-4 py-2 rounded-xl border border-rose-400/80 text-rose-600 dark:text-rose-400 text-xs font-bold hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
               >
-                Details
+                {tCard("details")}
               </Link>
 
-              <button
-                onClick={handleAddToCart}
-                disabled={!inStock}
-                className={`px-5 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shadow-2xs ${
-                  inStock
-                    ? "bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
-                    : "bg-stone-200 dark:bg-white/10 text-stone-400 cursor-not-allowed"
-                }`}
-              >
-                {inStock ? "Add To Cart" : "Out of Stock"}
-              </button>
+              <div className="flex flex-col items-end">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={!canAddToCart}
+                  className={`px-5 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shadow-2xs ${
+                    inStock
+                      ? "bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
+                      : canPreOrder
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white animate-pulse"
+                      : "bg-stone-200 dark:bg-white/10 text-stone-400 cursor-not-allowed"
+                  }`}
+                >
+                  {inStock ? tCard("addToCart") : canPreOrder ? tCard("preOrder") : tCard("outOfStock")}
+                </button>
+                {canPreOrder && (
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium mt-0.5">
+                    {tCard("shipsBackInStock")}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -231,7 +292,13 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
 
   /* ---------------- GRID VIEW LAYOUT (FULL-BLEED BEAUTY CARDS) ---------------- */
   const CardContent = (
-    <div className="flex h-full flex-col rounded-2xl bg-white dark:bg-[#1e1215] p-3 sm:p-3.5 border border-stone-200/80 dark:border-white/10 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
+    <div
+      className={`flex h-full flex-col rounded-2xl p-3 sm:p-3.5 border-2 hover:-translate-y-0.5 transition-all duration-200 group ${
+        canPreOrder
+          ? "bg-amber-500/5 dark:bg-amber-950/10 border-amber-500/70 dark:border-amber-500/60 hover:border-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+          : "bg-white dark:bg-[#1e1215] border-stone-200/60 dark:border-white/10 hover:border-pink-500/80 dark:hover:border-pink-500/70 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)]"
+      }`}
+    >
       
       {/* Full-Bleed Image Banner */}
       <div className="relative w-full h-40 sm:h-52 md:h-56 mb-2.5 sm:mb-3 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden group/img">
@@ -248,9 +315,17 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
 
           {/* Floating Top-Left Badges */}
           <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-10 flex flex-col gap-1 items-start">
-            {type === "combo" ? (
+            {canPreOrder ? (
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-amber-500 to-orange-500 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
+                ⏳ {tCard("preOrder")}
+              </span>
+            ) : type === "free" || finalPrice === 0 ? (
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-emerald-500 to-teal-600 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
+                🎁 {tCard("freeOrder")}
+              </span>
+            ) : type === "combo" ? (
               <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white bg-rose-600/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
-                🔥 Combo
+                🔥 {tCard("combo")}
               </span>
             ) : (
               category && (
@@ -281,7 +356,7 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
                 ))}
               </div>
               <span className="ml-1.5 text-[9px] font-extrabold text-rose-600 dark:text-rose-400">
-                +{product.comboProducts.length} Items
+                {tCard("comboItems", { count: product.comboProducts.length })}
               </span>
             </div>
           )}
@@ -289,7 +364,10 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
 
         {/* Floating Wishlist Love Heart Button */}
         <button
-          onClick={(e) => toggleWishlist(product, e)}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleWishlist(product, e);
+          }}
           title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
           aria-label="Wishlist"
           className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-20 w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
@@ -317,7 +395,10 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
               {variants.map((v, i) => (
                 <button
                   key={i}
-                  onClick={() => setSelectedVariant(v)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedVariant(v);
+                  }}
                   className={`px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full border transition cursor-pointer ${
                     selectedVariant === v
                       ? "bg-rose-500 text-white border-rose-500 shadow-2xs"
@@ -335,55 +416,80 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
           {/* Price & Stock */}
           <div className="flex items-center justify-between pt-1">
             <div className="flex gap-1.5 sm:gap-2 items-baseline flex-wrap">
-              <span className="text-xs sm:text-base font-extrabold text-rose-600 dark:text-rose-400 font-mono">
-                ৳ {finalPrice.toLocaleString()}
-              </span>
-
-              {hasDiscount && (
-                <span className="text-[10px] sm:text-xs line-through text-stone-400 font-mono">
-                  ৳ {originalPrice.toLocaleString()}
-                </span>
-              )}
+              {(() => {
+                const formatted = formatPrice(
+                  originalPrice,
+                  type === "free" ? 0 : finalPrice
+                );
+                return (
+                  <>
+                    {formatted.originalText && (
+                      <span className="text-[10px] sm:text-xs line-through text-stone-400 dark:text-stone-500 font-mono">
+                        {formatted.originalText}
+                      </span>
+                    )}
+                    <span
+                      className={`text-xs sm:text-base font-black ${
+                        formatted.isFree
+                          ? "text-emerald-600 dark:text-emerald-400 tracking-wider uppercase"
+                          : "text-rose-600 dark:text-rose-400 font-mono"
+                      }`}
+                    >
+                      {formatted.finalText}
+                    </span>
+                  </>
+                );
+              })()}
             </div>
 
             <span
               className={`text-[9px] sm:text-[10px] font-bold ${
-                inStock ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"
+                inStock
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : canPreOrder
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-red-500"
               }`}
             >
-              {inStock ? "In Stock" : "Sold Out"}
+              {inStock ? tCard("inStock") : canPreOrder ? tCard("preOrderAvailable") : tCard("outOfStock")}
             </span>
           </div>
 
           {/* Actions Footer */}
-          <div className="flex gap-1.5 sm:gap-2 pt-2.5">
-            <Link
-              href={`/products/${productId}`}
-              className="w-1/2 text-center rounded-xl border border-rose-400/80 text-rose-600 dark:text-rose-400 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer flex items-center justify-center truncate"
-            >
-              Details
-            </Link>
+          <div className="flex flex-col gap-1 pt-2">
+            <div className="flex gap-1.5 sm:gap-2">
+              <Link
+                href={`/products/${productId}`}
+                className="w-1/2 text-center rounded-xl border border-rose-400/80 text-rose-600 dark:text-rose-400 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer flex items-center justify-center truncate"
+              >
+                {tCard("details")}
+              </Link>
 
-            <button
-              onClick={handleAddToCart}
-              disabled={!inStock}
-              className={`w-1/2 rounded-xl py-1.5 sm:py-2 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shadow-2xs flex items-center justify-center truncate ${
-                inStock
-                  ? "bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
-                  : "bg-stone-200 dark:bg-white/10 text-stone-400 cursor-not-allowed"
-              }`}
-            >
-              {inStock ? "Add" : "Out"}
-            </button>
+              <button
+                onClick={handleAddToCart}
+                disabled={!canAddToCart}
+                className={`w-1/2 rounded-xl py-1.5 sm:py-2 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shadow-2xs flex items-center justify-center truncate ${
+                  inStock
+                    ? "bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
+                    : canPreOrder
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold"
+                    : "bg-stone-200 dark:bg-white/10 text-stone-400 cursor-not-allowed"
+                }`}
+              >
+                {inStock ? tCard("add") : canPreOrder ? tCard("preOrder") : tCard("out")}
+              </button>
+            </div>
+
+            {canPreOrder && (
+              <span className="text-[9px] sm:text-[10px] text-amber-600 dark:text-amber-400 font-medium text-center italic">
+                {tCard("shipsBackInStock")}
+              </span>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 
-  return hasDiscount && calculatedDiscountPercent >= 10 ? (
-    <AnimatedDiscountBorder>{CardContent}</AnimatedDiscountBorder>
-  ) : (
-    CardContent
-  );
+  return CardContent;
 }

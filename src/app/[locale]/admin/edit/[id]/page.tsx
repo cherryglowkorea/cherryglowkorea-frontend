@@ -37,6 +37,7 @@ import {
   Flame,
   Star,
   Info,
+  Clock,
 } from "lucide-react";
 
 const CATEGORIES = [
@@ -83,6 +84,7 @@ export default function EditProductPage() {
     isFeatured: false,
     isBestSelling: false,
     type: "single", // "single" | "combo"
+    allowPreOrder: true,
     price: "",
     salePrice: "",
   });
@@ -140,11 +142,19 @@ export default function EditProductPage() {
           isFeatured: p.isFeatured || false,
           isBestSelling: p.isBestSelling || false,
           type: p.type || "single",
+          allowPreOrder: p.allowPreOrder !== false,
           price: p.type === "combo" ? String(p.price || "") : "",
           salePrice: p.type === "combo" ? String(p.salePrice || "") : "",
         });
 
-        setVariants(p.variants || []);
+        const sanitizedVariants = (p.variants || []).map((v: any) => ({
+          ...v,
+          weight: v.weight ?? "",
+          unit: v.unit || "ml",
+          price: v.price ?? "",
+          stock: v.stock ?? "",
+        }));
+        setVariants(sanitizedVariants);
         setExistingImages(p.images || []);
 
         if (p.type === "combo" && p.comboProducts && p.comboProducts.length > 0) {
@@ -263,7 +273,6 @@ export default function EditProductPage() {
         }
       });
 
-      // Keep existing images
       formData.append("existingImages", JSON.stringify(existingImages));
 
       // Append new images
@@ -397,7 +406,7 @@ export default function EditProductPage() {
                 <Package className="h-5 w-5" /> Basic Product Details
               </div>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
-                {form.type === "combo" ? "Combo Package" : "Single Product"}
+                {form.type === "combo" ? "Combo Package" : form.type === "free" ? "Free Order Item" : "Single Product"}
               </span>
             </div>
 
@@ -413,6 +422,7 @@ export default function EditProductPage() {
                     ...form,
                     type: v,
                     category: v === "combo" ? "COMBO DEALS" : form.category,
+                    ...(v === "free" ? { price: "0", salePrice: "0" } : {}),
                   })
                 }
               >
@@ -422,8 +432,30 @@ export default function EditProductPage() {
                 <SelectContent className="rounded-2xl">
                   <SelectItem value="single">Single Product (Standard Skincare)</SelectItem>
                   <SelectItem value="combo">Combo Deal (Custom Bundle Package)</SelectItem>
+                  <SelectItem value="free">Free Order Product (Free Sample / ৳ 0 Item)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Pre-Order Toggle Setting */}
+            <div className="pt-3 border-t border-stone-100 dark:border-rose-900/30 flex items-center justify-between">
+              <div>
+                <span className="font-extrabold text-xs text-stone-800 dark:text-rose-100 flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-amber-500" /> Enable Pre-Order / Backorder
+                </span>
+                <p className="text-[11px] text-stone-500 dark:text-rose-300/60">
+                  Allow customers to place pre-orders when stock is 0
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.allowPreOrder}
+                  onChange={(e) => setForm({ ...form, allowPreOrder: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
             </div>
 
             {/* Product Name & Brand */}
@@ -710,7 +742,7 @@ export default function EditProductPage() {
                       <div className="col-span-3">
                         <Input
                           placeholder="e.g. 150"
-                          value={v.weight}
+                          value={v.weight ?? ""}
                           onChange={(e) => updateVariant(i, "weight", e.target.value)}
                           className="rounded-xl border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950 text-xs"
                         />
@@ -732,7 +764,7 @@ export default function EditProductPage() {
                         <Input
                           type="number"
                           placeholder="Price"
-                          value={v.price}
+                          value={v.price ?? ""}
                           onChange={(e) => updateVariant(i, "price", e.target.value)}
                           className="rounded-xl border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950 text-xs font-mono"
                         />
@@ -741,7 +773,7 @@ export default function EditProductPage() {
                         <Input
                           type="number"
                           placeholder="Stock"
-                          value={v.stock}
+                          value={v.stock ?? ""}
                           onChange={(e) => updateVariant(i, "stock", e.target.value)}
                           className="rounded-xl border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950 text-xs font-mono"
                         />

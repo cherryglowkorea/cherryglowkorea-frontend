@@ -29,13 +29,15 @@ export default async function LocaleLayout({ children, params }) {
       <AuthProvider>
         <WishlistProvider>
           <CartProvider>
-            <ClientNavbar />
-            <PromoPopup />
-            {children}
-            <Toaster richColors position="top-right" />
-            <Messenger />
+            <div lang={locale} className={locale === "bn" ? "font-bangla" : ""}>
+              <ClientNavbar />
+              <PromoPopup />
+              {children}
+              <Toaster richColors position="top-right" />
+              <Messenger />
+              <Footer />
+            </div>
           </CartProvider>
-          <Footer />
         </WishlistProvider>
       </AuthProvider>
     </NextIntlClientProvider>

@@ -24,10 +24,11 @@ import {
   Star,
   ArrowRight,
   RefreshCw,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useWishlist } from "@/context/WishlistContext";
-import { cleanProductName, getVariantLabel } from "@/lib/utils";
+import { cleanProductName, getVariantLabel, formatPrice } from "@/lib/utils";
 import StockBadge from "@/components/shared/StockBadge";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
@@ -302,19 +303,25 @@ export default function ProductDetailsClient({
   }, [product, selectedVariant]);
 
   /* ---------------- Prices ---------------- */
+  const isFreeProduct = useMemo(() => {
+    return product?.type === "free" || product?.isFree || (product?.price === 0 && product?.salePrice === 0);
+  }, [product]);
+
   const finalPrice = useMemo(() => {
     if (!product) return 0;
+    if (isFreeProduct) return 0;
     if (product.type === "combo") return product.salePrice || product.price || 0;
     return selectedVariant
       ? selectedVariant.price || product.price || 0
       : product.price || product.basePrice || 0;
-  }, [product, selectedVariant]);
+  }, [product, selectedVariant, isFreeProduct]);
 
   const originalPrice = useMemo(() => {
     if (!product) return 0;
     if (product.type === "combo") return product.price || 0;
-    return product.price || product.basePrice || finalPrice;
-  }, [product, finalPrice]);
+    const base = selectedVariant?.price || product.basePrice || product.price || 0;
+    return base > 0 ? base : finalPrice;
+  }, [product, selectedVariant, finalPrice]);
 
   const discountAmount = originalPrice > finalPrice ? originalPrice - finalPrice : 0;
   const discountPercent =
@@ -325,8 +332,12 @@ export default function ProductDetailsClient({
   /* ---------------- Stock ---------------- */
   const stock =
     product?.type === "combo"
-      ? product.stock || 35
-      : selectedVariant?.stock ?? product?.stock ?? 10;
+      ? product.stock ?? 0
+      : selectedVariant?.stock ?? product?.stock ?? 0;
+
+  const allowPreOrder = product?.allowPreOrder !== false;
+  const canPreOrder = stock <= 0 && allowPreOrder;
+  const canPurchase = stock > 0 || canPreOrder;
 
   /* ---------------- Add To Cart ---------------- */
   const handleAddToCart = () => {
@@ -347,10 +358,11 @@ export default function ProductDetailsClient({
       type: product.type || "single",
       comboProducts: product.comboProducts || [],
       quantity: quantity,
+      isPreOrder: canPreOrder,
     };
 
     addToCart(productForCart);
-    toast.success(`Added ${quantity} item(s) to your cart!`);
+    toast.success(canPreOrder ? `Added ${quantity} pre-order item(s) to your cart!` : `Added ${quantity} item(s) to your cart!`);
     setTimeout(() => setAdding(false), 400);
   };
 
@@ -371,10 +383,10 @@ export default function ProductDetailsClient({
       type: product.type || "single",
       comboProducts: product.comboProducts || [],
       quantity: quantity,
+      isPreOrder: canPreOrder,
     };
 
     addToCart(productForCart);
-    // Direct checkout flow bypassing cart page for instant conversion
     router.push("/checkout");
   };
 
@@ -465,19 +477,35 @@ export default function ProductDetailsClient({
 
           {/* Pricing Row */}
           <div className="flex items-baseline gap-3.5 border-b border-stone-200/80 dark:border-white/10 pb-4">
-            <span className="text-2xl md:text-3xl font-extrabold text-rose-600 dark:text-rose-400 font-mono">
-              ৳{(finalPrice * quantity).toLocaleString()}
-            </span>
-            {originalPrice > finalPrice && (
-              <div className="flex items-center gap-2">
-                <span className="line-through text-xs md:text-sm text-stone-400 font-mono">
-                  ৳{(originalPrice * quantity).toLocaleString()}
-                </span>
-                <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-200 uppercase tracking-wider">
-                  Save ৳{((originalPrice - finalPrice) * quantity).toFixed(0)} ({discountPercent}% OFF)
-                </span>
-              </div>
-            )}
+            {(() => {
+              const formatted = formatPrice(
+                originalPrice * quantity,
+                isFreeProduct ? 0 : finalPrice * quantity
+              );
+              return (
+                <>
+                  {formatted.originalText && (
+                    <span className="line-through text-xs md:text-sm text-stone-400 dark:text-stone-500 font-mono">
+                      {formatted.originalText}
+                    </span>
+                  )}
+                  <span
+                    className={`text-2xl md:text-3xl font-black ${
+                      formatted.isFree
+                        ? "text-emerald-600 dark:text-emerald-400 tracking-wider uppercase font-sans"
+                        : "text-rose-600 dark:text-rose-400 font-mono"
+                    }`}
+                  >
+                    {formatted.finalText}
+                  </span>
+                  {!formatted.isFree && originalPrice > finalPrice && (
+                    <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-200 uppercase tracking-wider">
+                      Save ৳{((originalPrice - finalPrice) * quantity).toFixed(0)} ({discountPercent}% OFF)
+                    </span>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Stock Indicator Status Badge (Reusable Component) */}
@@ -648,7 +676,7 @@ export default function ProductDetailsClient({
                       }`}
                     >
                       <span>{label}</span>
-                      {v.price && (
+                      {Boolean(v.price && Number(v.price) > 0) && (
                         <span
                           className={`font-mono text-[11px] ${
                             isSelected ? "text-white/90 font-bold" : "text-stone-500 dark:text-rose-300/70 font-semibold"
@@ -689,24 +717,42 @@ export default function ProductDetailsClient({
             </div>
           </div>
 
+          {/* Pre-Order Banner Notice */}
+          {canPreOrder && (
+            <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-2.5 font-medium shadow-xs">
+              <Clock className="w-4.5 h-4.5 text-amber-500 shrink-0" />
+              <span>
+                <strong>Pre-Order Item:</strong> Ships when back in stock. We will notify you as soon as restocked!
+              </span>
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             <button
               onClick={handleAddToCart}
-              disabled={stock <= 0 || adding}
-              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-stone-900 to-stone-800 dark:from-rose-950 dark:to-stone-900 text-white font-extrabold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all border border-stone-700/50 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              disabled={!canPurchase || adding}
+              className={`w-full py-3.5 px-6 rounded-2xl text-white font-extrabold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all border flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 ${
+                canPreOrder
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 border-amber-400/50"
+                  : "bg-gradient-to-r from-stone-900 to-stone-800 dark:from-rose-950 dark:to-stone-900 border-stone-700/50"
+              }`}
             >
               <ShoppingCart className="w-4 h-4" />
-              <span>{adding ? "Adding..." : "Add to Cart"}</span>
+              <span>{adding ? "Adding..." : canPreOrder ? "Pre-Order Now" : "Add to Cart"}</span>
             </button>
 
             <button
               onClick={handleBuyNow}
-              disabled={stock <= 0}
-              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              disabled={!canPurchase}
+              className={`w-full py-3.5 px-6 rounded-2xl text-white font-extrabold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 ${
+                canPreOrder
+                  ? "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+                  : "bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700"
+              }`}
             >
               <Sparkles className="w-4 h-4" />
-              <span>Buy Now (Instant Checkout)</span>
+              <span>{canPreOrder ? "Pre-Order & Checkout" : "Buy Now (Instant Checkout)"}</span>
             </button>
           </div>
 

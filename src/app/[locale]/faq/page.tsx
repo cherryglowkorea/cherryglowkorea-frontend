@@ -29,12 +29,19 @@ export default function FAQPage() {
     { id: "payment", label: "Payment & Security", icon: CreditCard },
   ];
 
+  const insideCost = 70;
+  const outsideCost = 130;
+  const freeThreshold = 3000;
+
   const faqs = [
     {
       category: "products",
       question: "Are Cherry Glow products 100% authentic and safe for sensitive skin?",
       answer:
         "Yes, absolutely. All Cherry Glow products are 100% authentic and directly imported from certified skincare laboratories in South Korea. They are dermatologically tested, cruelty-free, and formulated to be gentle on all skin types, including sensitive skin.",
+    },
+    {
+      category: "products",
       question: "Are all Cherry Glow products 100% authentic?",
       answer:
         "Yes, absolutely. We source all our cosmetics directly from authorized distributors and brand headquarters in South Korea. Every product comes with a 100% authenticity guarantee.",

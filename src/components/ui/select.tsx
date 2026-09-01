@@ -15,6 +15,7 @@ const SelectValue = SelectPrimitive.Value
 const SelectTrigger = React.forwardRef<any, any>(({ className, children, ...props }: any, ref: any) => (
   <SelectPrimitive.Trigger
     ref={ref}
+    suppressHydrationWarning
     className={cn(
       "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-stone-900 px-3 py-2 text-xs font-semibold text-stone-800 dark:text-rose-100 shadow-2xs focus:outline-none focus:ring-2 focus:ring-rose-400/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 cursor-pointer transition-all duration-200",
       className
@@ -53,6 +54,7 @@ const SelectContent = React.forwardRef<any, any>(({ className, children, positio
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
+      suppressHydrationWarning
       className={cn(
         "relative z-50 max-h-60 min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-2xl border border-stone-200/80 dark:border-white/10 bg-white/95 dark:bg-[#1e1215]/95 text-stone-800 dark:text-rose-50 shadow-xl backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-select-content-transform-origin]",
         position === "popper" &&
@@ -84,6 +86,7 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName
 const SelectItem = React.forwardRef<any, any>(({ className, children, ...props }: any, ref: any) => (
   <SelectPrimitive.Item
     ref={ref}
+    suppressHydrationWarning
     className={cn(
       "relative flex w-full cursor-pointer select-none items-center rounded-xl py-2 pl-3 pr-8 text-xs font-medium outline-none focus:bg-rose-50 dark:focus:bg-rose-950/40 focus:text-rose-600 dark:focus:text-rose-300 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-pink-500 data-[state=checked]:to-rose-500 data-[state=checked]:text-white data-[state=checked]:font-bold data-[disabled]:pointer-events-none data-[disabled]:opacity-50 transition-colors duration-150",
       className

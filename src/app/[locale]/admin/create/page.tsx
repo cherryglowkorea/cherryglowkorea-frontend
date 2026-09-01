@@ -37,6 +37,7 @@ import {
   Sliders,
   Check,
   Info,
+  Clock,
 } from "lucide-react";
 import Image from "next/image";
 import { useGetCategoriesQuery, useGetAttributesQuery } from "@/redux/api/ecommerceApi";
@@ -89,6 +90,7 @@ export default function CreateProductPage() {
     isFeatured: false,
     isBestSelling: false,
     isNewArrival: true,
+    allowPreOrder: true,
     status: "active",
   });
 
@@ -274,6 +276,7 @@ export default function CreateProductPage() {
         isFeatured: form.isFeatured,
         isBestSelling: form.isBestSelling,
         isNewArrival: form.isNewArrival,
+        allowPreOrder: form.allowPreOrder,
         status: form.status,
       };
 
@@ -362,7 +365,7 @@ export default function CreateProductPage() {
               <Package size={15} />
               <span>Product Type Selection</span>
             </label>
-            <div className="grid grid-cols-2 gap-3 text-xs font-bold">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-bold">
               <button
                 type="button"
                 onClick={() => setForm({ ...form, type: "single" })}
@@ -378,7 +381,7 @@ export default function CreateProductPage() {
                     <span>Single Product</span>
                   </div>
                   <p className="text-[11px] font-normal text-stone-500 dark:text-slate-400 mt-0.5">
-                    Standard skincare item (Serum, Cleanser, Cream, etc.)
+                    Standard skincare item
                   </p>
                 </div>
                 {form.type === "single" && <CheckCircle2 className="h-5 w-5 text-rose-500 shrink-0" />}
@@ -396,14 +399,56 @@ export default function CreateProductPage() {
                 <div>
                   <div className="font-extrabold text-sm flex items-center gap-1.5">
                     <Gift size={16} className="text-pink-500" />
-                    <span>Skincare Combo Bundle</span>
+                    <span>Combo Bundle</span>
                   </div>
                   <p className="text-[11px] font-normal text-stone-500 dark:text-slate-400 mt-0.5">
-                    Set / Kit of multiple products bundled at special discount
+                    Set / Kit of multiple items
                   </p>
                 </div>
                 {form.type === "combo" && <CheckCircle2 className="h-5 w-5 text-rose-500 shrink-0" />}
               </button>
+
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, type: "free", price: "0", salePrice: "0" })}
+                className={`p-3.5 rounded-2xl border transition-all text-left flex items-center justify-between cursor-pointer ${
+                  form.type === "free"
+                    ? "bg-white dark:bg-rose-900/80 border-emerald-500 text-emerald-700 dark:text-white shadow-sm ring-1 ring-emerald-400"
+                    : "bg-white/60 dark:bg-stone-900/40 border-stone-200 dark:border-slate-800 text-stone-600 dark:text-slate-300 hover:border-emerald-300"
+                }`}
+              >
+                <div>
+                  <div className="font-extrabold text-sm flex items-center gap-1.5">
+                    <Sparkles size={16} className="text-emerald-500" />
+                    <span>Free Order Product</span>
+                  </div>
+                  <p className="text-[11px] font-normal text-stone-500 dark:text-slate-400 mt-0.5">
+                    Free sample / ৳ 0 promotion item
+                  </p>
+                </div>
+                {form.type === "free" && <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />}
+              </button>
+            </div>
+
+            {/* Pre-Order Toggle Setting */}
+            <div className="pt-2 border-t border-rose-200/40 dark:border-rose-900/40 flex items-center justify-between">
+              <div>
+                <span className="font-extrabold text-xs text-stone-800 dark:text-rose-100 flex items-center gap-1.5">
+                  <Clock size={14} className="text-amber-500" /> Enable Pre-Order / Backorder
+                </span>
+                <p className="text-[11px] text-stone-500 dark:text-slate-400">
+                  Allow customers to order this product even when stock is 0
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.allowPreOrder}
+                  onChange={(e) => setForm({ ...form, allowPreOrder: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
             </div>
           </div>
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useTranslations } from "next-intl";
 import { Star, CheckCircle2, Quote, Sparkles } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
@@ -54,6 +55,7 @@ const DEFAULT_TESTIMONIALS = [
 ];
 
 export default function Testimonials() {
+  const tTest = useTranslations("testimonials");
   const [reviews, setReviews] = useState(DEFAULT_TESTIMONIALS);
 
   const API_BASE =
@@ -82,13 +84,13 @@ export default function Testimonials() {
         {/* Section Header */}
         <div className="text-center space-y-2 max-w-2xl mx-auto">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-300 bg-rose-100/70 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/40 shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5" /> Customer Feedback & Reviews
+            <Sparkles className="w-3.5 h-3.5" /> {tTest("badge")}
           </span>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-stone-900 dark:text-white">
-            What Our Customers Say
+            {tTest("title")}
           </h2>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-100/60">
-            Real experiences and honest feedback from skincare lovers across Bangladesh
+            {tTest("subtitle")}
           </p>
         </div>
 
@@ -157,7 +159,7 @@ export default function Testimonials() {
                             </span>
                           </div>
                           <p className="text-[10px] text-stone-400 dark:text-rose-200/50 font-medium truncate">
-                            {dateStr || "Verified Buyer"}{" "}
+                            {dateStr || tTest("verifiedBuyer")}{" "}
                             {item.productName ? `• ${item.productName}` : ""}
                           </p>
                         </div>
@@ -188,7 +190,7 @@ export default function Testimonials() {
                       </div>
 
                       <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-950/40">
-                        Verified Order
+                        {tTest("verifiedOrder")}
                       </span>
                     </div>
                   </div>

@@ -185,10 +185,15 @@ export default function OrdersTable({
                     {/* Items Summary */}
                     <TableCell className="py-3.5 px-4">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40">
                             {items.length} {items.length === 1 ? "item" : "items"}
                           </span>
+                          {(o.orderType === "pre-order" || o.fulfillmentStatus === "awaiting-stock" || items.some((i: any) => i.isPreOrder)) && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1">
+                              ⏳ Pre-Order
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-stone-600 dark:text-rose-200/80 truncate max-w-[200px]" title={items.map((i) => i.name).join(", ")}>
                           {items[0]?.name || "N/A"}

@@ -4,8 +4,8 @@ import * as React from "react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { GoogleLogin } from "@react-oauth/google";
-import { useTranslations } from "next-intl";
+import { useGoogleLogin } from "@react-oauth/google";
+import { useLocale, useTranslations } from "next-intl";
 import { Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/auth-layout";
 import { FormField } from "@/components/form-field";
@@ -18,16 +18,12 @@ const avatars = {
   female: "/avatars/female.png",
 };
 
-function passwordIssue(password) {
-  if (password.length < 6) return "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।";
-  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password))
-    return "পাসওয়ার্ডে অন্তত একটি অক্ষর ও একটি সংখ্যা থাকতে হবে।";
-  return "";
-}
-
 export default function RegisterPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const isBn = locale === "bn";
   const tAuth = useTranslations("auth");
+
   const [name, setName] = React.useState("");
   const [identifier, setIdentifier] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -37,21 +33,141 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [googleLoading, setGoogleLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState<any>({});
+
+  const handleGoogleRegister = useGoogleLogin({
+    flow: "auth-code",
+    onSuccess: async (codeResponse) => {
+      setGoogleLoading(true);
+      setFormError("");
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/google`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: codeResponse.code }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setFormError(data?.message || (isBn ? "Google রেজিস্ট্রেশন ব্যর্থ হয়েছে।" : "Google registration failed."));
+          return;
+        }
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          window.location.href = "/";
+        }
+      } catch {
+        setFormError(isBn ? "Google রেজিস্টার প্রসেস করতে সমস্যা হয়েছে।" : "Failed to process Google sign up.");
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      setFormError(isBn ? "Google সাইন আপ করা সম্ভব হয়নি।" : "Google sign up was un-successful.");
+    },
+  });
+
+  // Field-level & form-level error states
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [formError, setFormError] = React.useState("");
 
+  // Phone number auto-detection logic
+  const isPhoneInput = React.useMemo(() => {
+    const trimmed = identifier.trim();
+    if (!trimmed) return false;
+    return /^[+0-9\s-]+$/.test(trimmed);
+  }, [identifier]);
+
+  const helperBadge = React.useMemo(() => {
+    const trimmed = identifier.trim();
+    if (!trimmed) return undefined;
+    if (isPhoneInput) return "📱 BD Mobile (+880)";
+    if (trimmed.includes("@")) return "✉️ Email Address";
+    return undefined;
+  }, [identifier, isPhoneInput]);
+
+  // Input change handlers to clear field errors on re-typing
+  const handleNameChange = (val: string) => {
+    setName(val);
+    if (errors.name) setErrors((prev) => ({ ...prev, name: "" }));
+    if (formError) setFormError("");
+  };
+
+  const handleIdentifierChange = (val: string) => {
+    setIdentifier(val);
+    if (errors.identifier) setErrors((prev) => ({ ...prev, identifier: "" }));
+    if (formError) setFormError("");
+  };
+
+  const handlePasswordChange = (val: string) => {
+    setPassword(val);
+    if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
+    if (formError) setFormError("");
+  };
+
+  const handleConfirmPasswordChange = (val: string) => {
+    setConfirmPassword(val);
+    if (errors.confirmPassword) setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+    if (formError) setFormError("");
+  };
+
   function validate() {
-    const next: any = {};
-    if (!name.trim()) next.name = "আপনার নাম লিখুন।";
-    if (!identifier.trim()) next.identifier = "ইমেইল অথবা মোবাইল নম্বর লিখুন।";
-    const pwIssue = passwordIssue(password);
-    if (pwIssue) next.password = pwIssue;
-    if (password !== confirmPassword) next.confirmPassword = "পাসওয়ার্ড মিলছে না।";
+    const next: Record<string, string> = {};
+    const trimmedName = name.trim();
+    const trimmedId = identifier.trim();
+
+    if (!trimmedName) {
+      next.name = isBn ? "আপনার পুরো নাম লিখুন।" : "Please enter your full name.";
+    }
+
+    if (!trimmedId) {
+      next.identifier = isBn
+        ? "ইমেইল অথবা মোবাইল নম্বর লিখুন।"
+        : "Please enter your email or mobile phone number.";
+    } else if (isPhoneInput) {
+      const cleanPhone = trimmedId.replace(/[\s-]/g, "");
+      const isBdPhone = /^(?:\+8801|8801|01)[3-9]\d{8}$/.test(cleanPhone);
+      if (!isBdPhone) {
+        next.identifier = isBn
+          ? "সঠিক ১১ ডিজিটের মোবাইল নম্বর লিখুন (যেমন: 017XXXXXXXX)।"
+          : "Please enter a valid 11-digit BD mobile number (e.g. 017XXXXXXXX).";
+      }
+    } else if (trimmedId.includes("@") || /[a-zA-Z]/.test(trimmedId)) {
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedId);
+      if (!isEmail) {
+        next.identifier = isBn
+          ? "সঠিক ইমেইল ঠিকানা লিখুন (যেমন: user@domain.com)।"
+          : "Please enter a valid email address (e.g. user@domain.com).";
+      }
+    }
+
+    if (!password) {
+      next.password = isBn
+        ? "পাসওয়ার্ড নির্বাচন করুন।"
+        : "Please choose a password.";
+    } else if (password.length < 6) {
+      next.password = isBn
+        ? "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।"
+        : "Password must be at least 6 characters.";
+    } else if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+      next.password = isBn
+        ? "পাসওয়ার্ডে অন্তত একটি অক্ষর ও একটি সংখ্যা থাকতে হবে।"
+        : "Password must contain at least one letter and one number.";
+    }
+
+    if (!confirmPassword) {
+      next.confirmPassword = isBn
+        ? "পাসওয়ার্ডটি নিশ্চিত করুন।"
+        : "Please confirm your password.";
+    } else if (password !== confirmPassword) {
+      next.confirmPassword = isBn
+        ? "পাসওয়ার্ড দুটি মিলছে না।"
+        : "Passwords do not match.";
+    }
+
     setErrors(next);
     return Object.keys(next).length === 0;
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError("");
     if (!validate()) return;
@@ -60,11 +176,11 @@ export default function RegisterPage() {
     try {
       const isEmail = identifier.includes("@");
       const endpoint = isEmail ? "/api/auth/register/email" : "/api/auth/register/phone";
-      const selectedAvatar = avatars[avatar];
+      const selectedAvatar = avatars[avatar as keyof typeof avatars];
 
       const body = isEmail
-        ? { name, email: identifier.trim(), password, avatar: selectedAvatar, photoURL: selectedAvatar }
-        : { name, phone: identifier.trim(), password, avatar: selectedAvatar, photoURL: selectedAvatar };
+        ? { name: name.trim(), email: identifier.trim(), password, avatar: selectedAvatar, photoURL: selectedAvatar }
+        : { name: name.trim(), phone: identifier.trim(), password, avatar: selectedAvatar, photoURL: selectedAvatar };
 
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
@@ -74,7 +190,7 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setFormError(data?.message || "রেজিস্ট্রেশন ব্যর্থ হয়েছে, আবার চেষ্টা করুন।");
+        setFormError(data?.message || (isBn ? "রেজিস্ট্রেশন ব্যর্থ হয়েছে, আবার চেষ্টা করুন।" : "Registration failed. Please try again."));
         return;
       }
 
@@ -83,7 +199,7 @@ export default function RegisterPage() {
         window.location.href = "/";
       }
     } catch {
-      setFormError("সার্ভারে সংযোগ করা যায়নি। ইন্টারনেট চেক করুন।");
+      setFormError(isBn ? "সার্ভারে সংযোগ করা যায়নি। ইন্টারনেট সংযোগ চেক করুন।" : "Unable to connect to server. Please check your internet connection.");
     } finally {
       setLoading(false);
     }
@@ -96,18 +212,21 @@ export default function RegisterPage() {
       subtitle={tAuth("createSubtitle")}
       image="https://res.cloudinary.com/dau8sazoh/image/upload/v1785587008/pexels-shvetsa-5217926_pkhpex.jpg"
       footer={
-        <>
-          {tAuth("haveAccount")}{" "}
-          <Link href="/login" className="font-medium text-rose-500 hover:underline">
+        <div className="text-center text-xs text-stone-500 dark:text-rose-100/60">
+          <span>{tAuth("haveAccount")}</span>{" "}
+          <Link
+            href="/login"
+            className="font-bold text-rose-500 hover:text-rose-600 hover:underline transition cursor-pointer"
+          >
             {tAuth("loginBtn")}
           </Link>
-        </>
+        </div>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-3" noValidate>
+      <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
         {/* Avatar Selector Inline */}
-        <div className="flex items-center justify-between rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-2 dark:border-white/5 dark:bg-white/5">
-          <label className="text-[13px] font-medium text-stone-700 dark:text-rose-100/80">
+        <div className="flex items-center justify-between rounded-xl border border-stone-200/80 bg-stone-50/60 px-4 py-2 dark:border-rose-900/60 dark:bg-[#1f1217]">
+          <label className="text-[13px] font-semibold text-stone-700 dark:text-rose-100/90">
             {tAuth("avatarLabel")}
           </label>
           <div className="flex items-center gap-4">
@@ -124,8 +243,8 @@ export default function RegisterPage() {
                 <Image
                   src={src}
                   alt={key}
-                  width={38}
-                  height={38}
+                  width={36}
+                  height={36}
                   unoptimized
                   className="rounded-full object-cover"
                 />
@@ -139,7 +258,7 @@ export default function RegisterPage() {
           label={tAuth("nameLabel")}
           placeholder={tAuth("namePlaceholder")}
           value={name}
-          onChange={setName}
+          onChange={handleNameChange}
           error={errors.name}
           autoComplete="name"
         />
@@ -150,8 +269,9 @@ export default function RegisterPage() {
           type="text"
           placeholder={tAuth("emailOrPhonePlaceholder")}
           value={identifier}
-          onChange={setIdentifier}
+          onChange={handleIdentifierChange}
           error={errors.identifier}
+          helperText={helperBadge}
           autoComplete="username"
         />
 
@@ -161,7 +281,7 @@ export default function RegisterPage() {
           type={showPassword ? "text" : "password"}
           placeholder={tAuth("registerPasswordPlaceholder")}
           value={password}
-          onChange={setPassword}
+          onChange={handlePasswordChange}
           error={errors.password}
           autoComplete="new-password"
           rightSlot={
@@ -183,7 +303,7 @@ export default function RegisterPage() {
           type={showConfirmPassword ? "text" : "password"}
           placeholder={tAuth("confirmPasswordPlaceholder")}
           value={confirmPassword}
-          onChange={setConfirmPassword}
+          onChange={handleConfirmPasswordChange}
           error={errors.confirmPassword}
           autoComplete="new-password"
           rightSlot={
@@ -199,59 +319,45 @@ export default function RegisterPage() {
           }
         />
 
+        {/* Global Registration Error Alert */}
         {formError && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-600 dark:bg-red-500/10 dark:text-red-300">
-            {formError}
-          </p>
+          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300 shadow-xs flex items-start gap-2">
+            <span className="shrink-0 text-sm">⚠️</span>
+            <span className="leading-snug">{formError}</span>
+          </div>
         )}
 
-        <PrimaryButton type="submit" loading={loading}>
-          {tAuth("registerBtn")}
+        <PrimaryButton type="submit" loading={loading} disabled={loading}>
+          {loading ? (isBn ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "Creating account...") : tAuth("registerBtn")}
         </PrimaryButton>
-
-        <p className="text-center text-[12px] leading-relaxed text-stone-400 dark:text-rose-100/40">
-          {tAuth("termsAgree")}
-        </p>
       </form>
 
-      <div className="my-3 flex items-center gap-3">
+      <div className="my-4 flex items-center gap-3">
         <div className="h-px flex-1 bg-stone-200 dark:bg-white/10" />
         <span className="text-[12px] text-stone-400 dark:text-rose-100/40">{tAuth("or")}</span>
         <div className="h-px flex-1 bg-stone-200 dark:bg-white/10" />
       </div>
 
-      <div className="flex justify-center w-full">
-        <GoogleLogin
-          onSuccess={async (credentialResponse) => {
-            setGoogleLoading(true);
-            try {
-              const res = await fetch(`${API_BASE}/api/auth/google`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: credentialResponse.credential }),
-              });
-              const data = await res.json();
-              if (!res.ok) {
-                setFormError(data?.message || "Google সাইনআপ ব্যর্থ হয়েছে।");
-                return;
-              }
-              if (data.token) {
-                localStorage.setItem("token", data.token);
-                window.location.href = "/";
-              }
-            } catch {
-              setFormError("Google সাইনআপে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
-            } finally {
-              setGoogleLoading(false);
-            }
-          }}
-          onError={() => setFormError("Google সাইনআপ বাতিল হয়েছে।")}
-          theme="outline"
-          size="large"
-          width="100%"
-          text="signup_with"
+      {/* Google OAuth Register Button */}
+      <button
+        type="button"
+        onClick={() => handleGoogleRegister()}
+        disabled={googleLoading || loading}
+        className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-2xl bg-white dark:bg-[#1a0f13] border border-stone-200/80 dark:border-rose-900/60 shadow-sm hover:shadow-md hover:border-rose-400/80 text-stone-700 dark:text-rose-100 font-medium text-sm transition-all duration-200 cursor-pointer disabled:opacity-50"
+      >
+        <Image
+          src="/google.svg"
+          alt="Google"
+          width={20}
+          height={20}
+          className="w-5 h-5 object-contain"
         />
-      </div>
+        <span>
+          {googleLoading
+            ? (isBn ? "সাইন আপ হচ্ছে..." : "Signing up...")
+            : tAuth("signUpGoogle")}
+        </span>
+      </button>
     </AuthLayout>
   );
 }

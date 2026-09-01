@@ -2,7 +2,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-const Input = React.forwardRef<any, any>(({ className, type, ...props }: any, ref: any) => {
+const Input = React.forwardRef<any, any>(({ className, type, value, ...props }: any, ref: any) => {
+  const safeValue = value === null ? "" : value;
   return (
     <input
       type={type}
@@ -11,7 +12,9 @@ const Input = React.forwardRef<any, any>(({ className, type, ...props }: any, re
         className
       )}
       ref={ref}
-      {...props} />
+      value={safeValue}
+      {...props}
+    />
   );
 })
 Input.displayName = "Input"

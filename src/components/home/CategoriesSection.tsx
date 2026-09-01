@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useGetCategoriesQuery } from "@/redux/api/ecommerceApi";
 import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 const defaultCategories = [
   { id: 1, name: "Cleanser", nameBn: "ক্লিনজার", image: "https://i.ibb.co/XZmby8wp/body-care.jpg" },
@@ -24,6 +24,7 @@ const defaultCategories = [
 
 export default function CategoriesSection() {
   const locale = useLocale();
+  const tCat = useTranslations("categories");
   const { data: dbCategories, isLoading } = useGetCategoriesQuery() as any;
   const scrollRef = useRef(null);
 
@@ -59,10 +60,10 @@ export default function CategoriesSection() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider text-rose-500">
-              <Sparkles className="w-3.5 h-3.5" /> Skincare Collections
+              <Sparkles className="w-3.5 h-3.5" /> {tCat("eyebrow")}
             </span>
             <h2 className="text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-white mt-1">
-              Shop by Category
+              {tCat("title")}
             </h2>
           </div>
 

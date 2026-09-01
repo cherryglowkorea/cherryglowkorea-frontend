@@ -6,6 +6,7 @@ import { Minus, Plus, Trash2, ShoppingBag, Tag, Truck, MapPin, ChevronRight, Pac
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
+import { formatPrice } from "@/lib/utils";
 
 const FALLBACK_IMAGE = "/placeholder.jpg";
 
@@ -57,7 +58,14 @@ export default function CartPage() {
     router.push("/checkout");
   };
 
-  if (!mounted || !isCartLoaded) return null;
+  if (!mounted || !isCartLoaded) {
+    return (
+      <div className="relative z-10 max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-20 min-h-[60vh] flex flex-col justify-center items-center">
+        <div className="w-10 h-10 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs font-semibold text-stone-400 dark:text-rose-100/40 uppercase tracking-wider animate-pulse">Loading Cart...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -365,11 +373,34 @@ function CartItemRow({ item, router, selectVariant, updateQuantity, removeFromCa
         <div className="flex items-center justify-between mt-1">
           {/* Price */}
           <div>
-            <p className="text-xs font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-400">
-              ৳{((item.selectedVariant?.price || item.price || 0) * item.quantity).toLocaleString()}
-            </p>
-            {item.quantity > 1 && (
-              <p className="text-[9px] text-stone-300 dark:text-rose-100/25">
+            {(() => {
+              const unitPrice = item.selectedVariant?.price ?? item.price ?? 0;
+              const origPrice = item.selectedVariant?.price ?? item.basePrice ?? item.price ?? 0;
+              const totalVal = unitPrice * item.quantity;
+              const totalOrig = origPrice * item.quantity;
+              const isFreeItem = item.type === "free" || item.isFree || (unitPrice === 0 && totalVal === 0);
+              const formatted = formatPrice(isFreeItem ? totalOrig : 0, isFreeItem ? 0 : totalVal);
+              return (
+                <div className="flex items-center gap-1.5">
+                  {formatted.originalText && (
+                    <span className="line-through text-xs text-stone-400 font-mono">
+                      {formatted.originalText}
+                    </span>
+                  )}
+                  <span
+                    className={`text-xs font-black ${
+                      formatted.isFree
+                        ? "text-emerald-600 dark:text-emerald-400 uppercase tracking-wide font-sans"
+                        : "text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-400 font-mono"
+                    }`}
+                  >
+                    {formatted.finalText}
+                  </span>
+                </div>
+              );
+            })()}
+            {item.quantity > 1 && (item.selectedVariant?.price || item.price) > 0 && (
+              <p className="text-[9px] text-stone-300 dark:text-rose-100/25 font-mono">
                 ৳{item.selectedVariant?.price || item.price || 0} × {item.quantity}
               </p>
             )}

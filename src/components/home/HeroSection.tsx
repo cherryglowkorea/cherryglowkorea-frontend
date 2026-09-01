@@ -19,7 +19,7 @@ export default function HeroSection() {
   const [direction, setDirection] = useState(0);
   const [dynamicSlides, setDynamicSlides] = useState([]);
   const [loadingBanners, setLoadingBanners] = useState(true);
-  const tHome = useTranslations("home");
+  const tHero = useTranslations("hero");
 
   const API_BASE =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -30,22 +30,22 @@ export default function HeroSection() {
   const defaultSlides = [
     {
       id: "1",
-      title: tHome("slide1Title") || "Glow Naturally",
-      description: tHome("slide1Desc") || "Clean K-Beauty skincare crafted to enhance your natural glow.",
+      title: tHero("slide1Title"),
+      description: tHero("slide1Desc"),
       image: "/hero-1.jpg",
-      primaryBtnText: tHome("shopNow") || "Shop Now",
+      primaryBtnText: tHero("shopNow"),
       primaryBtnLink: "/products",
-      secondaryBtnText: tHome("explore") || "Explore Products",
+      secondaryBtnText: tHero("explore"),
       secondaryBtnLink: "/about",
     },
     {
       id: "2",
-      title: tHome("slide2Title") || "Beauty That Cares",
-      description: tHome("slide2Desc") || "Dermatologically tested skincare made for every skin type.",
+      title: tHero("slide2Title"),
+      description: tHero("slide2Desc"),
       image: "/hero-2.jpg",
-      primaryBtnText: tHome("viewProducts") || "View Products",
+      primaryBtnText: tHero("viewProducts"),
       primaryBtnLink: "/products",
-      secondaryBtnText: tHome("learnMore") || "Learn More",
+      secondaryBtnText: tHero("learnMore"),
       secondaryBtnLink: "/about",
     },
   ];

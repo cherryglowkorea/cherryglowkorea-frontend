@@ -23,20 +23,27 @@ export default function Footer() {
   const pathname = usePathname();
   const tFooter = useTranslations("footer");
   const tNav = useTranslations("nav");
+  const tNewsletter = useTranslations("newsletter");
   const [email, setEmail] = useState("");
 
-  // Do not render public Footer on Admin pages
-  if (pathname?.startsWith("/admin")) {
+  // Do not render public Footer on Admin or Auth (Login/Register) pages
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/register");
+
+  if (pathname?.startsWith("/admin") || isAuthPage) {
     return null;
   }
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !email.includes("@")) {
-      toast.error("Please enter a valid email address.");
+      toast.error(tNewsletter("invalidEmail"));
       return;
     }
-    toast.success("Welcome to the Glow Club! Your 10% discount code has been sent.");
+    toast.success(tNewsletter("successMsg"));
     setEmail("");
   };
 
@@ -59,8 +66,8 @@ export default function Footer() {
                 <Truck className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-white">Free Express Shipping</h4>
-                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">On all orders over ৳2,000 in BD</p>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-white">{tFooter("freeShipping")}</h4>
+                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">{tFooter("freeShippingDesc")}</p>
               </div>
             </div>
 
@@ -70,8 +77,8 @@ export default function Footer() {
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-white">100% Authentic Korean</h4>
-                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">Directly imported from South Korea</p>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-white">{tFooter("authentic")}</h4>
+                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">{tFooter("authenticDesc")}</p>
               </div>
             </div>
 
@@ -81,8 +88,8 @@ export default function Footer() {
                 <CreditCard className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-white">Secure Checkout</h4>
-                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">bKash, Nagad, Cards & COD</p>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-white">{tFooter("secureCheckout")}</h4>
+                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">{tFooter("secureCheckoutDesc")}</p>
               </div>
             </div>
 
@@ -92,8 +99,8 @@ export default function Footer() {
                 <Headphones className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-white">Dedicated Support</h4>
-                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">Fast customer service response</p>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-white">{tFooter("dedicatedSupport")}</h4>
+                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">{tFooter("dedicatedSupportDesc")}</p>
               </div>
             </div>
           </div>
@@ -109,13 +116,13 @@ export default function Footer() {
 
             <div className="space-y-1.5 text-center lg:text-left relative z-10">
               <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider text-rose-300 dark:text-pink-300 bg-rose-500/20 dark:bg-pink-500/20 border border-rose-400/30 dark:border-pink-500/30">
-                <Sparkles className="w-3.5 h-3.5 text-pink-300" /> Exclusive Perks
+                <Sparkles className="w-3.5 h-3.5 text-pink-300" /> {tNewsletter("exclusivePerks")}
               </span>
               <h3 className="text-xl sm:text-2xl font-serif font-bold text-white">
-                Join the <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-rose-300 to-pink-200">Cherry Glow Club</span> & Get 10% OFF
+                {tNewsletter("joinClubTitle")}
               </h3>
               <p className="text-xs sm:text-sm text-stone-300 dark:text-rose-100/70 max-w-md font-medium">
-                Subscribe to receive authentic skincare tips, new product arrivals, and instant promo codes.
+                {tNewsletter("joinClubDesc")}
               </p>
             </div>
 
@@ -124,7 +131,7 @@ export default function Footer() {
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-400 pointer-events-none" />
                 <input
                   type="email"
-                  placeholder="Enter your email address..."
+                  placeholder={tNewsletter("placeholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-11 pr-4 py-3.5 bg-stone-950/80 dark:bg-[#1a0f13]/90 border border-stone-700/80 focus:border-rose-400 focus:ring-2 focus:ring-rose-500/30 text-xs sm:text-sm text-white placeholder-stone-400 rounded-2xl outline-none transition shadow-inner"
@@ -134,7 +141,7 @@ export default function Footer() {
                 type="submit"
                 className="px-6 py-3.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-rose-500/20 transition cursor-pointer flex items-center justify-center gap-2 shrink-0"
               >
-                <Send className="w-3.5 h-3.5" /> Subscribe
+                <Send className="w-3.5 h-3.5" /> {tNewsletter("subscribe")}
               </button>
             </form>
           </div>
@@ -155,7 +162,7 @@ export default function Footer() {
             </Link>
 
             <p className="text-xs leading-relaxed text-stone-400 dark:text-rose-100/70">
-              Premium Korean beauty and skincare products crafted with purity, innovation, and care to enhance your natural glow.
+              {tFooter("tagline")}
             </p>
 
             {/* Social Icons */}
@@ -183,7 +190,7 @@ export default function Footer() {
           {/* Col 2: Quick Links */}
           <div>
             <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-pink-400">
-              Quick Navigation
+              {tFooter("quickLinks")}
             </h4>
             <ul className="space-y-2.5 text-xs text-stone-400 dark:text-rose-100/70">
               <li>
@@ -198,7 +205,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/combo" className="transition-colors hover:text-pink-400 flex items-center gap-1.5">
-                  <span className="text-pink-500 font-bold">•</span> Combo Bundles
+                  <span className="text-pink-500 font-bold">•</span> {tFooter("comboBundles")}
                 </Link>
               </li>
               <li>
@@ -217,32 +224,32 @@ export default function Footer() {
           {/* Col 3: Support & Policies */}
           <div>
             <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-pink-400">
-              Customer Support & Legal
+              {tFooter("supportLegal")}
             </h4>
             <ul className="space-y-2.5 text-xs text-stone-400 dark:text-rose-100/70">
               <li>
                 <Link href="/cart" className="transition-colors hover:text-pink-400">
-                  Shopping Cart
+                  {tFooter("cart")}
                 </Link>
               </li>
               <li>
                 <Link href="/checkout" className="transition-colors hover:text-pink-400">
-                  Order Checkout
+                  {tFooter("checkout")}
                 </Link>
               </li>
               <li>
                 <Link href="/faq" className="transition-colors hover:text-pink-400">
-                  Frequently Asked Questions (FAQ)
+                  {tFooter("faq")}
                 </Link>
               </li>
               <li>
                 <Link href="/privacy-policy" className="transition-colors hover:text-pink-400">
-                  Privacy Policy
+                  {tFooter("privacy")}
                 </Link>
               </li>
               <li>
                 <Link href="/terms" className="transition-colors hover:text-pink-400">
-                  Terms & Conditions
+                  {tFooter("terms")}
                 </Link>
               </li>
             </ul>
@@ -251,7 +258,7 @@ export default function Footer() {
           {/* Col 4: Contact & Hotline */}
           <div className="space-y-3">
             <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-pink-400">
-              Contact & Hotline
+              {tFooter("contactHotline")}
             </h4>
             <div className="space-y-2.5 text-xs text-stone-400 dark:text-rose-100/70">
               <div className="flex items-center gap-2.5">
@@ -270,7 +277,7 @@ export default function Footer() {
 
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-pink-400 shrink-0 mt-0.5" />
-                <span>Dhaka, Bangladesh & Busan, South Korea</span>
+                <span>{tFooter("location")}</span>
               </div>
             </div>
           </div>
@@ -279,7 +286,7 @@ export default function Footer() {
         {/* 4. Bottom Footer Bar: Copyright & Soft Card Payment Badges */}
         <div className="mt-14 pt-8 border-t border-stone-800 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-stone-400 dark:text-rose-100/50 text-center md:text-left">
-            © {new Date().getFullYear()} <span className="text-white font-semibold">Cherry Glow Korea</span>. All rights reserved. Built with authentic care.
+            © {new Date().getFullYear()} <span className="text-white font-semibold">Cherry Glow Korea</span>. {tFooter("rights")}
           </p>
 
           {/* Softer Payment Method Icons */}

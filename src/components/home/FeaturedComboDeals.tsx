@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
 import ProductCard from "../products/ProductCard";
 import { useCart } from "@/context/CartContext";
 
 export default function FeaturedComboDeals() {
+  const tCombo = useTranslations("comboDeals");
   const [combos, setCombos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -43,13 +45,13 @@ export default function FeaturedComboDeals() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-300 bg-rose-100/70 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/40 shadow-2xs">
-              🔥 Special Bundles
+              {tCombo("badge")}
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-stone-900 dark:text-white mt-2">
-              Featured Combo Deals
+              {tCombo("title")}
             </h2>
             <p className="text-xs sm:text-sm text-stone-500 dark:text-rose-100/60 mt-1">
-              Get your skincare routine essentials in a bundle and save big!
+              {tCombo("subtitle")}
             </p>
           </div>
 
@@ -57,7 +59,7 @@ export default function FeaturedComboDeals() {
             href="/products?type=combo"
             className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 hover:text-rose-700 transition"
           >
-            Explore All Combo Deals <ArrowRight className="w-4 h-4" />
+            {tCombo("exploreAll")} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 

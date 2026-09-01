@@ -1,5 +1,4 @@
 "use client";
-
 import { Link } from "@/i18n/navigation";
 import ProductCard from "@/components/products/ProductCard";
 import SkeletonCard from "@/components/products/SkeletonCard";
@@ -27,7 +26,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useGetCategoriesQuery, useGetBrandsQuery } from "@/redux/api/ecommerceApi";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Select,
   SelectContent,
@@ -58,6 +57,7 @@ const API_BASE =
   "http://localhost:5000";
 
 function ProductsPageInner() {
+  const tF = useTranslations("productFilters");
   const { addToCart } = useCart();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -303,7 +303,7 @@ function ProductsPageInner() {
                   : "bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-rose-100/70 hover:border-rose-300 hover:text-rose-600"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" /> All Products
+              <Sparkles className="w-3.5 h-3.5" /> {tF("allProducts")}
             </button>
             <button
               onClick={() => setTypeFilter("combo")}
@@ -313,7 +313,7 @@ function ProductsPageInner() {
                   : "bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-rose-100/70 hover:border-rose-300 hover:text-rose-600"
               }`}
             >
-              <Gift className="w-3.5 h-3.5" /> Combo Deals
+              <Gift className="w-3.5 h-3.5" /> {tF("comboDeals")}
             </button>
             <button
               onClick={() => setTypeFilter("single")}
@@ -323,7 +323,17 @@ function ProductsPageInner() {
                   : "bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-rose-100/70 hover:border-rose-300 hover:text-rose-600"
               }`}
             >
-              <Droplets className="w-3.5 h-3.5" /> Single Items
+              <Droplets className="w-3.5 h-3.5" /> {tF("singleItems")}
+            </button>
+            <button
+              onClick={() => setTypeFilter("free")}
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer shrink-0 ${
+                typeFilter === "free"
+                  ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white border-transparent shadow-sm"
+                  : "bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-rose-100/70 hover:border-rose-300 hover:text-rose-600"
+              }`}
+            >
+              <Gift className="w-3.5 h-3.5" /> {tF("freeOrder")}
             </button>
           </div>
         </section>
@@ -360,11 +370,11 @@ function ProductsPageInner() {
                 {/* Search Block */}
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-rose-500 mb-3 flex items-center gap-1.5">
-                    <Search className="w-3.5 h-3.5" /> Search Products
+                    <Search className="w-3.5 h-3.5" /> {tF("searchProducts")}
                   </h3>
                   <div className="relative">
                     <Input
-                      placeholder="Search skincare..."
+                      placeholder={tF("searchPlaceholder")}
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       className="w-full pl-9 pr-8 py-2 bg-stone-50 dark:bg-white/5 border-stone-200 dark:border-white/10 rounded-xl focus:border-rose-400 focus:ring-rose-200 text-stone-800 dark:text-white text-xs"
@@ -386,7 +396,7 @@ function ProductsPageInner() {
                 <div>
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-rose-500 flex items-center gap-1.5">
-                      <Tag className="w-3.5 h-3.5" /> Categories
+                      <Tag className="w-3.5 h-3.5" /> {tF("categories")}
                     </h3>
                     {category !== "All" && (
                       <button
@@ -411,7 +421,7 @@ function ProductsPageInner() {
                               : "text-stone-600 dark:text-rose-100/70 hover:bg-rose-50 dark:hover:bg-white/5 hover:text-rose-600"
                           }`}
                         >
-                          <span>{catItem.displayName}</span>
+                          <span>{catItem.name === "All" ? tF("allProducts") : catItem.displayName}</span>
                         </button>
                       );
                     })}
@@ -421,16 +431,17 @@ function ProductsPageInner() {
                 {/* Product Type Filter */}
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-rose-500 mb-3 flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5" /> Product Type
+                    <Layers className="w-3.5 h-3.5" /> {tF("productType")}
                   </h3>
                   <Select value={typeFilter} onValueChange={(val) => setTypeFilter(val)}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select Product Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Products</SelectItem>
-                      <SelectItem value="single">Single Items Only</SelectItem>
-                      <SelectItem value="combo">Combo Bundles Only</SelectItem>
+                      <SelectItem value="all">{tF("allProducts")}</SelectItem>
+                      <SelectItem value="single">{tF("singleItems")}</SelectItem>
+                      <SelectItem value="combo">{tF("comboDeals")}</SelectItem>
+                      <SelectItem value="free">{tF("freeOrder")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -438,7 +449,7 @@ function ProductsPageInner() {
                 {/* Price Range Filter */}
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-rose-500 mb-3 flex items-center gap-1.5">
-                    <DollarSign className="w-3.5 h-3.5" /> Price Range (৳)
+                    <DollarSign className="w-3.5 h-3.5" /> {tF("priceRange")}
                   </h3>
                   <div className="flex items-center gap-2">
                     <input
@@ -463,7 +474,7 @@ function ProductsPageInner() {
                 {brands.length > 1 && (
                   <div>
                     <h3 className="text-xs font-bold uppercase tracking-wider text-rose-500 mb-3">
-                      Brand
+                      {tF("brand")}
                     </h3>
                     <Select value={brand} onValueChange={(val) => setBrand(val)}>
                       <SelectTrigger className="w-full">
@@ -486,7 +497,7 @@ function ProductsPageInner() {
                     onClick={handleResetFilters}
                     className="w-full py-2.5 text-xs font-bold text-rose-500 hover:text-rose-600 bg-rose-50 dark:bg-rose-950/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/30 rounded-xl transition duration-200 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" /> Reset All Filters
+                    <RotateCcw className="w-3.5 h-3.5" /> {tF("resetFilters")}
                   </button>
                 )}
               </div>
@@ -499,12 +510,12 @@ function ProductsPageInner() {
               <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-3 border-b border-rose-100/60 dark:border-white/5">
                 <div>
                   <h2 className="text-lg font-serif font-bold text-stone-900 dark:text-white">
-                    {category === "All" ? "All Products" : category}
+                    {category === "All" ? tF("allProducts") : category}
                   </h2>
                   <p className="text-xs text-stone-500 dark:text-rose-100/60 mt-0.5 font-medium">
                     {loading
-                      ? "Fetching products..."
-                      : `Showing ${startItem}–${endItem} of ${totalProducts} products`}
+                      ? tF("fetching")
+                      : tF("showingRange", { start: startItem, end: endItem, total: totalProducts })}
                   </p>
                 </div>
 
@@ -512,7 +523,7 @@ function ProductsPageInner() {
                 <div className="flex items-center gap-3.5 flex-wrap">
                   {/* 1. Items per page selector */}
                   <div className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-rose-100/60">
-                    <span className="hidden sm:inline font-medium">Show:</span>
+                    <span className="hidden sm:inline font-medium">{tF("show")}</span>
                     <Select value={String(limit)} onValueChange={(val) => setLimit(Number(val))}>
                       <SelectTrigger className="w-20 bg-stone-100 dark:bg-white/5 border-stone-200/60 dark:border-white/10 font-semibold">
                         <SelectValue />
@@ -528,17 +539,17 @@ function ProductsPageInner() {
 
                   {/* 2. Amazon-style Single Unified Sort Dropdown */}
                   <div className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-rose-100/60">
-                    <span className="hidden sm:inline font-medium">Sort by:</span>
+                    <span className="hidden sm:inline font-medium">{tF("sortBy")}</span>
                     <Select value={sortOption} onValueChange={(val) => setSortOption(val)}>
                       <SelectTrigger className="w-48 bg-stone-100 dark:bg-white/5 border-stone-200/60 dark:border-white/10 font-bold">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="default">Featured (Newest First)</SelectItem>
-                        <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                        <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                        <SelectItem value="name-asc">Name: A to Z</SelectItem>
-                        <SelectItem value="name-desc">Name: Z to A</SelectItem>
+                        <SelectItem value="default">{tF("sortDefault")}</SelectItem>
+                        <SelectItem value="price-asc">{tF("sortPriceAsc")}</SelectItem>
+                        <SelectItem value="price-desc">{tF("sortPriceDesc")}</SelectItem>
+                        <SelectItem value="name-asc">{tF("sortNameAsc")}</SelectItem>
+                        <SelectItem value="name-desc">{tF("sortNameDesc")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

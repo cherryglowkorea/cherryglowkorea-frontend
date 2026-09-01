@@ -45,3 +45,52 @@ export function getVariantLabel(v?: any, index: number = 0): string {
 
   return `Option ${index + 1}`;
 }
+
+export interface FormattedPrice {
+  display: "strikethrough-free" | "free-only" | "strikethrough-normal" | "normal";
+  originalText: string | null;
+  finalText: string;
+  isFree: boolean;
+}
+
+export function formatPrice(
+  originalPrice: number = 0,
+  finalPrice: number = 0,
+  currency: string = "৳"
+): FormattedPrice {
+  const orig = Number(originalPrice) || 0;
+  const final = Number(finalPrice) || 0;
+
+  if (final === 0) {
+    if (orig > 0) {
+      return {
+        display: "strikethrough-free",
+        originalText: `${currency}${orig.toLocaleString()}`,
+        finalText: "FREE",
+        isFree: true,
+      };
+    }
+    return {
+      display: "free-only",
+      originalText: null,
+      finalText: "FREE",
+      isFree: true,
+    };
+  }
+
+  if (orig > final) {
+    return {
+      display: "strikethrough-normal",
+      originalText: `${currency}${orig.toLocaleString()}`,
+      finalText: `${currency}${final.toLocaleString()}`,
+      isFree: false,
+    };
+  }
+
+  return {
+    display: "normal",
+    originalText: null,
+    finalText: `${currency}${final.toLocaleString()}`,
+    isFree: false,
+  };
+}

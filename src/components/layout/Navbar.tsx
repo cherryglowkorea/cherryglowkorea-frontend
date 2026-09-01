@@ -37,6 +37,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const tNav = useTranslations("nav");
+  const tTopbar = useTranslations("topbar");
 
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(2000);
 
@@ -60,7 +61,7 @@ export default function Navbar() {
   const navLinks = [
     { name: tNav("home"), href: "/" },
     { name: tNav("products"), href: "/products" },
-    { name: "Build Combo 🎁", href: "/combo" },
+    { name: tNav("combo"), href: "/combo" },
     { name: tNav("about"), href: "/about" },
     { name: tNav("contact"), href: "/contact" },
   ];
@@ -100,18 +101,18 @@ export default function Navbar() {
           <div className="flex items-center gap-5 font-semibold text-xs sm:text-[13px]">
             <span className="flex items-center gap-1.5 text-amber-300">
               <ShieldCheck size={15} className="text-amber-400 shrink-0" />
-              <span>100% Authentic Korean Skincare</span>
+              <span>{tTopbar("authentic")}</span>
             </span>
             <span className="text-stone-700">•</span>
             <span className="flex items-center gap-1.5 text-emerald-300">
               <CreditCard size={15} className="text-emerald-400 shrink-0" />
-              <span>Cash On Delivery Available</span>
+              <span>{tTopbar("cod")}</span>
             </span>
           </div>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-rose-300 font-semibold text-xs sm:text-[13px]">
               <Truck size={15} className="text-rose-400 shrink-0" />
-              <span>Free Delivery Over ৳{freeShippingThreshold.toLocaleString()}</span>
+              <span>{tTopbar("freeDeliveryOver", { threshold: freeShippingThreshold.toLocaleString() })}</span>
             </span>
             <div className="flex items-center gap-2">
               <LanguageSwitcher variant="dark" />
@@ -165,7 +166,7 @@ export default function Navbar() {
                 </span>
               )}
             </div>
-            <span className="hidden lg:inline text-xs font-semibold">Wishlist</span>
+            <span className="hidden lg:inline text-xs font-semibold">{tNav("wishlist")}</span>
           </Link>
 
           {/* Cart Drawer */}
@@ -295,15 +296,15 @@ export default function Navbar() {
                   {!user ? (
                     <div className="flex items-center justify-between gap-2">
                       <div className="text-xs">
-                        <p className="font-bold text-stone-900 dark:text-white">Welcome Guest!</p>
-                        <p className="text-stone-400 text-[10px]">Sign in for order tracking</p>
+                        <p className="font-bold text-stone-900 dark:text-white">{tNav("welcomeGuest")}</p>
+                        <p className="text-stone-400 text-[10px]">{tNav("signInTracking")}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Link
                           href="/login"
                           className="px-3 py-1.5 rounded-xl bg-rose-500 text-white font-bold text-xs"
                         >
-                          Login
+                          {tNav("login")}
                         </Link>
                       </div>
                     </div>
@@ -336,7 +337,7 @@ export default function Navbar() {
 
                 {/* Mobile Navigation Links */}
                 <nav className="flex flex-col gap-1.5">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 px-3">Navigation</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 px-3">{tNav("navigation")}</p>
                   {navLinks.map((link) => {
                     const isActive =
                       pathname === link.href ||
@@ -364,7 +365,7 @@ export default function Navbar() {
 
                 {/* Quick Featured Collections (Mobile) */}
                 <div className="space-y-1.5 pt-2 border-t border-stone-100 dark:border-white/10">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 px-3">Featured Collections</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 px-3">{tNav("featuredCollections")}</p>
                   <Link
                     href="/#best-sellers"
                     onClick={handleBestSellersClick}
@@ -372,7 +373,7 @@ export default function Navbar() {
                   >
                     <span className="flex items-center gap-2">
                       <Flame size={15} className="text-amber-500 fill-amber-500/20" />
-                      Best Sellers
+                      {tNav("bestSellers")}
                     </span>
                     <ChevronRight size={14} className="opacity-40" />
                   </Link>
@@ -383,7 +384,7 @@ export default function Navbar() {
                   >
                     <span className="flex items-center gap-2">
                       <Sparkles size={14} className="text-rose-400" />
-                      Serums & Essence
+                      {tNav("serumsEssence")}
                     </span>
                     <ChevronRight size={14} className="opacity-40" />
                   </Link>
@@ -394,7 +395,7 @@ export default function Navbar() {
                   >
                     <span className="flex items-center gap-2">
                       <Sun size={15} className="text-amber-400" />
-                      Sun Protection
+                      {tNav("sunProtection")}
                     </span>
                     <ChevronRight size={14} className="opacity-40" />
                   </Link>
@@ -402,13 +403,13 @@ export default function Navbar() {
 
                 {/* Mobile App Settings (Language & Theme) */}
                 <div className="space-y-2 pt-2 border-t border-stone-100 dark:border-white/10">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 px-3">Preferences</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 px-3">{tNav("preferences")}</p>
                   <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-stone-50 dark:bg-white/5">
-                    <span className="text-xs font-bold text-stone-600 dark:text-rose-100/70">Language</span>
+                    <span className="text-xs font-bold text-stone-600 dark:text-rose-100/70">{tNav("language")}</span>
                     <LanguageSwitcher />
                   </div>
                   <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-stone-50 dark:bg-white/5">
-                    <span className="text-xs font-bold text-stone-600 dark:text-rose-100/70">Theme Mode</span>
+                    <span className="text-xs font-bold text-stone-600 dark:text-rose-100/70">{tNav("themeMode")}</span>
                     <ThemeToggle />
                   </div>
                 </div>
@@ -421,7 +422,7 @@ export default function Navbar() {
                   onClick={handleLogout}
                   className="w-full mt-6 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 text-xs font-bold flex items-center justify-center gap-2 border border-rose-200/60 dark:border-rose-900/40 cursor-pointer"
                 >
-                  <LogOut size={16} /> Log Out
+                  <LogOut size={16} /> {tNav("logout")}
                 </button>
               )}
 
@@ -466,17 +467,17 @@ export default function Navbar() {
               className="hover:text-rose-600 dark:hover:text-rose-300 transition flex items-center gap-1.5 cursor-pointer"
             >
               <Flame size={15} className="text-amber-500 fill-amber-500/20 shrink-0" />
-              <span>Best Sellers</span>
+              <span>{tNav("bestSellers")}</span>
             </Link>
             <span className="text-stone-300 dark:text-stone-700">•</span>
             <Link href="/products?category=Serum" className="hover:text-rose-600 dark:hover:text-rose-300 transition flex items-center gap-1.5">
               <Sparkles size={14} className="text-rose-400 shrink-0" />
-              <span>Serums & Essence</span>
+              <span>{tNav("serumsEssence")}</span>
             </Link>
             <span className="text-stone-300 dark:text-stone-700">•</span>
             <Link href="/products?category=Sunscreen" className="hover:text-rose-600 dark:hover:text-rose-300 transition flex items-center gap-1.5">
               <Sun size={15} className="text-amber-400 shrink-0" />
-              <span>Sun Protection</span>
+              <span>{tNav("sunProtection")}</span>
             </Link>
           </div>
         </div>

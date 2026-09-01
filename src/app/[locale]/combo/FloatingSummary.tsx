@@ -1,20 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronUp, ChevronDown, Sparkles } from "lucide-react";
 
 export default function FloatingSummary({
   subtotal = 0,
-  discount = 0,
+  couponDiscount = 0,
+  tierDiscount = 0,
   total = 0,
   handleCheckout,
-}) {
+  couponCode = "",
+  tierPercent = 0,
+}: any) {
+  const tCombo = useTranslations("buildCombo");
   const [open, setOpen] = useState(false);
+  const totalDiscount = couponDiscount + tierDiscount;
 
   const nextTierText = () => {
     if (subtotal === 0) return "Select products to build your custom combo bundle!";
-    if (discount > 0) {
-      return `🎉 Total Combo Discount: ৳${discount.toFixed(0)}`;
+    if (totalDiscount > 0) {
+      return `🎉 Total Combo Discount: ৳${totalDiscount.toFixed(0)}`;
     }
     return "Custom Combo Package Ready!";
   };
@@ -59,11 +65,11 @@ export default function FloatingSummary({
       {/* MOBILE MINI BAR */}
       <div className="flex items-center justify-between px-4 py-3 sm:hidden">
         <div>
-          <p className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">Total Savings</p>
-          <p className="text-xs text-emerald-500 font-bold">-৳{discount.toFixed(0)}</p>
+          <p className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">{tCombo("totalSavings")}</p>
+          <p className="text-xs text-emerald-500 font-bold">-৳{totalDiscount.toFixed(0)}</p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] text-stone-400 font-bold">Payable Total</p>
+          <p className="text-[10px] text-stone-400 font-bold">{tCombo("payableTotal")}</p>
           <p className="font-extrabold text-base text-pink-600 dark:text-pink-400">৳{total.toFixed(0)}</p>
         </div>
 
@@ -76,7 +82,7 @@ export default function FloatingSummary({
             transition cursor-pointer
           "
         >
-          Checkout
+          {tCombo("checkout")}
         </button>
       </div>
 
@@ -86,25 +92,34 @@ export default function FloatingSummary({
           sm:hidden
           overflow-hidden
           transition-all duration-300 ease-in-out
-          ${open ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}
+          ${open ? "max-h-52 opacity-100" : "max-h-0 opacity-0"}
         `}
       >
         <div className="px-4 pb-4 pt-1 space-y-2 border-t border-rose-100/30">
           <div className="flex justify-between text-xs text-stone-600 dark:text-rose-100/70">
-            <span>Package Subtotal</span>
-            <span>৳{subtotal}</span>
+            <span>{tCombo("packageSubtotal")}</span>
+            <span>৳{subtotal.toLocaleString()}</span>
           </div>
 
-          <div className="flex justify-between text-xs text-emerald-500 font-medium">
-            <span>Combo Savings</span>
-            <span>-৳{discount.toFixed(0)}</span>
-          </div>
+          {couponDiscount > 0 && (
+            <div className="flex justify-between text-xs text-emerald-500 font-medium">
+              <span>Coupon ({couponCode})</span>
+              <span>-৳{couponDiscount.toFixed(0)}</span>
+            </div>
+          )}
+
+          {tierDiscount > 0 && (
+            <div className="flex justify-between text-xs text-pink-500 font-medium">
+              <span>Bundle Discount ({tierPercent}%)</span>
+              <span>-৳{tierDiscount.toFixed(0)}</span>
+            </div>
+          )}
 
           <div className="border-t border-rose-100/30 my-2" />
 
           <div className="flex justify-between text-sm font-bold text-stone-800 dark:text-white">
             <span>Total Payable</span>
-            <span>৳{total.toFixed(0)}</span>
+            <span className="text-pink-600 dark:text-pink-400 font-extrabold font-mono">৳{total.toFixed(0)}</span>
           </div>
         </div>
       </div>
@@ -118,13 +133,20 @@ export default function FloatingSummary({
         <div className="space-y-2.5">
           <div className="flex justify-between text-xs text-stone-600 dark:text-rose-100/70">
             <span>Package Subtotal</span>
-            <span className="font-semibold text-stone-800 dark:text-rose-100">৳{subtotal}</span>
+            <span className="font-mono font-semibold">৳{subtotal.toLocaleString()}</span>
           </div>
 
-          {discount > 0 && (
-            <div className="flex justify-between text-xs text-emerald-500 font-semibold bg-emerald-50/50 dark:bg-emerald-950/20 p-2 rounded-lg border border-emerald-100 dark:border-white/5">
-              <span>Combo Discount</span>
-              <span>-৳{discount.toFixed(0)}</span>
+          {couponDiscount > 0 && (
+            <div className="flex justify-between text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50/70 dark:bg-emerald-950/30 p-2 rounded-lg border border-emerald-100 dark:border-emerald-900/40">
+              <span>Coupon ({couponCode})</span>
+              <span>-৳{couponDiscount.toFixed(0)}</span>
+            </div>
+          )}
+
+          {tierDiscount > 0 && (
+            <div className="flex justify-between text-xs text-pink-600 dark:text-pink-400 font-bold bg-pink-50/70 dark:bg-pink-950/30 p-2 rounded-lg border border-pink-100 dark:border-pink-900/40">
+              <span>Bundle Discount ({tierPercent}%)</span>
+              <span>-৳{tierDiscount.toFixed(0)}</span>
             </div>
           )}
 
@@ -132,7 +154,7 @@ export default function FloatingSummary({
 
           <div className="flex justify-between text-sm font-bold text-stone-800 dark:text-rose-50">
             <span>Total Payable</span>
-            <span className="text-base text-pink-600 dark:text-pink-400 font-extrabold">৳{total.toFixed(0)}</span>
+            <span className="text-base text-pink-600 dark:text-pink-400 font-extrabold font-mono">৳{total.toFixed(0)}</span>
           </div>
         </div>
 

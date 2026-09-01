@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import ProductCard from "../products/ProductCard";
 import { useCart } from "@/context/CartContext";
 import { Sparkles, ArrowRight } from "lucide-react";
 
 export default function FeaturedProducts() {
+  const tFeat = useTranslations("featuredProducts");
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -40,10 +42,10 @@ export default function FeaturedProducts() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-300 bg-rose-100/70 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/40 shadow-2xs">
-              <Sparkles className="w-3.5 h-3.5" /> Handpicked Best of Korean Skincare
+              <Sparkles className="w-3.5 h-3.5" /> {tFeat("badge")}
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-stone-900 dark:text-white mt-2">
-              Featured Products
+              {tFeat("title")}
             </h2>
           </div>
 
@@ -51,7 +53,7 @@ export default function FeaturedProducts() {
             href="/products"
             className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-pink-600 dark:text-pink-400 hover:text-pink-700 transition"
           >
-            Explore All Products ({featuredProducts.length}) <ArrowRight className="w-4 h-4" />
+            {tFeat("exploreAll")} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 

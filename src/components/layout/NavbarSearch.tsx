@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Link, useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import axios from "axios";
 import {
   Search,
@@ -39,6 +40,7 @@ const TRENDING_KEYWORDS = [
 ];
 
 export default function NavbarSearch({ isMobile = false }) {
+  const tNav = useTranslations("nav");
   const [query, setQuery] = useState("");
   const [productResults, setProductResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -134,7 +136,7 @@ export default function NavbarSearch({ isMobile = false }) {
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search for skincare, serums, sunscreen, brands..."
+          placeholder={tNav("searchPlaceholder")}
           value={query}
           onFocus={() => setIsFocused(true)}
           onChange={(e) => {
@@ -163,7 +165,7 @@ export default function NavbarSearch({ isMobile = false }) {
           type="submit"
           className="self-stretch px-6 flex items-center justify-center bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-extrabold text-xs sm:text-sm transition-all cursor-pointer shrink-0"
         >
-          <span>Search</span>
+          <span>{tNav("searchBtn")}</span>
         </button>
       </form>
 

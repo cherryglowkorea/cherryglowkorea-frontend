@@ -41,6 +41,7 @@ import {
   Clock,
   Headphones,
 } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 const FALLBACK_IMAGE = "/placeholder.jpg";
 
@@ -368,9 +369,12 @@ export default function CheckoutPage() {
           deliveryCharge,
           items: cart,
           paymentMethod: paymentMethod === "cod" ? t("cod") : "Digital Payment",
+          orderType: data.orderType || (cart.some((i) => i.isPreOrder) ? "pre-order" : "regular"),
+          fulfillmentStatus: data.fulfillmentStatus || "ready-to-ship",
+          message: data.message,
         });
         clearCart();
-        toast.success("🎉 Order placed successfully!");
+        toast.success(data.message || "🎉 Order placed successfully!");
       } else {
         toast.error(data.message || "Failed to place order. Please try again.");
       }
@@ -451,7 +455,9 @@ export default function CheckoutPage() {
                 {t("thankYou")}, {orderSuccess.customerName}!
               </h1>
               <p className="text-stone-500 dark:text-rose-100/60 text-xs sm:text-sm mt-1">
-                {t("orderConfirmedDesc")}
+                {orderSuccess.orderType === "pre-order" || orderSuccess.fulfillmentStatus === "awaiting-stock"
+                  ? "Your order is confirmed as a pre-order. We'll notify you and ship as soon as stock arrives."
+                  : t("orderConfirmedDesc")}
               </p>
             </div>
 
@@ -938,6 +944,19 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              {/* Pre-Order Notice Banner */}
+              {cart.some((i) => i.isPreOrder) && (
+                <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-900/60 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-3 shadow-xs">
+                  <Clock className="w-5 h-5 text-amber-500 shrink-0" />
+                  <div>
+                    <p className="font-bold text-xs">📦 Pre-Order / Backorder Notice</p>
+                    <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-0.5">
+                      Some items in your cart are on pre-order. We'll notify you and ship as soon as stock arrives!
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Items List */}
               <div className="space-y-3 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
                 {cart.map((item, idx) => {
@@ -955,18 +974,48 @@ export default function CheckoutPage() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-xs font-semibold text-stone-800 dark:text-rose-100 truncate">
-                          {item.name}
-                        </h3>
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="text-xs font-semibold text-stone-800 dark:text-rose-100 truncate">
+                            {item.name}
+                          </h3>
+                          {item.isPreOrder && (
+                            <span className="text-[9px] font-extrabold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 px-1.5 py-0.5 rounded">
+                              Pre-Order
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11px] text-stone-400 dark:text-rose-100/40 mt-0.5">
                           {item.selectedVariant ? `${item.selectedVariant.weight || ''}${item.selectedVariant.unit || ''}` : "Standard"} × {item.quantity}
                         </p>
                       </div>
 
                       <div className="text-right">
-                        <p className="text-xs font-bold text-stone-800 dark:text-rose-50">
-                          ৳{(itemPrice * item.quantity).toLocaleString()}
-                        </p>
+                        {(() => {
+                          const itemPrice = item.selectedVariant?.price ?? item.price ?? 0;
+                          const origPrice = item.selectedVariant?.price ?? item.basePrice ?? item.price ?? 0;
+                          const itemTotal = itemPrice * item.quantity;
+                          const totalOrig = origPrice * item.quantity;
+                          const isFreeItem = item.type === "free" || item.isFree || (itemPrice === 0 && itemTotal === 0);
+                          const formatted = formatPrice(isFreeItem ? totalOrig : 0, isFreeItem ? 0 : itemTotal);
+                          return (
+                            <div className="flex items-center justify-end gap-1.5">
+                              {formatted.originalText && (
+                                <span className="line-through text-xs text-stone-400 font-mono">
+                                  {formatted.originalText}
+                                </span>
+                              )}
+                              <span
+                                className={`text-xs font-black ${
+                                  formatted.isFree
+                                    ? "text-emerald-600 dark:text-emerald-400 uppercase tracking-wide font-sans"
+                                    : "text-stone-800 dark:text-rose-50 font-mono"
+                                }`}
+                              >
+                                {formatted.finalText}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   );

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Tag, Sparkles, CheckCircle2, X } from "lucide-react";
 
 import ComboSelected from "./ComboSelected";
@@ -11,8 +12,10 @@ import ComboList from "./ComboList";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import FloatingSummary from "./FloatingSummary";
+import { cleanProductName } from "@/lib/utils";
 
 export default function ComboPage() {
+  const tCombo = useTranslations("buildCombo");
   const [products, setProducts] = useState([]);
   const [combo, setCombo] = useState([]);
 
@@ -68,13 +71,37 @@ export default function ComboPage() {
     selectVariant(id, variant);
   };
 
-  // 🔥 Remove (Syncs both Combo builder & global CartContext)
-  const removeFromCombo = (id) => {
-    const updated = combo.filter((p) => p._id !== id);
+  // 🔥 Remove with Undo Toast (Safety for accidental clicks)
+  const removeFromCombo = (id: string) => {
+    const targetIndex = combo.findIndex((p: any) => (p._id || p.productId) === id);
+    if (targetIndex === -1) return;
+
+    const removedItem = combo[targetIndex];
+    const updated = combo.filter((_, idx) => idx !== targetIndex);
+
     localStorage.setItem("combo", JSON.stringify(updated));
+    setCombo(updated);
     window.dispatchEvent(new Event("comboUpdated"));
     removeFromCart(id);
-    toast.info("Product removed");
+
+    const itemTitle = cleanProductName(removedItem.name || "Product");
+    toast(`Removed "${itemTitle}"`, {
+      duration: 4000,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setCombo((currentCombo) => {
+            const restored = [...currentCombo];
+            restored.splice(targetIndex, 0, removedItem);
+            localStorage.setItem("combo", JSON.stringify(restored));
+            window.dispatchEvent(new Event("comboUpdated"));
+            addToCart(removedItem);
+            return restored;
+          });
+          toast.success(`Restored "${itemTitle}"`);
+        },
+      },
+    });
   };
 
   // 🔥 Subtotal calculation
@@ -170,8 +197,19 @@ export default function ComboPage() {
     return Math.min(subtotal, appliedCoupon.discountAmount);
   }, [appliedCoupon, subtotal]);
 
-  const totalDiscount = baseDiscount + couponDiscountAmount;
-  const total = Math.max(0, subtotal - couponDiscountAmount);
+  // Bundle Tier Discount (3+ items = 5%, 5+ items = 10%, 8+ items = 15%)
+  const count = combo.length;
+  let tierPercent = 0;
+  if (count >= 8) tierPercent = 15;
+  else if (count >= 5) tierPercent = 10;
+  else if (count >= 3) tierPercent = 5;
+
+  const tierDiscountAmount = useMemo(() => {
+    return (subtotal * tierPercent) / 100;
+  }, [subtotal, tierPercent]);
+
+  const totalDiscount = baseDiscount + couponDiscountAmount + tierDiscountAmount;
+  const total = Math.max(0, subtotal - couponDiscountAmount - tierDiscountAmount);
 
   // 🔥 Direct Checkout (Redirects to /checkout)
   const handleCheckout = () => {
@@ -217,17 +255,17 @@ export default function ComboPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-xl md:text-2xl font-serif font-bold text-stone-900 dark:text-white flex items-center gap-2">
-                Make Your Own Combo
+                {tCombo("title")}
                 <Sparkles className="w-5 h-5 text-pink-500 animate-pulse" />
               </h1>
               <p className="text-xs text-stone-500 dark:text-rose-100/50 mt-1">
-                Select 2 or more items to build your customized K-Beauty set and apply special admin coupons for maximum savings!
+                {tCombo("subtext")}
               </p>
             </div>
 
             {/* Quick Admin Coupon Badges */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-bold text-stone-400 dark:text-rose-100/50">Admin Coupons:</span>
+              <span className="text-[11px] font-bold text-stone-400 dark:text-rose-100/50">{tCombo("adminCoupons")}</span>
               <button
                 onClick={() => handleApplyCoupon("COMBO20")}
                 className="px-2.5 py-1 rounded-xl bg-pink-100 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300 text-[11px] font-extrabold hover:bg-pink-200 transition border border-pink-200 dark:border-pink-900/50 cursor-pointer flex items-center gap-1"
@@ -262,7 +300,7 @@ export default function ComboPage() {
             {/* Admin Combo Coupon Input Section */}
             <div className="pt-2 border-t border-rose-100/40 dark:border-white/5 space-y-2">
               <label className="text-[11px] font-bold uppercase tracking-wider text-stone-700 dark:text-rose-200 flex items-center gap-1.5">
-                <Tag size={12} className="text-pink-500" /> Apply Combo Coupon
+                <Tag size={12} className="text-pink-500" /> {tCombo("applyCoupon")}
               </label>
 
               {appliedCoupon ? (
@@ -289,7 +327,7 @@ export default function ComboPage() {
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="Enter coupon (e.g. COMBO20, COMBO500)"
+                    placeholder={tCombo("couponPlaceholder")}
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
                     className="flex-1 uppercase font-mono text-xs px-3 py-2 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-white/5 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-pink-500/20"
@@ -300,7 +338,7 @@ export default function ComboPage() {
                     disabled={couponLoading}
                     className="px-3.5 py-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
                   >
-                    {couponLoading ? "..." : "Apply"}
+                    {couponLoading ? "..." : tCombo("apply")}
                   </button>
                 </div>
               )}
@@ -310,41 +348,42 @@ export default function ComboPage() {
             {combo.length > 0 && (
               <div className="hidden lg:block border-t border-rose-100/40 dark:border-white/5 pt-4 space-y-3">
                 <h3 className="font-serif font-bold text-stone-800 dark:text-rose-50 text-xs uppercase tracking-wider">
-                  Package Summary
+                  {tCombo("packageSummary")}
                 </h3>
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs text-stone-600 dark:text-rose-100/70">
-                    <span>Package Subtotal ({combo.length} items)</span>
-                    <span className="font-semibold text-stone-850 dark:text-rose-100">৳{subtotal.toLocaleString()}</span>
+                    <span>{tCombo("packageSubtotal")} ({combo.length} items)</span>
+                    <span className="font-semibold text-stone-850 dark:text-rose-100 font-mono">৳{subtotal.toLocaleString()}</span>
                   </div>
 
                   {couponDiscountAmount > 0 && (
                     <div className="flex justify-between text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50/70 dark:bg-emerald-950/30 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
-                      <span>Admin Coupon Discount ({appliedCoupon?.code})</span>
+                      <span>{tCombo("couponDiscount")} ({appliedCoupon?.code})</span>
                       <span>-৳{couponDiscountAmount.toLocaleString()}</span>
+                    </div>
+                  )}
+
+                  {tierDiscountAmount > 0 && (
+                    <div className="flex justify-between text-xs text-pink-600 dark:text-pink-400 font-bold bg-pink-50/70 dark:bg-pink-950/30 p-2.5 rounded-xl border border-pink-100 dark:border-pink-900/40">
+                      <span>{tCombo("bundleDiscount")} ({tierPercent}% OFF)</span>
+                      <span>-৳{tierDiscountAmount.toLocaleString()}</span>
                     </div>
                   )}
 
                   <div className="border-t border-rose-100/40 dark:border-white/5 my-1.5" />
 
                   <div className="flex justify-between text-xs font-bold text-stone-850 dark:text-rose-50">
-                    <span>Total Payable</span>
+                    <span>{tCombo("totalPayable")}</span>
                     <span className="text-base text-pink-600 dark:text-pink-400 font-extrabold font-mono">৳{total.toLocaleString()}</span>
                   </div>
                 </div>
 
                 <button
                   onClick={handleCheckout}
-                  className="
-                    w-full mt-2.5
-                    bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600
-                    text-white py-3.5 rounded-2xl font-extrabold uppercase text-xs tracking-wider shadow-md hover:shadow-lg
-                    transition duration-300 cursor-pointer flex items-center justify-center gap-2
-                  "
+                  className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-2xl text-xs font-extrabold uppercase tracking-wider transition shadow-md hover:shadow-lg cursor-pointer text-center block"
                 >
-                  <Sparkles size={14} />
-                  Checkout Custom Package
+                  {tCombo("checkout")}
                 </button>
               </div>
             )}
@@ -355,9 +394,12 @@ export default function ComboPage() {
         <div className="lg:hidden">
           <FloatingSummary
             subtotal={subtotal}
-            discount={couponDiscountAmount}
+            couponDiscount={couponDiscountAmount}
+            tierDiscount={tierDiscountAmount}
             total={total}
             handleCheckout={handleCheckout}
+            couponCode={appliedCoupon?.code || ""}
+            tierPercent={tierPercent}
           />
         </div>
       </div>

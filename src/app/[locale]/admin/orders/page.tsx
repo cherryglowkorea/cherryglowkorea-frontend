@@ -119,6 +119,13 @@ export default function OrdersPage() {
       .filter((o) => o.status !== "cancelled")
       .reduce((sum, o) => sum + (Number(o?.pricing?.total) || 0), 0);
 
+    const preOrderCount = orders.filter(
+      (o) =>
+        o.orderType === "pre-order" ||
+        o.fulfillmentStatus === "awaiting-stock" ||
+        (o.items || o.products || []).some((i) => i.isPreOrder)
+    ).length;
+
     return {
       totalCount,
       pendingCount,
@@ -126,6 +133,7 @@ export default function OrdersPage() {
       shippedCount,
       deliveredCount,
       cancelledCount,
+      preOrderCount,
       totalRevenue,
     };
   }, [orders]);
@@ -134,8 +142,14 @@ export default function OrdersPage() {
   const filteredOrders = useMemo(() => {
     return orders
       .filter((o) => {
-        // Status Filter
-        if (activeTab !== "all" && o.status !== activeTab) {
+        // Status / Tab Filter
+        if (activeTab === "pre-order") {
+          const isPreOrder =
+            o.orderType === "pre-order" ||
+            o.fulfillmentStatus === "awaiting-stock" ||
+            (o.items || o.products || []).some((i) => i.isPreOrder);
+          if (!isPreOrder) return false;
+        } else if (activeTab !== "all" && o.status !== activeTab) {
           return false;
         }
 
@@ -174,16 +188,17 @@ export default function OrdersPage() {
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === "newest") {
+        const effectiveSort = activeTab === "pre-order" && sortBy === "newest" ? "oldest" : sortBy;
+        if (effectiveSort === "newest") {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         }
-        if (sortBy === "oldest") {
+        if (effectiveSort === "oldest") {
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         }
-        if (sortBy === "highest") {
+        if (effectiveSort === "highest") {
           return (b.pricing?.total || 0) - (a.pricing?.total || 0);
         }
-        if (sortBy === "lowest") {
+        if (effectiveSort === "lowest") {
           return (a.pricing?.total || 0) - (b.pricing?.total || 0);
         }
         return 0;
@@ -394,6 +409,7 @@ export default function OrdersPage() {
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-stone-100 dark:border-rose-900/30">
           {[
             { key: "all", label: "All Orders", count: metrics.totalCount },
+            { key: "pre-order", label: "⏳ Pre-Orders", count: metrics.preOrderCount },
             { key: "pending", label: "Pending", count: metrics.pendingCount },
             { key: "processing", label: "Processing", count: metrics.processingCount },
             { key: "shipped", label: "Shipped", count: metrics.shippedCount },

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, Leaf, Heart, CheckCircle2, Sparkles } from "lucide-react";
 
 interface Reason {
@@ -16,49 +17,6 @@ interface Reason {
   targetY: number;
 }
 
-const reasons: Reason[] = [
-  {
-    title: "Dermatologist Tested",
-    description: "Formulated and approved by skin experts.",
-    position: "top",
-    icon: ShieldCheck,
-    originX: 340,
-    originY: 190,
-    targetX: 340,
-    targetY: 95,
-  },
-  {
-    title: "Natural Ingredients",
-    description: "Powered by clean, plant-based extracts.",
-    position: "right",
-    icon: Leaf,
-    originX: 410,
-    originY: 260,
-    targetX: 460,
-    targetY: 260,
-  },
-  {
-    title: "Cruelty Free",
-    description: "Never tested on animals, always ethical.",
-    position: "bottom",
-    icon: Heart,
-    originX: 340,
-    originY: 330,
-    targetX: 340,
-    targetY: 425,
-  },
-  {
-    title: "Proven Results",
-    description: "Visible improvement in weeks.",
-    position: "left",
-    icon: CheckCircle2,
-    originX: 270,
-    originY: 260,
-    targetX: 220,
-    targetY: 260,
-  },
-];
-
 const desktopPositionClasses: Record<string, string> = {
   top: "top-0 left-1/2 -translate-x-1/2",
   bottom: "bottom-0 left-1/2 -translate-x-1/2",
@@ -67,7 +25,51 @@ const desktopPositionClasses: Record<string, string> = {
 };
 
 export default function BenefitsSection() {
+  const tWhy = useTranslations("whyChooseUs");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const reasons: Reason[] = [
+    {
+      title: tWhy("dermaTestedTitle"),
+      description: tWhy("dermaTestedDesc"),
+      position: "top",
+      icon: ShieldCheck,
+      originX: 340,
+      originY: 190,
+      targetX: 340,
+      targetY: 95,
+    },
+    {
+      title: tWhy("naturalTitle"),
+      description: tWhy("naturalDesc"),
+      position: "right",
+      icon: Leaf,
+      originX: 410,
+      originY: 260,
+      targetX: 460,
+      targetY: 260,
+    },
+    {
+      title: tWhy("crueltyFreeTitle"),
+      description: tWhy("crueltyFreeDesc"),
+      position: "bottom",
+      icon: Heart,
+      originX: 340,
+      originY: 330,
+      targetX: 340,
+      targetY: 425,
+    },
+    {
+      title: tWhy("provenResultsTitle"),
+      description: tWhy("provenResultsDesc"),
+      position: "left",
+      icon: CheckCircle2,
+      originX: 270,
+      originY: 260,
+      targetX: 220,
+      targetY: 260,
+    },
+  ];
 
   return (
     <section className="relative py-20 overflow-hidden bg-gradient-to-b from-transparent via-rose-50/20 to-transparent dark:via-rose-950/20">
@@ -84,16 +86,16 @@ export default function BenefitsSection() {
             className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/80 text-xs font-semibold text-rose-600 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60 mb-3 shadow-xs"
           >
             <Sparkles className="w-3.5 h-3.5 text-rose-500" />
-            Premium Skincare Guarantee
+            {tWhy("badge")}
           </motion.div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Why Choose{" "}
+            {tWhy("title")}{" "}
             <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent">
-              Cherry Glow
+              {tWhy("brandName")}
             </span>
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-rose-100/70">
-            Formulated with precision, backed by science, designed for glowing skin.
+            {tWhy("subtitle")}
           </p>
         </div>
 

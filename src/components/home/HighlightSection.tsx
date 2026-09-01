@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, Leaf, Heart, Truck, Sparkles, Award } from "lucide-react";
 
 export default function HighlightsSection() {
+  const tBadges = useTranslations("trustBadges");
   const [freeThreshold, setFreeThreshold] = useState<number>(3000);
 
   useEffect(() => {
@@ -25,23 +27,23 @@ export default function HighlightsSection() {
   const highlights = [
     {
       icon: ShieldCheck,
-      title: "Dermatologically Tested",
-      subtitle: "Gentle & safe for sensitive skin",
+      title: tBadges("dermaTested"),
+      subtitle: tBadges("dermaTestedSub"),
     },
     {
       icon: Leaf,
-      title: "100% Authentic Korean",
-      subtitle: "Imported directly from South Korea",
+      title: tBadges("authenticKorean"),
+      subtitle: tBadges("authenticKoreanSub"),
     },
     {
       icon: Heart,
-      title: "Cruelty-Free & Clean",
-      subtitle: "Formulated without harsh chemicals",
+      title: tBadges("crueltyFree"),
+      subtitle: tBadges("crueltyFreeSub"),
     },
     {
       icon: Truck,
-      title: "Fast Nationwide Delivery",
-      subtitle: `Free shipping on orders over ৳${freeThreshold.toLocaleString()}`,
+      title: tBadges("fastDelivery"),
+      subtitle: tBadges("fastDeliverySub", { threshold: freeThreshold.toLocaleString() }),
     },
   ];
 

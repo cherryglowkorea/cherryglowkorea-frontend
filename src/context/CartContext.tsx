@@ -175,11 +175,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       prev.map((item) => {
         if (item.productId !== productId && item._id !== productId) return item;
 
-        const stock = Number(item.selectedVariant?.stock ?? item.stock ?? 999);
+        const isPreOrder = item.isPreOrder || item.allowPreOrder || item.type === "pre-order" || (typeof item.stock === "number" && item.stock <= 0);
+        const rawStock = Number(item.selectedVariant?.stock ?? item.stock ?? 999);
+        const effectiveStock = (isPreOrder || rawStock <= 0) ? 99 : rawStock;
 
         const qty =
           type === "inc"
-            ? Math.min(item.quantity + 1, stock)
+            ? Math.min(item.quantity + 1, effectiveStock)
             : Math.max(item.quantity - 1, 1);
 
         return { ...item, quantity: qty };
