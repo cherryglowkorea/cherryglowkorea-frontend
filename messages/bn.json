@@ -139,6 +139,7 @@
     "allProducts": "সকল পণ্য",
     "comboDeals": "কম্বো ডিল",
     "singleItems": "সিঙ্গেল আইটেম",
+    "preOrders": "প্রি-অর্ডার",
     "freeOrder": "ফ্রি অর্ডার",
     "showingRange": "{total} টি পণ্যের মধ্যে {start}–{end} দেখানো হচ্ছে",
     "fetching": "পণ্য লোড হচ্ছে...",

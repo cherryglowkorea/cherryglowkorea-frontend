@@ -90,7 +90,7 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
     return true;
   }, [selectedVariant, product.stock, variants, type]);
 
-  const allowPreOrder = product.allowPreOrder !== false;
+  const allowPreOrder = product.allowPreOrder === true;
   const canPreOrder = !inStock && allowPreOrder;
   const canAddToCart = inStock || canPreOrder;
 

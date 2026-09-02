@@ -335,7 +335,7 @@ export default function ProductDetailsClient({
       ? product.stock ?? 0
       : selectedVariant?.stock ?? product?.stock ?? 0;
 
-  const allowPreOrder = product?.allowPreOrder !== false;
+  const allowPreOrder = product?.allowPreOrder === true;
   const canPreOrder = stock <= 0 && allowPreOrder;
   const canPurchase = stock > 0 || canPreOrder;
 

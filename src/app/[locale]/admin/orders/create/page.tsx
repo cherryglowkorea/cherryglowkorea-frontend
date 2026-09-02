@@ -90,6 +90,9 @@ export default function CreateOrderPage() {
       .finally(() => setLoadingProducts(false));
   }, [API]);
 
+  // Warning Confirmation Modal state
+  const [showStockWarningModal, setShowStockWarningModal] = useState(false);
+
   // Filtered products list
   const filteredProducts = useMemo(() => {
     if (!debouncedSearch) return [];
@@ -121,6 +124,10 @@ export default function CreateOrderPage() {
     }
 
     const itemPrice = Number(variant?.price) || Number(selectedProduct.price) || Number(selectedProduct.salePrice) || 0;
+    const currentStock = variant && typeof variant.stock === "number" 
+      ? Number(variant.stock) 
+      : Number(selectedProduct.stock ?? 0);
+    const isOutOfStock = currentStock <= 0;
 
     const exists = items.find(
       (i) =>
@@ -143,18 +150,25 @@ export default function CreateOrderPage() {
           name: selectedProduct.name,
           brand: selectedProduct.brand || "",
           image: selectedProduct.images?.[0]?.url || selectedProduct.thumbnail || "",
+          stock: currentStock,
+          isPreOrder: isOutOfStock,
           variant: variant
             ? {
                 weight: variant.weight || "",
                 unit: variant.unit || "",
                 size: variant.size || "",
+                stock: variant.stock,
               }
             : null,
           price: itemPrice,
           quantity: qty,
         },
       ]);
-      toast.success(`Added ${selectedProduct.name} to order`);
+      if (isOutOfStock) {
+        toast.warning(`Added ${selectedProduct.name} (Stock: 0 - Pre-Order)`);
+      } else {
+        toast.success(`Added ${selectedProduct.name} to order`);
+      }
     }
 
     // Reset selection input
@@ -196,15 +210,11 @@ export default function CreateOrderPage() {
     return Math.max(0, safeSub - safeDisc + safeShip);
   }, [subtotal, discount, shipping]);
 
-  // Create Order Handler
-  const handleCreateOrder = async () => {
-    if (!customer.name.trim()) return toast.error("Customer name is required");
-    if (!customer.phone.trim()) return toast.error("Customer phone number is required");
-    if (!customer.address.trim()) return toast.error("Shipping address is required");
-    if (items.length === 0) return toast.error("Please add at least one product to the order");
-
+  // Execute Order API Request
+  const executeCreateOrder = async () => {
     try {
       setIsSubmitting(true);
+      setShowStockWarningModal(false);
       const token = localStorage.getItem("token");
 
       const payload = {
@@ -221,6 +231,7 @@ export default function CreateOrderPage() {
           quantity: item.quantity,
           price: item.price,
           variant: item.variant,
+          isPreOrder: Boolean(item.isPreOrder),
         })),
         subtotal: Number(subtotal),
         discount: Number(discount),
@@ -237,7 +248,7 @@ export default function CreateOrderPage() {
       });
 
       if (response.status === 201 || response.data?.success) {
-        toast.success("Order created successfully!");
+        toast.success(response.data?.message || "Order created successfully!");
         router.push("/admin/orders");
       }
     } catch (err) {
@@ -246,6 +257,22 @@ export default function CreateOrderPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Create Order Handler (triggers confirmation modal if stock 0)
+  const handleCreateOrder = async () => {
+    if (!customer.name.trim()) return toast.error("Customer name is required");
+    if (!customer.phone.trim()) return toast.error("Customer phone number is required");
+    if (!customer.address.trim()) return toast.error("Shipping address is required");
+    if (items.length === 0) return toast.error("Please add at least one product to the order");
+
+    const hasOutOfStockItems = items.some((i) => i.isPreOrder || i.stock <= 0);
+    if (hasOutOfStockItems) {
+      setShowStockWarningModal(true);
+      return;
+    }
+
+    await executeCreateOrder();
   };
 
   return (
@@ -392,40 +419,53 @@ export default function CreateOrderPage() {
               {/* Autocomplete Search Results Dropdown */}
               {search && filteredProducts.length > 0 && (
                 <div className="absolute z-20 top-full left-0 right-0 mt-2 bg-white dark:bg-[#181215] border border-stone-200 dark:border-stone-800 rounded-2xl shadow-xl max-h-60 overflow-y-auto divide-y divide-stone-100 dark:divide-stone-800/60">
-                  {filteredProducts.map((p) => (
-                    <div
-                      key={p._id}
-                      onClick={() => handleSelectProduct(p)}
-                      className="p-3 hover:bg-stone-100 dark:hover:bg-white/5 cursor-pointer flex items-center justify-between transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        {(p.images?.[0]?.url || p.thumbnail) ? (
-                          <img
-                            src={p.images?.[0]?.url || p.thumbnail}
-                            alt={p.name}
-                            className="h-9 w-9 rounded-lg object-cover border border-stone-200 dark:border-stone-800"
-                          />
-                        ) : (
-                          <div className="h-9 w-9 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-xs font-bold text-stone-400">
-                            PROD
+                  {filteredProducts.map((p) => {
+                    const prodStock = Number(p.stock ?? 0);
+                    const isOut = prodStock <= 0;
+                    return (
+                      <div
+                        key={p._id}
+                        onClick={() => handleSelectProduct(p)}
+                        className="p-3 hover:bg-stone-100 dark:hover:bg-white/5 cursor-pointer flex items-center justify-between transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          {(p.images?.[0]?.url || p.thumbnail) ? (
+                            <img
+                              src={p.images?.[0]?.url || p.thumbnail}
+                              alt={p.name}
+                              className="h-9 w-9 rounded-lg object-cover border border-stone-200 dark:border-stone-800"
+                            />
+                          ) : (
+                            <div className="h-9 w-9 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-xs font-bold text-stone-400">
+                              PROD
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-semibold text-xs sm:text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                              <span>{p.name}</span>
+                              {isOut ? (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300">
+                                  Out of Stock (0)
+                                </span>
+                              ) : (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                                  Stock: {prodStock}
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                              {p.brand ? `${p.brand} • ` : ""}
+                              {p.variants?.length || 0} variants
+                            </p>
                           </div>
-                        )}
-                        <div>
-                          <p className="font-semibold text-xs sm:text-sm text-stone-900 dark:text-stone-100">
-                            {p.name}
-                          </p>
-                          <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                            {p.brand ? `${p.brand} • ` : ""}
-                            {p.variants?.length || 0} variants
-                          </p>
                         </div>
-                      </div>
 
-                      <span className="font-bold text-xs text-rose-500 dark:text-rose-400 font-mono">
-                        ৳ {p.price || p.variants?.[0]?.price || 0}
-                      </span>
-                    </div>
-                  ))}
+                        <span className="font-bold text-xs text-rose-500 dark:text-rose-400 font-mono">
+                          ৳ {p.price || p.variants?.[0]?.price || 0}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -435,9 +475,16 @@ export default function CreateOrderPage() {
               <div className="p-4 rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-[#0d0709] space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      {selectedProduct.name}
-                    </h4>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                        {selectedProduct.name}
+                      </h4>
+                      {((variant && (variant.stock ?? selectedProduct.stock ?? 0) <= 0) || (!variant && (selectedProduct.stock ?? 0) <= 0)) && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                          ⚠️ Out of Stock — Pre-Order Mode
+                        </span>
+                      )}
+                    </div>
                     {selectedProduct.brand && (
                       <span className="text-xs text-stone-500 dark:text-stone-400">
                         Brand: {selectedProduct.brand}
@@ -466,18 +513,28 @@ export default function CreateOrderPage() {
                       {selectedProduct.variants.map((v, idx) => {
                         const isSelected =
                           variant?.weight === v.weight && variant?.unit === v.unit;
+                        const vStock = Number(v.stock ?? selectedProduct.stock ?? 0);
                         return (
                           <button
                             key={idx}
                             type="button"
                             onClick={() => setVariant(v)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all border ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all border flex items-center gap-1.5 ${
                               isSelected
                                 ? "bg-rose-600 text-white border-rose-600 shadow-xs font-bold"
                                 : "bg-white dark:bg-[#161113] border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-600"
                             }`}
                           >
-                            {v.weight} {v.unit} (৳{v.price})
+                            <span>{v.weight} {v.unit} (৳{v.price})</span>
+                            {vStock <= 0 ? (
+                              <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-200 font-bold">
+                                Out
+                              </span>
+                            ) : (
+                              <span className="text-[9px] opacity-75">
+                                ({vStock})
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -571,8 +628,13 @@ export default function CreateOrderPage() {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="font-bold text-xs text-stone-900 dark:text-stone-100 truncate">
-                          {item.name}
+                        <p className="font-bold text-xs text-stone-900 dark:text-stone-100 truncate flex items-center gap-1.5">
+                          <span>{item.name}</span>
+                          {item.isPreOrder && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30 shrink-0">
+                              Pre-Order
+                            </span>
+                          )}
                         </p>
                         {item.variant ? (
                           <p className="text-[11px] text-stone-500 dark:text-stone-400">
@@ -720,6 +782,71 @@ export default function CreateOrderPage() {
           </div>
         </div>
       </div>
+
+      {/* Stock Warning Confirmation Modal */}
+      {showStockWarningModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-3xl bg-white dark:bg-[#181215] border border-amber-200 dark:border-amber-900/60 p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 border-b border-stone-100 dark:border-stone-800 pb-3">
+              <div className="p-2.5 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0">
+                <Package className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-base text-stone-900 dark:text-stone-100">
+                  Out of Stock Warning
+                </h3>
+                <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                  প্রি-অর্ডার নিশ্চিতকরণ (Pre-Order Confirmation)
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-xs text-stone-600 dark:text-stone-300">
+              <p>
+                এই অর্ডারে থাকা নিচের প্রোডাক্টটির/প্রোডাক্টগুলোর **বর্তমানে স্টক নেই (Stock: 0)**:
+              </p>
+
+              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/40 space-y-1.5 max-h-36 overflow-y-auto">
+                {items
+                  .filter((i) => i.isPreOrder || i.stock <= 0)
+                  .map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between font-medium">
+                      <span className="font-bold text-amber-900 dark:text-amber-200 truncate max-w-[220px]">
+                        • {item.name}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200/70 dark:bg-amber-900 text-amber-950 dark:text-amber-100">
+                        Stock: {item.stock ?? 0}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+
+              <p className="text-[11px] text-stone-500 dark:text-stone-400 italic">
+                অর্ডারটি সম্পন্ন করলে এটি এডমিন প্যানেলে **Pre-Order / Awaiting Stock** হিসেবে সেভ হবে এবং স্টক আসার পর শিপমেন্ট করতে পারবেন। আপনি কি এটি তৈরি করতে চান?
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowStockWarningModal(false)}
+                disabled={isSubmitting}
+                className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800 font-bold text-xs transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeCreateOrder}
+                disabled={isSubmitting}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-extrabold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer"
+              >
+                {isSubmitting ? "Creating..." : "Confirm & Save Pre-Order"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -105,7 +105,7 @@ function ComboProductCard({ p, selected, addToCombo, router }) {
 
   const isFree = p.type === "free" || p.isFree || (minPrice === 0 && (p.salePrice === 0 || p.price === 0));
   const inStock = (typeof p.stock === "number" ? p.stock > 0 : true);
-  const allowPreOrder = p.allowPreOrder !== false;
+  const allowPreOrder = p.allowPreOrder === true;
   const canPreOrder = !inStock && allowPreOrder;
   const formatted = formatPrice(p.price || p.basePrice || minPrice, isFree ? 0 : minPrice);
 

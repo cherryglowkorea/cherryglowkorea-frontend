@@ -90,7 +90,7 @@ export default function CreateProductPage() {
     isFeatured: false,
     isBestSelling: false,
     isNewArrival: true,
-    allowPreOrder: true,
+    allowPreOrder: false,
     status: "active",
   });
 

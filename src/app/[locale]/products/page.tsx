@@ -23,6 +23,7 @@ import {
   Sparkles,
   Gift,
   Droplets,
+  Clock,
 } from "lucide-react";
 import axios from "axios";
 import { useGetCategoriesQuery, useGetBrandsQuery } from "@/redux/api/ecommerceApi";
@@ -326,6 +327,16 @@ function ProductsPageInner() {
               <Droplets className="w-3.5 h-3.5" /> {tF("singleItems")}
             </button>
             <button
+              onClick={() => setTypeFilter("pre-order")}
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer shrink-0 ${
+                typeFilter === "pre-order"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-transparent shadow-sm"
+                  : "bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-rose-100/70 hover:border-amber-300 hover:text-amber-600"
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" /> {tF("preOrders")}
+            </button>
+            <button
               onClick={() => setTypeFilter("free")}
               className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer shrink-0 ${
                 typeFilter === "free"
@@ -441,6 +452,7 @@ function ProductsPageInner() {
                       <SelectItem value="all">{tF("allProducts")}</SelectItem>
                       <SelectItem value="single">{tF("singleItems")}</SelectItem>
                       <SelectItem value="combo">{tF("comboDeals")}</SelectItem>
+                      <SelectItem value="pre-order">{tF("preOrders")}</SelectItem>
                       <SelectItem value="free">{tF("freeOrder")}</SelectItem>
                     </SelectContent>
                   </Select>

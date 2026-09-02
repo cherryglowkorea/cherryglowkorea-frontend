@@ -139,6 +139,7 @@
     "allProducts": "All Products",
     "comboDeals": "Combo Deals",
     "singleItems": "Single Items",
+    "preOrders": "Pre-Orders",
     "freeOrder": "Free Order",
     "showingRange": "Showing {start}–{end} of {total} products",
     "fetching": "Fetching products...",

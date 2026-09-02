@@ -175,7 +175,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       prev.map((item) => {
         if (item.productId !== productId && item._id !== productId) return item;
 
-        const isPreOrder = item.isPreOrder || item.allowPreOrder || item.type === "pre-order" || (typeof item.stock === "number" && item.stock <= 0);
+        const isPreOrder = Boolean(item.isPreOrder) || item.allowPreOrder === true || item.type === "pre-order";
         const rawStock = Number(item.selectedVariant?.stock ?? item.stock ?? 999);
         const effectiveStock = (isPreOrder || rawStock <= 0) ? 99 : rawStock;
 

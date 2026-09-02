@@ -13,8 +13,9 @@ export default function PromoPopup() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Do not show promo popup on admin dashboard routes
-  const isAdmin = pathname?.includes("/admin") || pathname?.startsWith("/admin");
+  // Only show promo popup on home page / landing page
+  const normalizedPath = pathname ? pathname.replace(/^\/([a-z]{2})(\/|$)/i, "/") : "/";
+  const isHomePage = normalizedPath === "/" || normalizedPath === "";
 
   const API_BASE =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -23,7 +24,7 @@ export default function PromoPopup() {
   const API = `${API_BASE}/banners/promo-banner`;
 
   useEffect(() => {
-    if (isAdmin) return;
+    if (!isHomePage) return;
     // Check if user already dismissed promo in this session
     const dismissed = sessionStorage.getItem("promo_dismissed");
     if (dismissed) return;
@@ -46,7 +47,7 @@ export default function PromoPopup() {
     };
 
     fetchBanner();
-  }, [API]);
+  }, [API, isHomePage]);
 
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -54,7 +55,7 @@ export default function PromoPopup() {
     sessionStorage.setItem("promo_dismissed", "true");
   };
 
-  if (isAdmin || !open || !banner) return null;
+  if (!isHomePage || !open || !banner) return null;
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 transition-all duration-300">
