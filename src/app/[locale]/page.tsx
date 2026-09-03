@@ -1,4 +1,5 @@
-"use client";
+// Rendering Strategy: ISR (revalidate: 600s) — Pre-renders high-traffic homepage at build time and revalidates edge cache every 10 minutes for optimal LCP performance.
+export const revalidate = 600;
 
 import HeroSection from "@/components/home/HeroSection";
 import HighlightsSection from "@/components/home/HighlightSection";

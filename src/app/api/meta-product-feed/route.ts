@@ -1,5 +1,4 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getDatabase } from "@/lib/mongodb";
 import { generateMetaProductFeedXml } from "@/lib/metaFeed";
 
 export const dynamic = "force-dynamic";
@@ -15,23 +14,13 @@ export async function GET(request: NextRequest) {
       (host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https");
     const baseUrl = `${protocol}://${host}`;
 
-    try {
-      const db = await getDatabase();
-      products = await db
-        .collection("products")
-        .find({ status: { $ne: "inactive" } })
-        .sort({ createdAt: -1 })
-        .toArray();
-    } catch (dbError) {
-      console.error("Direct MongoDB query error in API route, falling back to API:", dbError);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://cherry-glow-database.onrender.com";
-      const res = await fetch(`${apiUrl}/products/allProduct/public?limit=1000`, {
-        next: { revalidate: 60 },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        products = Array.isArray(data) ? data : data.products || [];
-      }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+    const res = await fetch(`${apiUrl}/api/products/allProduct/public?limit=100`, {
+      next: { revalidate: 60 },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      products = Array.isArray(data) ? data : data.products || [];
     }
 
     const xmlFeed = generateMetaProductFeedXml(products, baseUrl);

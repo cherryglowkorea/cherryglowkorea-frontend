@@ -24,6 +24,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
 
   const [form, setForm] = useState({
     name: "",
+    sku: "",
     price: "",
     category: "",
     section: "featured",
@@ -43,6 +44,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
     if (product) {
       setForm({
         name: product.name || "",
+        sku: product.sku || "",
         price: product.price || "",
         category: product.category || "",
         section: product.section || "featured",
@@ -150,6 +152,12 @@ export default function ProductForm({ product, onClose, onSuccess }) {
         placeholder="Product Name"
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}
+      />
+
+      <Input
+        placeholder="SKU (e.g. CG-TONER-001)"
+        value={form.sku}
+        onChange={(e) => setForm({ ...form, sku: e.target.value })}
       />
 
       <div className="flex gap-4">

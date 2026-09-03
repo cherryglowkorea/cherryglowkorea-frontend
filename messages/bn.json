@@ -132,6 +132,7 @@
   "productFilters": {
     "searchProducts": "পণ্য খুঁজুন",
     "searchPlaceholder": "স্কিনকেয়ার খুঁজুন...",
+    "category": "ক্যাটাগরি",
     "categories": "ক্যাটাগরি",
     "productType": "পণ্যের প্রকার",
     "priceRange": "মূল্যের সীমা (৳)",
@@ -148,10 +149,13 @@
     "sortDefault": "ফিচার্ড (নতুনগুলো আগে)",
     "sortPriceAsc": "দাম: কম থেকে বেশি",
     "sortPriceDesc": "দাম: বেশি থেকে কম",
+    "sortPriceLow": "দাম: কম থেকে বেশি",
+    "sortPriceHigh": "দাম: বেশি থেকে কম",
     "sortNameAsc": "নাম: ক থেকে ক্ষ (A-Z)",
     "sortNameDesc": "নাম: Z থেকে A",
     "resetFilters": "সকল ফিল্টার রিসেট করুন",
-    "filters": "ফিল্টারসমূহ"
+    "filters": "ফিল্টারসমূহ",
+    "noProductsFound": "কোনো পণ্য পাওয়া যায়নি"
   },
   "buildCombo": {
     "title": "আপনার নিজের কম্বো বানান",

@@ -449,6 +449,13 @@ export default function ProductDetailsClient({
               {cleanProductName(name)}
             </h1>
 
+            {/* SKU */}
+            {product.sku && (
+              <p className="text-[11px] text-stone-400 dark:text-rose-200/50 font-mono font-semibold tracking-wide">
+                SKU: {product.sku}
+              </p>
+            )}
+
             {/* Rating Summary Bar */}
             <div className="flex items-center gap-3 pt-1">
               <div className="flex items-center gap-1">

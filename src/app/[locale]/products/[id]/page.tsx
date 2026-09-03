@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 import ProductDetailsClient from "./ProductDetailsClient";
 
+// Rendering Strategy: ISR (revalidate: 300s) — Pre-renders top/featured products at build time via generateStaticParams while refreshing product data on-demand in the background every 5 minutes.
+export const revalidate = 300;
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
@@ -8,6 +11,33 @@ const API_BASE =
 
 interface Props {
   params: Promise<{ id: string; locale: string }>;
+}
+
+/**
+ * Pre-generate static params for top/featured products across all supported locales at build time.
+ */
+export async function generateStaticParams() {
+  const locales = ["en", "bn"];
+  try {
+    const res = await fetch(`${API_BASE}/products/allProduct/public?limit=20`, {
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const products = Array.isArray(data) ? data : data.products || [];
+
+    const params: { locale: string; id: string }[] = [];
+    for (const locale of locales) {
+      for (const product of products) {
+        if (product._id) {
+          params.push({ locale, id: String(product._id) });
+        }
+      }
+    }
+    return params;
+  } catch (err) {
+    return [];
+  }
 }
 
 /**

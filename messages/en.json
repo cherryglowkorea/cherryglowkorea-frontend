@@ -132,6 +132,7 @@
   "productFilters": {
     "searchProducts": "Search Products",
     "searchPlaceholder": "Search skincare...",
+    "category": "Category",
     "categories": "Categories",
     "productType": "Product Type",
     "priceRange": "Price Range (৳)",
@@ -148,10 +149,13 @@
     "sortDefault": "Featured (Newest First)",
     "sortPriceAsc": "Price: Low to High",
     "sortPriceDesc": "Price: High to Low",
+    "sortPriceLow": "Price: Low to High",
+    "sortPriceHigh": "Price: High to Low",
     "sortNameAsc": "Name: A to Z",
     "sortNameDesc": "Name: Z to A",
     "resetFilters": "Reset All Filters",
-    "filters": "Filters"
+    "filters": "Filters",
+    "noProductsFound": "No Products Found"
   },
   "buildCombo": {
     "title": "Make Your Own Combo",

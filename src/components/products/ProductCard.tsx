@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -10,7 +10,7 @@ import { useCart } from "@/context/CartContext";
 import AnimatedDiscountBorder from "../shared/AnimatedDiscountBorder";
 import { cleanProductName, getVariantLabel, formatPrice } from "@/lib/utils";
 
-export default function ProductCard({ product, onAddToCart, index = 0, viewMode = "grid" }) {
+export default function ProductCard({ product, onAddToCart = null, index = 0, viewMode = "grid", layout = "grid" }: any) {
   const tCard = useTranslations("productCard");
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { addToCart: contextAddToCart } = useCart();
@@ -19,18 +19,38 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
   const {
     _id,
     id,
-    name,
-    image,
-    thumbnail,
+    name = "",
+    brand = "",
+    thumbnail = "",
+    image = "",
     images = [],
     variants = [],
-    discountType,
-    discountValue,
-    type,
+    isBestSelling = false,
+    isFeatured = false,
+    type = "single",
+    allowPreOrder: allowPreOrderProp = true,
+    discountType = "none",
+    discountValue = 0,
+    price: basePriceParam,
+    salePrice: salePriceParam,
+    comboProducts = [],
     category,
-  } = product;
+  } = product || {};
 
   const productId = _id || id;
+
+  const displayImage = thumbnail || image || images?.[0]?.url || "/placeholder.jpg";
+
+  const optimizedImage =
+    displayImage && typeof displayImage === "string" && displayImage.includes("/upload/")
+      ? displayImage.replace("/upload/", "/upload/w_600,f_auto,q_auto:good/")
+      : displayImage || "/placeholder.jpg";
+
+  const [imgSrc, setImgSrc] = useState(optimizedImage);
+
+  useEffect(() => {
+    setImgSrc(optimizedImage);
+  }, [optimizedImage]);
 
   // 👉 Default variant (lowest price or first)
   const [selectedVariant, setSelectedVariant] = useState(variants[0] || null);
@@ -120,15 +140,6 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
     }
   };
 
-  const displayImage = thumbnail || image || images?.[0]?.url || "/placeholder.jpg";
-
-  const optimizedImage =
-    displayImage && typeof displayImage === "string" && displayImage.includes("/upload/")
-      ? displayImage.replace("/upload/", "/upload/w_600,f_auto,q_auto:good/")
-      : displayImage;
-
-  const [imgSrc, setImgSrc] = useState(optimizedImage);
-
   /* ---------------- LIST VIEW LAYOUT ---------------- */
   if (viewMode === "list") {
     return (
@@ -148,7 +159,9 @@ export default function ProductCard({ product, onAddToCart, index = 0, viewMode 
               fill
               sizes="(max-width: 768px) 100vw, 220px"
               priority={index < 4}
-              onError={() => setImgSrc("/placeholder.jpg")}
+              onError={() => {
+                if (imgSrc !== "/placeholder.jpg") setImgSrc("/placeholder.jpg");
+              }}
               className="object-cover transition-transform duration-500 group-hover/img:scale-105"
             />
 
