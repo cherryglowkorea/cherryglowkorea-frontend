@@ -11,10 +11,9 @@ import {
   X,
   Search,
   SlidersHorizontal,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
+  ChevronDown,
+  Loader2,
+  CheckCircle2,
   RotateCcw,
   Tag,
   DollarSign,
@@ -65,12 +64,6 @@ export default function ProductsClient() {
   // View Mode: 'grid' or 'list'
   const [viewMode, setViewMode] = useState("grid");
 
-  // Initialize state from URL params
-  const [currentPage, setCurrentPage] = useState(() => {
-    const p = searchParams.get("page");
-    return p ? Math.max(1, parseInt(p, 10)) : 1;
-  });
-
   const [limit, setLimit] = useState(() => {
     const l = searchParams.get("limit");
     return l ? parseInt(l, 10) : 12;
@@ -87,8 +80,10 @@ export default function ProductsClient() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Data fetching states
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
 
@@ -128,21 +123,10 @@ export default function ProductsClient() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  /* ---------------- Reset Page when filters change ---------------- */
-  const isFirstRender = useRef(true);
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    setCurrentPage(1);
-  }, [category, brand, debouncedSearch, sortOption, typeFilter, limit, minPrice, maxPrice]);
-
   /* ---------------- Synchronize URL Params ---------------- */
   const updateUrlParams = useCallback(() => {
     const params = new URLSearchParams();
 
-    if (currentPage > 1) params.set("page", String(currentPage));
     if (limit !== 12) params.set("limit", String(limit));
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (category !== "All") params.set("category", category);
@@ -158,17 +142,19 @@ export default function ProductsClient() {
     if (typeof window !== "undefined") {
       window.history.replaceState(null, "", newUrl);
     }
-  }, [currentPage, limit, debouncedSearch, category, brand, sortOption, typeFilter, minPrice, maxPrice, pathname]);
+  }, [limit, debouncedSearch, category, brand, sortOption, typeFilter, minPrice, maxPrice, pathname]);
 
-  /* ---------------- CLIENT-SIDE ROUTE HANDLER FETCH ---------------- */
+  /* ---------------- CLIENT-SIDE INITIAL & FILTER FETCH ---------------- */
   useEffect(() => {
     let isCancelled = false;
 
-    const fetchPaginatedProducts = async () => {
+    const fetchInitialProducts = async () => {
       try {
         setLoading(true);
+        setCurrentPage(1);
+
         const params = new URLSearchParams({
-          page: String(currentPage),
+          page: "1",
           limit: String(limit),
           search: debouncedSearch,
           category: category,
@@ -210,13 +196,65 @@ export default function ProductsClient() {
       }
     };
 
-    fetchPaginatedProducts();
+    fetchInitialProducts();
     updateUrlParams();
 
     return () => {
       isCancelled = true;
     };
-  }, [currentPage, limit, debouncedSearch, category, brand, sortOption, typeFilter, minPrice, maxPrice]);
+  }, [limit, debouncedSearch, category, brand, sortOption, typeFilter, minPrice, maxPrice, updateUrlParams]);
+
+  /* ---------------- Handle Load More Products ---------------- */
+  const handleLoadMore = async () => {
+    if (loadingMore || currentPage >= totalPages) return;
+
+    const nextPage = currentPage + 1;
+    setLoadingMore(true);
+
+    try {
+      const params = new URLSearchParams({
+        page: String(nextPage),
+        limit: String(limit),
+        search: debouncedSearch,
+        category: category,
+        brand: brand,
+        type: typeFilter,
+        sort: sortOption,
+      });
+
+      if (minPrice) params.set("minPrice", minPrice);
+      if (maxPrice) params.set("maxPrice", maxPrice);
+
+      let endpoint = "/api/products";
+      if (typeFilter === "pre-order") {
+        endpoint = "/api/products/pre-orders";
+      } else if (typeFilter === "free") {
+        endpoint = "/api/products/free-orders";
+      }
+
+      const res = await axios.get(`${endpoint}?${params.toString()}`);
+
+      if (res.data && typeof res.data === "object" && Array.isArray(res.data.products)) {
+        setProducts((prev) => {
+          const existingIds = new Set(prev.map((p: any) => p._id));
+          const uniqueNew = res.data.products.filter((p: any) => !existingIds.has(p._id));
+          return [...prev, ...uniqueNew];
+        });
+        setCurrentPage(nextPage);
+        setTotalPages(res.data.totalPages || 1);
+        setTotalProducts(res.data.totalProducts || 0);
+      } else if (Array.isArray(res.data)) {
+        setProducts((prev) => [...prev, ...res.data]);
+        setCurrentPage(nextPage);
+        setTotalPages(1);
+        setTotalProducts(res.data.length);
+      }
+    } catch (err) {
+      console.error("Load more products error:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   /* ---------------- Handle Reset Filters ---------------- */
   const handleResetFilters = () => {
@@ -228,35 +266,8 @@ export default function ProductsClient() {
     setTypeFilter("all");
     setMinPrice("");
     setMaxPrice("");
-    setCurrentPage(1);
     setLimit(12);
   };
-
-  /* ---------------- Handle Page Navigation ---------------- */
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
-    setCurrentPage(newPage);
-    if (productsSectionRef.current) {
-      (productsSectionRef.current as any).scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  /* ---------------- Smart Page Numbers Generator ---------------- */
-  const pageNumbers = useMemo(() => {
-    if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-
-    if (currentPage <= 4) {
-      return [1, 2, 3, 4, 5, "...", totalPages];
-    }
-
-    if (currentPage >= totalPages - 3) {
-      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-    }
-
-    return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages];
-  }, [currentPage, totalPages]);
 
   const hasActiveFilters =
     category !== "All" ||
@@ -267,10 +278,6 @@ export default function ProductsClient() {
     minPrice !== "" ||
     maxPrice !== "" ||
     limit !== 12;
-
-  // Items count range text
-  const startItem = totalProducts === 0 ? 0 : (currentPage - 1) * limit + 1;
-  const endItem = Math.min(currentPage * limit, totalProducts);
 
   return (
     <div className="min-h-screen bg-stone-50/60 dark:bg-[#120a0d] text-stone-800 dark:text-rose-50 transition-colors relative overflow-hidden">
@@ -496,8 +503,7 @@ export default function ProductsClient() {
               <div className="bg-white dark:bg-[#1e1215] p-4 rounded-2xl border border-stone-200/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-wrap items-center justify-between gap-4">
                 {/* Result Counts Summary */}
                 <div className="text-xs text-stone-600 dark:text-rose-100/70">
-                  Showing <span className="font-bold text-stone-900 dark:text-white">{startItem}-{endItem}</span> of{" "}
-                  <span className="font-bold text-stone-900 dark:text-white">{totalProducts}</span> products
+                  {tF("showingLoaded", { count: products.length, total: totalProducts })}
                 </div>
 
                 {/* View Mode Toggle & Sort Dropdown */}
@@ -530,7 +536,7 @@ export default function ProductsClient() {
 
                   {/* Limit per page selector */}
                   <div className="flex items-center gap-1.5 text-xs text-stone-500">
-                    <span>Show:</span>
+                    <span>{tF("show")}</span>
                     <Select value={String(limit)} onValueChange={(val) => setLimit(Number(val))}>
                       <SelectTrigger className="w-16 h-8 text-xs bg-stone-50 dark:bg-white/5 border-stone-200 dark:border-white/10 rounded-xl">
                         <SelectValue />
@@ -609,72 +615,64 @@ export default function ProductsClient() {
                 </div>
               )}
 
-              {/* Pagination Bar */}
-              {totalPages > 1 && (
-                <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-stone-200/60 dark:border-white/10">
-                  <div className="text-xs text-stone-500">
-                    Page <span className="font-bold text-stone-800 dark:text-white">{currentPage}</span> of{" "}
-                    <span className="font-bold text-stone-800 dark:text-white">{totalPages}</span>
+              {/* Load More Section */}
+              {!loading && products.length > 0 && (
+                <div className="pt-8 pb-4 flex flex-col items-center justify-center gap-4 border-t border-stone-200/60 dark:border-white/10">
+                  {/* Progress Indicator */}
+                  <div className="w-full max-w-xs space-y-2 text-center">
+                    <p className="text-xs text-stone-500 dark:text-rose-100/60 font-medium">
+                      {tF("showingLoaded", { count: products.length, total: totalProducts })}
+                    </p>
+                    <div className="w-full h-1.5 bg-stone-200/80 dark:bg-white/10 rounded-full overflow-hidden p-[1px]">
+                      <div
+                        className="h-full bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 rounded-full transition-all duration-500 ease-out"
+                        style={{
+                          width: `${Math.min(100, Math.max(5, (products.length / (totalProducts || 1)) * 100))}%`,
+                        }}
+                      />
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 mx-auto sm:mx-0">
-                    <button
-                      onClick={() => handlePageChange(1)}
-                      disabled={currentPage === 1}
-                      className="p-2 rounded-xl border border-stone-200/80 dark:border-white/10 disabled:opacity-30 hover:bg-rose-50 dark:hover:bg-white/5 transition cursor-pointer"
-                      title="First Page"
-                    >
-                      <ChevronsLeft className="w-4 h-4 text-stone-600 dark:text-rose-100" />
-                    </button>
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="p-2 rounded-xl border border-stone-200/80 dark:border-white/10 disabled:opacity-30 hover:bg-rose-50 dark:hover:bg-white/5 transition cursor-pointer"
-                      title="Previous Page"
-                    >
-                      <ChevronLeft className="w-4 h-4 text-stone-600 dark:text-rose-100" />
-                    </button>
-
-                    {pageNumbers.map((num, idx) => {
-                      if (num === "...") {
-                        return (
-                          <span key={`dots-${idx}`} className="px-2 text-stone-400 text-xs font-bold">
-                            ...
-                          </span>
-                        );
+                  {/* Skeletons while loading more */}
+                  {loadingMore && (
+                    <div
+                      className={
+                        viewMode === "grid"
+                          ? "w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-2"
+                          : "w-full flex flex-col gap-4 pt-2"
                       }
-                      return (
-                        <button
-                          key={`page-${num}`}
-                          onClick={() => handlePageChange(num as number)}
-                          className={`w-8 h-8 rounded-xl text-xs font-extrabold transition cursor-pointer ${
-                            currentPage === num
-                              ? "bg-rose-600 text-white shadow-sm"
-                              : "bg-white dark:bg-white/5 border border-stone-200/80 dark:border-white/10 text-stone-700 dark:text-rose-100 hover:border-rose-300"
-                          }`}
-                        >
-                          {num}
-                        </button>
-                      );
-                    })}
+                    >
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonCard key={`load-more-skel-${i}`} />
+                      ))}
+                    </div>
+                  )}
 
+                  {/* Load More Button OR End of Collection Badge */}
+                  {currentPage < totalPages ? (
                     <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="p-2 rounded-xl border border-stone-200/80 dark:border-white/10 disabled:opacity-30 hover:bg-rose-50 dark:hover:bg-white/5 transition cursor-pointer"
-                      title="Next Page"
+                      onClick={handleLoadMore}
+                      disabled={loadingMore}
+                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-rose-600/20 hover:shadow-lg hover:shadow-rose-600/30 transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      <ChevronRight className="w-4 h-4 text-stone-600 dark:text-rose-100" />
+                      {loadingMore ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-white" />
+                          <span>{tF("loadingMore")}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>{tF("loadMore")}</span>
+                          <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+                        </>
+                      )}
                     </button>
-                    <button
-                      onClick={() => handlePageChange(totalPages)}
-                      disabled={currentPage === totalPages}
-                      className="p-2 rounded-xl border border-stone-200/80 dark:border-white/10 disabled:opacity-30 hover:bg-rose-50 dark:hover:bg-white/5 transition cursor-pointer"
-                      title="Last Page"
-                    >
-                      <ChevronsRight className="w-4 h-4 text-stone-600 dark:text-rose-100" />
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 text-xs font-semibold text-rose-700 dark:text-rose-300 shadow-2xs">
+                      <CheckCircle2 className="w-4 h-4 text-rose-500" />
+                      <span>{tF("allProductsLoaded")}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </main>

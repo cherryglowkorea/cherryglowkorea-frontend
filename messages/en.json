@@ -155,7 +155,11 @@
     "sortNameDesc": "Name: Z to A",
     "resetFilters": "Reset All Filters",
     "filters": "Filters",
-    "noProductsFound": "No Products Found"
+    "noProductsFound": "No Products Found",
+    "loadMore": "Load More Products",
+    "loadingMore": "Loading More Products...",
+    "allProductsLoaded": "You've reached the end of the collection",
+    "showingLoaded": "Showing {count} of {total} products"
   },
   "buildCombo": {
     "title": "Make Your Own Combo",

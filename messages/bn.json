@@ -155,7 +155,11 @@
     "sortNameDesc": "নাম: Z থেকে A",
     "resetFilters": "সকল ফিল্টার রিসেট করুন",
     "filters": "ফিল্টারসমূহ",
-    "noProductsFound": "কোনো পণ্য পাওয়া যায়নি"
+    "noProductsFound": "কোনো পণ্য পাওয়া যায়নি",
+    "loadMore": "আরও পণ্য দেখুন",
+    "loadingMore": "পণ্য লোড হচ্ছে...",
+    "allProductsLoaded": "আপনি সব পণ্য দেখে ফেলেছেন",
+    "showingLoaded": "{total} টির মধ্যে {count} টি পণ্য দেখানো হচ্ছে"
   },
   "buildCombo": {
     "title": "আপনার নিজের কম্বো বানান",
