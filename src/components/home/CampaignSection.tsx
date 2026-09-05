@@ -144,7 +144,7 @@ export default function CampaignSection() {
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-rose-500 border-t-transparent"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 relative z-10">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 relative z-10">
               {displayProducts.map((p: any) => {
                 const { regularPrice, salePrice } = getProductPrices(p);
                 const discountPercent = regularPrice > salePrice && regularPrice > 0
@@ -156,12 +156,12 @@ export default function CampaignSection() {
                 return (
                   <div
                     key={p._id || p.id}
-                    className="group relative rounded-2xl bg-[#23141A] border border-rose-900/40 hover:border-rose-500/60 p-4 flex flex-col justify-between space-y-3 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-rose-950/50"
+                    className="group relative rounded-2xl bg-[#23141A] border border-rose-900/40 hover:border-rose-500/60 p-2.5 sm:p-4 flex flex-col justify-between space-y-2 sm:space-y-3 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-rose-950/50"
                   >
                     {/* Discount Tag Badge */}
                     {discountPercent > 0 && (
-                      <span className="absolute top-3 left-3 z-10 rounded-full bg-gradient-to-r from-rose-600 to-pink-600 px-2.5 py-1 text-[10px] font-black uppercase text-white shadow-md flex items-center gap-1">
-                        <Zap size={11} className="fill-white" />
+                      <span className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 rounded-full bg-gradient-to-r from-rose-600 to-pink-600 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-black uppercase text-white shadow-md flex items-center gap-1">
+                        <Zap size={10} className="fill-white" />
                         {discountPercent}% {isBn ? "ছাড়" : "OFF"}
                       </span>
                     )}
@@ -172,7 +172,7 @@ export default function CampaignSection() {
                         src={p.thumbnail || p.image || "/placeholder.png"}
                         alt={displayName}
                         fill
-                        sizes="(max-width: 640px) 100vw, 250px"
+                        sizes="(max-width: 640px) 50vw, 250px"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </Link>
@@ -181,7 +181,7 @@ export default function CampaignSection() {
                     <div className="space-y-1.5 flex-1 flex flex-col justify-between pt-1">
                       <div>
                         {p.category && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 block">
+                          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-rose-400 block truncate">
                             {p.category}
                           </span>
                         )}
@@ -193,12 +193,12 @@ export default function CampaignSection() {
                       </div>
 
                       {/* Pricing Display */}
-                      <div className="pt-2 border-t border-rose-950/60 flex items-baseline gap-2">
-                        <span className="text-base sm:text-lg font-black text-rose-400">
+                      <div className="pt-2 border-t border-rose-950/60 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+                        <span className="text-sm sm:text-lg font-black text-rose-400 font-mono">
                           ৳{salePrice.toLocaleString()}
                         </span>
                         {regularPrice > salePrice && (
-                          <span className="text-xs text-stone-400 line-through font-semibold">
+                          <span className="text-[10px] sm:text-xs text-stone-400 line-through font-semibold font-mono">
                             ৳{regularPrice.toLocaleString()}
                           </span>
                         )}
@@ -207,9 +207,9 @@ export default function CampaignSection() {
                       {/* Instant Add To Cart CTA Button */}
                       <button
                         onClick={() => addToCart(p)}
-                        className="w-full h-9 mt-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold text-xs shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full h-8 sm:h-9 mt-1 sm:mt-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold text-[11px] sm:text-xs shadow-sm transition active:scale-95 flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer"
                       >
-                        <ShoppingBag size={14} />
+                        <ShoppingBag size={13} />
                         <span>{tCamp("addToCart")}</span>
                       </button>
                     </div>

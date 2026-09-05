@@ -152,7 +152,7 @@ export default function BestSoldProducts() {
 
         {/* Loading Skeletons */}
         {loading && (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
@@ -180,8 +180,8 @@ export default function BestSoldProducts() {
               }}
               loop={products.length >= 4}
               speed={600}
-              spaceBetween={16}
-              slidesPerView={1.2}
+              spaceBetween={10}
+              slidesPerView={2}
               onBeforeInit={(swiper) => {
                 swiperRef.current = swiper;
               }}
@@ -190,16 +190,20 @@ export default function BestSoldProducts() {
                 setIsEnd(swiper.isEnd);
               }}
               breakpoints={{
-                540: {
+                480: {
                   slidesPerView: 2,
+                  spaceBetween: 12,
+                },
+                640: {
+                  slidesPerView: 2.5,
                   spaceBetween: 16,
                 },
                 768: {
-                  slidesPerView: 2.5,
-                  spaceBetween: 20,
+                  slidesPerView: 3,
+                  spaceBetween: 18,
                 },
                 1024: {
-                  slidesPerView: 3,
+                  slidesPerView: 3.5,
                   spaceBetween: 20,
                 },
                 1280: {

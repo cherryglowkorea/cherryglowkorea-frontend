@@ -306,7 +306,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
   /* ---------------- GRID VIEW LAYOUT (FULL-BLEED BEAUTY CARDS) ---------------- */
   const CardContent = (
     <div
-      className={`flex h-full flex-col rounded-2xl p-3 sm:p-3.5 border-2 hover:-translate-y-0.5 transition-all duration-200 group ${
+      className={`flex h-full flex-col rounded-2xl p-2.5 sm:p-3.5 border-2 hover:-translate-y-0.5 transition-all duration-200 group ${
         canPreOrder
           ? "bg-amber-500/5 dark:bg-amber-950/10 border-amber-500/70 dark:border-amber-500/60 hover:border-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]"
           : "bg-white dark:bg-[#1e1215] border-stone-200/60 dark:border-white/10 hover:border-pink-500/80 dark:hover:border-pink-500/70 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)]"
@@ -314,7 +314,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
     >
       
       {/* Full-Bleed Image Banner */}
-      <div className="relative w-full h-40 sm:h-52 md:h-56 mb-2.5 sm:mb-3 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden group/img">
+      <div className="relative w-full h-36 sm:h-52 md:h-56 mb-2 sm:mb-3 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden group/img">
         <Link href={`/products/${productId}`} className="block w-full h-full relative cursor-pointer">
           <Image
             src={imgSrc || "/placeholder.jpg"}
@@ -342,7 +342,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
               </span>
             ) : (
               category && (
-                <span className="text-[9px] sm:text-[10px] font-bold text-stone-900 bg-white/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs max-w-[100px] truncate">
+                <span className="text-[9px] sm:text-[10px] font-bold text-stone-900 bg-white/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs max-w-[90px] sm:max-w-[100px] truncate">
                   {category}
                 </span>
               )
@@ -383,7 +383,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
           }}
           title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
           aria-label="Wishlist"
-          className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-20 w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
+          className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-20 w-7 h-7 sm:w-8.5 sm:h-8.5 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
             isWishlisted
               ? "bg-rose-50 dark:bg-rose-950/90 border-rose-200 dark:border-rose-900/50 text-rose-500"
               : "bg-white/90 dark:bg-[#1e1215]/90 border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-rose-100 hover:text-rose-500"

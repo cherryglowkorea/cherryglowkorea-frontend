@@ -198,7 +198,7 @@ export default function Footer() {
       </div>
 
       {/* 3. Main 4-Column Footer */}
-      <div className="mx-auto max-w-[1536px] px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1536px] px-4 pt-16 pb-20 sm:pb-24 sm:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
@@ -332,57 +332,71 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* 4. Bottom Footer Bar: Copyright & Soft Card Payment Badges */}
-        <div className="mt-14 pt-8 border-t border-stone-800 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-stone-400 dark:text-rose-100/50 text-center md:text-left">
-            © {new Date().getFullYear()} <span className="text-white font-semibold">Cherry Glow Korea</span>. {tFooter("rights")}
-          </p>
+        {/* 4. Bottom Footer Bar: Copyright, Developed By & Soft Card Payment Badges */}
+        <div className="mt-14 pt-8 border-t border-stone-800 dark:border-white/10 flex flex-col lg:flex-row items-center justify-between gap-5">
+          <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 text-xs text-stone-400 dark:text-rose-100/50 text-center lg:text-left">
+            <p>
+              © {new Date().getFullYear()} <span className="text-white font-semibold">Cherry Glow Korea</span>. {tFooter("rights")}
+            </p>
+            <span className="hidden sm:inline text-stone-600 dark:text-rose-100/20">•</span>
+            <p className="flex items-center gap-1.5">
+              <span>{tFooter("developedBy")}</span>
+              <a
+                href="https://shipon-chowdhury.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-pink-400 hover:text-pink-300 dark:text-rose-400 dark:hover:text-rose-300 transition-colors hover:underline"
+              >
+                Shipon Chowdhury
+              </a>
+            </p>
+          </div>
 
-          {/* Softer Payment Method Icons */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
+          {/* Balanced 5 Payment Method Icons: Fits on a single row with safe clearance from floating Messenger button */}
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 lg:pr-16">
+            <div className="h-8 sm:h-9 px-2.5 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105 shrink-0">
               <Image
                 src="/payment-icon/BKash-bKash-Logo.wine.svg"
                 alt="bKash Payment"
-                width={75}
-                height={30}
-                className="object-contain h-7 w-auto"
+                width={56}
+                height={22}
+                className="object-contain h-4.5 sm:h-5 w-auto"
               />
             </div>
-            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
+            <div className="h-8 sm:h-9 px-2.5 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105 shrink-0">
               <Image
                 src="/payment-icon/Nagad-Horizontal-Logo.wine.svg"
                 alt="Nagad Payment"
-                width={75}
-                height={30}
-                className="object-contain h-7 w-auto"
+                width={56}
+                height={22}
+                className="object-contain h-4.5 sm:h-5 w-auto"
               />
             </div>
-            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
+            <div className="h-8 sm:h-9 px-2.5 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105 shrink-0">
               <Image
                 src="/payment-icon/Visa_Inc.-Logo.wine.svg"
                 alt="Visa Payment"
-                width={60}
-                height={30}
-                className="object-contain h-6.5 w-auto"
+                width={46}
+                height={22}
+                className="object-contain h-3.5 sm:h-4 w-auto"
               />
             </div>
-            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
+            <div className="h-8 sm:h-9 px-2.5 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105 shrink-0">
               <Image
                 src="/payment-icon/Mastercard-Logo.wine.svg"
                 alt="Mastercard Payment"
-                width={60}
-                height={30}
-                className="object-contain h-6.5 w-auto"
+                width={46}
+                height={22}
+                className="object-contain h-4.5 sm:h-5 w-auto"
               />
             </div>
-            <div className="h-10 px-3.5 py-1 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105">
+            <div className="h-8 sm:h-9 px-2.5 bg-stone-100/90 dark:bg-white/10 rounded-xl border border-stone-200/60 dark:border-white/10 shadow-2xs flex items-center justify-center transition-all hover:bg-white dark:hover:bg-white/20 hover:scale-105 shrink-0">
               <Image
                 src="/payment-icon/cash-on-delivery.png"
                 alt="Cash on Delivery"
-                width={85}
-                height={30}
-                className="object-contain h-6.5 w-auto"
+                width={60}
+                height={22}
+                className="object-contain h-4.5 sm:h-5 w-auto"
               />
             </div>
           </div>

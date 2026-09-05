@@ -162,6 +162,11 @@
     "showingLoaded": "Showing {count} of {total} products"
   },
   "buildCombo": {
+    "customBundleBuilder": "Custom Bundle Builder",
+    "buildTitle": "Make Your Own Combo",
+    "buildSubtitle": "Select 2 or more items to build your customized K-Beauty set and apply special admin coupons for maximum savings!",
+    "yourCustomPackage": "Your Custom Package",
+    "availableCatalog": "Available Products Catalog",
     "title": "Make Your Own Combo",
     "subtext": "Select 2 or more items to build your customized K-Beauty set and apply special admin coupons for maximum savings!",
     "step1": "Step 1: Choose Your Products",
@@ -219,7 +224,8 @@
     "terms": "Terms & Conditions",
     "contactHotline": "Contact & Hotline",
     "location": "Dhaka, Bangladesh & Busan, South Korea",
-    "rights": "All rights reserved. Built with authentic care."
+    "rights": "All rights reserved. Built with authentic care.",
+    "developedBy": "Developed by"
   },
   "auth": {
     "loginEyebrow": "WELCOME BACK",

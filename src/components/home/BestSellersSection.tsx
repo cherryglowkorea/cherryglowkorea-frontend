@@ -468,8 +468,8 @@ export default function BestSellersSection({
             }}
             loop={displayProducts.length >= 4}
             speed={600}
-            spaceBetween={20}
-            slidesPerView={1}
+            spaceBetween={10}
+            slidesPerView={2}
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;
             }}
@@ -478,8 +478,12 @@ export default function BestSellersSection({
               setIsEnd(swiper.isEnd);
             }}
             breakpoints={{
-              640: {
+              480: {
                 slidesPerView: 2,
+                spaceBetween: 12,
+              },
+              640: {
+                slidesPerView: 2.5,
                 spaceBetween: 16,
               },
               1024: {

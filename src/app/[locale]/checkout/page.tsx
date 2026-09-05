@@ -41,6 +41,9 @@ import {
   Clock,
   Headphones,
   PhoneCall,
+  Trash2,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { formatPrice, getVariantLabel } from "@/lib/utils";
 
@@ -91,7 +94,7 @@ export function calculateDeliveryFee(
 }
 
 export default function CheckoutPage() {
-  const { cart, isLoaded: isCartLoaded, clearCart, coupon: contextCoupon } = useCart();
+  const { cart, isLoaded: isCartLoaded, clearCart, coupon: contextCoupon, updateQuantity, removeFromCart } = useCart();
   const { setAuthData } = useAuth();
   const router = useRouter();
   const t = useTranslations("checkout");
@@ -128,9 +131,6 @@ export default function CheckoutPage() {
   const [couponStatus, setCouponStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [storeSettings, setStoreSettings] = useState<any>(null);
 
-  // Terms & Conditions State
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [termsError, setTermsError] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -218,39 +218,61 @@ export default function CheckoutPage() {
 
   // Robust unit/size display extractor to prevent "ml x 2" bug
   const getItemDisplaySize = (item: any) => {
+    // If it's a combo product or has comboProducts, don't show "Set" badge
+    if (item.type === "combo" || (item.comboProducts && item.comboProducts.length > 0)) {
+      return "";
+    }
+
+    const isIgnored = (str: any) => {
+      if (!str) return true;
+      const s = String(str).trim().toLowerCase();
+      return (
+        s === "set" ||
+        s === "standard" ||
+        s === "default" ||
+        s === "null" ||
+        s === "undefined" ||
+        s === "" ||
+        /^option\s*\d*$/i.test(s)
+      );
+    };
+
     const v = item.selectedVariant;
 
     // 1. If variant explicitly has a size string (e.g. "100ml", "50ml")
-    if (v?.size && String(v.size).trim().length > 0 && String(v.size).trim().toLowerCase() !== "null") {
+    if (v?.size && !isIgnored(v.size)) {
       return String(v.size).trim();
     }
 
     // 2. If variant has weight or volume + unit
     const rawWeight = v?.weight ?? v?.volume ?? v?.amount;
     const rawUnit = v?.unit ?? "";
-    if (rawWeight !== undefined && rawWeight !== null && String(rawWeight).trim().length > 0) {
+    if (rawWeight !== undefined && rawWeight !== null && !isIgnored(rawWeight)) {
       const weightStr = String(rawWeight).trim();
       const unitStr = String(rawUnit).trim();
       if (/[a-zA-Z]/.test(weightStr)) {
-        return weightStr;
+        if (!isIgnored(weightStr)) return weightStr;
+      } else {
+        const combined = `${weightStr}${unitStr || "ml"}`;
+        if (!isIgnored(combined)) return combined;
       }
-      return `${weightStr}${unitStr || "ml"}`;
     }
 
     // 3. Check variant title or name
-    if (v?.title && String(v.title).trim() && !/^(default|standard|null|option \d+)$/i.test(String(v.title).trim())) {
+    if (v?.title && !isIgnored(v.title)) {
       return String(v.title).trim();
     }
-    if (v?.name && String(v.name).trim() && !/^(default|standard|null|option \d+)$/i.test(String(v.name).trim())) {
+    if (v?.name && !isIgnored(v.name)) {
       return String(v.name).trim();
     }
 
     // 4. Check product-level size or weight
-    if (item.size && String(item.size).trim()) {
+    if (item.size && !isIgnored(item.size)) {
       return String(item.size).trim();
     }
-    if (item.weight && String(item.weight).trim()) {
-      return `${String(item.weight).trim()}${item.unit || "ml"}`;
+    if (item.weight && !isIgnored(item.weight)) {
+      const combined = `${String(item.weight).trim()}${item.unit || "ml"}`;
+      if (!isIgnored(combined)) return combined;
     }
 
     // 5. Try extracting size/unit directly from product name (e.g., "100ml", "50ml", "30g", "250ml")
@@ -262,21 +284,21 @@ export default function CheckoutPage() {
     }
 
     // 6. If variant has unit only (e.g. "ml" without weight), search variants list for values
-    if (v?.unit && item.variants && Array.isArray(item.variants)) {
+    if (v?.unit && !isIgnored(v.unit) && item.variants && Array.isArray(item.variants)) {
       const matchVar = item.variants.find((cand: any) => cand.size || cand.weight);
-      if (matchVar?.size) return String(matchVar.size).trim();
-      if (matchVar?.weight) return `${matchVar.weight}${matchVar.unit || v.unit}`;
+      if (matchVar?.size && !isIgnored(matchVar.size)) return String(matchVar.size).trim();
+      if (matchVar?.weight && !isIgnored(matchVar.weight)) return `${matchVar.weight}${matchVar.unit || v.unit}`;
     }
 
     // 7. Fallback to getVariantLabel if meaningful
     if (v) {
       const label = getVariantLabel(v);
-      if (label && !label.startsWith("Option") && label.toLowerCase() !== "ml") {
+      if (label && !isIgnored(label) && label.toLowerCase() !== "ml") {
         return label;
       }
     }
 
-    return "Standard";
+    return "";
   };
 
   // Auto-sync delivery area (dhaka vs outside) with district selection
@@ -391,11 +413,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!agreedToTerms) {
-      setTermsError("Please agree to the Terms & Conditions and Return Policy to confirm your order.");
-      toast.error("Please agree to the Terms & Conditions and Return Policy");
-      return;
-    }
 
     // Check if any product needs size/variant selection
     const missingVariant = cart.find(
@@ -757,31 +774,11 @@ export default function CheckoutPage() {
       <div className="relative z-10 max-w-[1536px] mx-auto px-3.5 sm:px-6 lg:px-8">
         
         {/* Streamlined Distraction-Free Header Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 sm:mb-8 sm:pb-4 border-b border-stone-200/80 dark:border-white/10">
-          <div className="flex items-center gap-3 sm:gap-4 flex-wrap sm:flex-nowrap">
-            {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-2 group shrink-0">
-              <Image
-                src="/logo.png"
-                alt="Cherry Glow Korea"
-                width={32}
-                height={32}
-                className="transition-transform group-hover:scale-105 shrink-0"
-              />
-              <div className="flex items-baseline gap-1">
-                <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-stone-900 dark:text-white">
-                  Cherry Glow
-                </span>
-                <span className="font-serif text-lg sm:text-xl italic font-semibold text-rose-500 dark:text-rose-400 hidden sm:inline">
-                  Korea
-                </span>
-              </div>
-            </Link>
-
-            <span className="hidden sm:inline-block text-stone-300 dark:text-white/20 font-light">|</span>
-
-            {/* Back Button & Title */}
-            <div className="flex items-center gap-2.5">
+        <div className="mb-4 pb-3 sm:mb-8 sm:pb-4 border-b border-stone-200/80 dark:border-white/10 space-y-2.5 sm:space-y-0">
+          {/* Top Bar: Nav, Brand, & Controls */}
+          <div className="flex items-center justify-between gap-3">
+            {/* Left: Back button + Brand Logo & Title */}
+            <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
               <button
                 type="button"
                 onClick={() => router.push("/cart")}
@@ -790,36 +787,69 @@ export default function CheckoutPage() {
               >
                 <ArrowLeft size={16} />
               </button>
-              <div>
-                <h1 className="text-base sm:text-xl font-black text-stone-900 dark:text-white leading-tight flex items-center gap-2">
+
+              <Link href="/" className="flex items-center gap-2 group shrink-0">
+                <Image
+                  src="/logo.png"
+                  alt="Cherry Glow Korea"
+                  width={28}
+                  height={28}
+                  className="transition-transform group-hover:scale-105 shrink-0 sm:w-8 sm:h-8"
+                />
+                <div className="flex items-baseline gap-1">
+                  <span className="font-serif text-base sm:text-xl font-bold tracking-tight text-stone-900 dark:text-white">
+                    Cherry Glow
+                  </span>
+                  <span className="font-serif text-base sm:text-xl italic font-semibold text-rose-500 dark:text-rose-400 hidden sm:inline">
+                    Korea
+                  </span>
+                </div>
+              </Link>
+
+              {/* Desktop Inline Title */}
+              <span className="hidden md:inline-block text-stone-300 dark:text-white/20 font-light">|</span>
+              <div className="hidden md:block">
+                <h1 className="text-base sm:text-lg font-black text-stone-900 dark:text-white leading-tight flex items-center gap-2">
                   {t("title")}
                 </h1>
-                <p className="text-[11px] sm:text-xs text-stone-500 dark:text-rose-100/50 mt-0.5">
+                <p className="text-[11px] text-stone-500 dark:text-rose-100/50 mt-0.5">
                   {t("subtitle")}
                 </p>
               </div>
             </div>
+
+            {/* Right: Stepper (Desktop) & Language / Theme Controls */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* Stepper indicator on large screens */}
+              <div className="hidden lg:flex items-center gap-2 text-xs font-semibold mr-1">
+                <span className="text-stone-400 dark:text-rose-100/40 flex items-center gap-1">
+                  <ShoppingBag size={12} /> 1. {t("stepCart")}
+                </span>
+                <ChevronRight size={13} className="text-stone-300" />
+                <span className="font-bold text-pink-500 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/40 px-3 py-1 rounded-xl border border-pink-200 dark:border-pink-900/30 flex items-center gap-1">
+                  <CreditCard size={12} /> 2. {t("stepCheckout")}
+                </span>
+                <ChevronRight size={13} className="text-stone-300" />
+                <span className="text-stone-400 dark:text-rose-100/40 flex items-center gap-1">
+                  <Sparkles size={12} /> 3. {t("stepConfirmation")}
+                </span>
+              </div>
+
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Stepper indicator */}
-            <div className="hidden lg:flex items-center gap-2 text-xs font-semibold mr-1">
-              <span className="text-stone-400 dark:text-rose-100/40 flex items-center gap-1">
-                <ShoppingBag size={12} /> 1. {t("stepCart")}
-              </span>
-              <ChevronRight size={13} className="text-stone-300" />
-              <span className="font-bold text-pink-500 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/40 px-3 py-1 rounded-xl border border-pink-200 dark:border-pink-900/30 flex items-center gap-1">
-                <CreditCard size={12} /> 2. {t("stepCheckout")}
-              </span>
-              <ChevronRight size={13} className="text-stone-300" />
-              <span className="text-stone-400 dark:text-rose-100/40 flex items-center gap-1">
-                <Sparkles size={12} /> 3. {t("stepConfirmation")}
-              </span>
+          {/* Mobile Page Title Row (Shown only below md) */}
+          <div className="md:hidden pt-0.5 flex items-center justify-between">
+            <div>
+              <h1 className="text-base sm:text-lg font-black text-stone-900 dark:text-white leading-tight">
+                {t("title")}
+              </h1>
+              <p className="text-[11px] text-stone-500 dark:text-rose-100/60 mt-0.5 leading-snug">
+                {t("subtitle")}
+              </p>
             </div>
-
-            {/* Language & Theme Controls */}
-            <LanguageSwitcher />
-            <ThemeToggle />
           </div>
         </div>
 
@@ -924,15 +954,6 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* 6. Temporary Dev-Only Debug Badge */}
-              {process.env.NODE_ENV === "development" && (
-                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-mono flex items-center justify-between flex-wrap gap-2">
-                  <span>
-                    Subtotal: ৳{subtotal} | Free Shipping Threshold: ৳{shippingSettings.freeShippingMinimum} | Delivery Fee: ৳{deliveryCharge}
-                  </span>
-                  <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-amber-500/20 font-bold">Dev Debug</span>
-                </div>
-              )}
 
               {/* Delivery Area Picker */}
               <div className="space-y-2">
@@ -1103,12 +1124,24 @@ export default function CheckoutPage() {
               )}
 
               {/* Items List */}
-              <div className="space-y-3 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
+              <div className="space-y-3 max-h-72 sm:max-h-80 overflow-y-auto pr-1 scrollbar-thin">
                 {cart.map((item, idx) => {
-                  const itemPrice = item.selectedVariant?.price || item.price || 0;
+                  const pId = item.productId || item._id;
+                  const itemPrice = item.selectedVariant?.price ?? item.price ?? 0;
+                  const origPrice = item.selectedVariant?.price ?? item.basePrice ?? item.price ?? 0;
+                  const itemTotal = itemPrice * item.quantity;
+                  const totalOrig = origPrice * item.quantity;
+                  const isFreeItem = item.type === "free" || item.isFree || (itemPrice === 0 && itemTotal === 0);
+                  const formatted = formatPrice(isFreeItem ? totalOrig : 0, isFreeItem ? 0 : itemTotal);
+                  const displaySize = getItemDisplaySize(item);
+
                   return (
-                    <div key={`${item.productId}-${idx}`} className="flex items-center gap-3 py-1">
-                      <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200/60 dark:border-white/5 overflow-hidden shrink-0">
+                    <div
+                      key={`${pId}-${idx}`}
+                      className="flex items-start gap-2.5 sm:gap-3 py-2 border-b border-stone-100 dark:border-white/5 last:border-b-0"
+                    >
+                      {/* Product Thumbnail */}
+                      <div className="relative w-12 h-12 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200/60 dark:border-white/5 overflow-hidden shrink-0 mt-0.5">
                         <Image
                           src={item.image || FALLBACK_IMAGE}
                           alt={item.name}
@@ -1118,49 +1151,88 @@ export default function CheckoutPage() {
                         />
                       </div>
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h3 className="text-xs font-semibold text-stone-800 dark:text-rose-100 truncate">
+                      {/* Product Info & Controls */}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-start justify-between gap-1.5">
+                          <h3
+                            className="text-xs font-semibold text-stone-800 dark:text-rose-100 line-clamp-1 leading-snug"
+                            title={item.name}
+                          >
                             {item.name}
                           </h3>
+
+                          {/* Delete Item Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              removeFromCart(pId);
+                              toast.info(item.name ? `Removed "${item.name}"` : "Item removed from cart");
+                            }}
+                            title="Remove item"
+                            className="text-stone-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 p-1 rounded-lg transition duration-200 shrink-0 cursor-pointer"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+
+                        {/* Variant / Size & Pre-order Badge */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {displaySize && displaySize.toLowerCase() !== "set" && (
+                            <span className="text-[10px] text-stone-500 dark:text-rose-100/60 font-medium bg-stone-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
+                              {displaySize}
+                            </span>
+                          )}
                           {item.isPreOrder && (
                             <span className="text-[9px] font-extrabold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 px-1.5 py-0.5 rounded">
                               Pre-Order
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-stone-400 dark:text-rose-100/40 mt-0.5">
-                          {getItemDisplaySize(item)} × {item.quantity}
-                        </p>
-                      </div>
 
-                      <div className="text-right">
-                        {(() => {
-                          const itemPrice = item.selectedVariant?.price ?? item.price ?? 0;
-                          const origPrice = item.selectedVariant?.price ?? item.basePrice ?? item.price ?? 0;
-                          const itemTotal = itemPrice * item.quantity;
-                          const totalOrig = origPrice * item.quantity;
-                          const isFreeItem = item.type === "free" || item.isFree || (itemPrice === 0 && itemTotal === 0);
-                          const formatted = formatPrice(isFreeItem ? totalOrig : 0, isFreeItem ? 0 : itemTotal);
-                          return (
-                            <div className="flex items-center justify-end gap-1.5">
-                              {formatted.originalText && (
-                                <span className="line-through text-xs text-stone-400 font-mono">
-                                  {formatted.originalText}
-                                </span>
-                              )}
-                              <span
-                                className={`text-xs font-black ${
-                                  formatted.isFree
-                                    ? "text-emerald-600 dark:text-emerald-400 uppercase tracking-wide font-sans"
-                                    : "text-stone-800 dark:text-rose-50 font-mono"
-                                }`}
-                              >
-                                {formatted.finalText}
+                        {/* Quantity Stepper & Price Row */}
+                        <div className="flex items-center justify-between pt-1">
+                          {/* Quantity Controls (Minimum 1, increase as much as user wants) */}
+                          <div className="inline-flex items-center border border-stone-200 dark:border-white/10 rounded-lg overflow-hidden bg-stone-50 dark:bg-stone-900/60 shadow-2xs">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(pId, "dec")}
+                              disabled={item.quantity <= 1}
+                              title={item.quantity <= 1 ? "Minimum 1 item" : "Decrease quantity"}
+                              className="w-6 h-6 flex items-center justify-center text-stone-500 dark:text-rose-100/60 hover:bg-stone-200 dark:hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                            >
+                              <Minus size={10} />
+                            </button>
+                            <span className="px-2 text-xs font-bold text-stone-800 dark:text-rose-100 min-w-[1.5rem] text-center font-mono">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(pId, "inc")}
+                              title="Increase quantity"
+                              className="w-6 h-6 flex items-center justify-center text-stone-500 dark:text-rose-100/60 hover:bg-stone-200 dark:hover:bg-white/10 transition cursor-pointer"
+                            >
+                              <Plus size={10} />
+                            </button>
+                          </div>
+
+                          {/* Item Price */}
+                          <div className="text-right">
+                            {formatted.originalText && (
+                              <span className="line-through text-[10px] text-stone-400 font-mono block">
+                                {formatted.originalText}
                               </span>
-                            </div>
-                          );
-                        })()}
+                            )}
+                            <span
+                              className={`text-xs font-black ${
+                                formatted.isFree
+                                  ? "text-emerald-600 dark:text-emerald-400 uppercase tracking-wide font-sans"
+                                  : "text-stone-800 dark:text-rose-50 font-mono"
+                              }`}
+                            >
+                              {formatted.finalText}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1270,90 +1342,90 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-2.5">
-                  {/* Cash on Delivery Option */}
-                  <div
-                    onClick={() => setPaymentMethod("cod")}
-                    className={`p-3 rounded-xl border-2 transition cursor-pointer flex items-start gap-3 ${
-                      paymentMethod === "cod"
-                        ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/30 shadow-2xs"
-                        : "border-stone-200 dark:border-white/10 hover:border-stone-300"
-                    }`}
-                  >
-                    <div className="w-4 h-4 rounded-full border-2 border-pink-500 flex items-center justify-center shrink-0 mt-0.5">
-                      {paymentMethod === "cod" && <div className="w-2 h-2 bg-pink-500 rounded-full" />}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-stone-800 dark:text-rose-50 flex items-center gap-1.5">
-                          <Banknote size={14} className="text-emerald-500" /> {t("cod")}
-                        </span>
-                        <span className="text-[9px] font-bold uppercase bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded flex items-center gap-1">
-                          <Sparkles size={10} /> {t("recommended")}
+                  <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+                    {/* Cash on Delivery Option */}
+                    <div
+                      onClick={() => setPaymentMethod("cod")}
+                      className={`p-2.5 sm:p-3 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between gap-1 sm:gap-1.5 ${
+                        paymentMethod === "cod"
+                          ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/30 shadow-2xs"
+                          : "border-stone-200 dark:border-white/10 hover:border-stone-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 border-pink-500 flex items-center justify-center shrink-0">
+                            {paymentMethod === "cod" && <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-pink-500 rounded-full" />}
+                          </div>
+                          <span className="font-bold text-[11px] sm:text-xs text-stone-800 dark:text-rose-50 flex items-center gap-1 truncate">
+                            <Banknote size={13} className="text-emerald-500 shrink-0" />
+                            <span className="truncate">{t("cod")}</span>
+                          </span>
+                        </div>
+                        <span className="text-[8px] sm:text-[9px] font-bold uppercase bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 px-1 sm:px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0">
+                          <Sparkles size={9} /> {t("recommended")}
                         </span>
                       </div>
-                      <p className="text-[10px] text-stone-500 dark:text-rose-100/50 mt-0.5 leading-tight">
+                      <p className="text-[9.5px] sm:text-[10px] text-stone-500 dark:text-rose-100/50 mt-0.5 leading-tight pl-5 sm:pl-6 line-clamp-1 sm:line-clamp-none">
                         {t("codDesc")}
+                      </p>
+                    </div>
+
+                    {/* Online Payment / Digital Wallet Option */}
+                    <div
+                      onClick={() => setPaymentMethod("bkash")}
+                      className={`p-2.5 sm:p-3 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between gap-1 sm:gap-1.5 ${
+                        paymentMethod === "bkash"
+                          ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/30 shadow-2xs"
+                          : "border-stone-200 dark:border-white/10 hover:border-stone-300 opacity-80"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 border-stone-300 dark:border-white/20 flex items-center justify-center shrink-0">
+                            {paymentMethod === "bkash" && <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-pink-500 rounded-full" />}
+                          </div>
+                          <span className="font-bold text-[11px] sm:text-xs text-stone-800 dark:text-rose-50 flex items-center gap-1 truncate">
+                            <Wallet size={13} className="text-pink-500 shrink-0" />
+                            <span className="truncate">{t("bkash")}</span>
+                          </span>
+                        </div>
+                        <span className="text-[8px] sm:text-[9px] font-bold text-stone-400 flex items-center gap-0.5 shrink-0">
+                          <CreditCard size={9} /> {t("digitalWallet")}
+                        </span>
+                      </div>
+                      <p className="text-[9.5px] sm:text-[10px] text-stone-500 dark:text-rose-100/50 mt-0.5 leading-tight pl-5 sm:pl-6 line-clamp-1 sm:line-clamp-none">
+                        Pay securely via bKash, Nagad
                       </p>
                     </div>
                   </div>
 
-                  {/* Online Payment / Digital Wallet Option */}
-                  <div
-                    onClick={() => setPaymentMethod("bkash")}
-                    className={`p-3 rounded-xl border-2 transition cursor-pointer flex flex-col gap-2 ${
-                      paymentMethod === "bkash"
-                        ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/30 shadow-2xs"
-                        : "border-stone-200 dark:border-white/10 hover:border-stone-300 opacity-80"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="w-4 h-4 rounded-full border-2 border-stone-300 dark:border-white/20 flex items-center justify-center shrink-0 mt-0.5">
-                        {paymentMethod === "bkash" && <div className="w-2 h-2 bg-pink-500 rounded-full" />}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-stone-800 dark:text-rose-50 flex items-center gap-1.5">
-                            <Wallet size={14} className="text-pink-500" /> {t("bkash")}
-                          </span>
-                          <span className="text-[9px] font-bold text-stone-400 flex items-center gap-1">
-                            <CreditCard size={10} /> {t("digitalWallet")}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-stone-500 dark:text-rose-100/50 mt-0.5 leading-tight">
-                          Pay securely via bKash, Nagad, or Card
+                  {/* Expandable clear payment instruction when selected */}
+                  {paymentMethod === "bkash" && (
+                    <div className="p-3 rounded-xl border border-pink-200/60 dark:border-pink-900/40 bg-pink-50/30 dark:bg-pink-950/20 space-y-2">
+                      <div className="bg-pink-100/60 dark:bg-pink-950/50 p-2.5 rounded-lg border border-pink-200 dark:border-pink-800/40 text-[11px] text-stone-800 dark:text-rose-100 space-y-1">
+                        <p className="font-bold flex items-center gap-1.5 text-pink-600 dark:text-pink-300">
+                          <PhoneCall size={12} className="shrink-0" />
+                          How it works:
+                        </p>
+                        <p className="text-stone-600 dark:text-rose-100/75 leading-relaxed text-[11px]">
+                          Our team will call you within <strong className="text-pink-600 dark:text-pink-300 font-bold">30 minutes</strong> to confirm your order and provide the direct merchant bKash/Nagad payment number or link.
                         </p>
                       </div>
+
+                      <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-stone-100 dark:bg-black/40 border border-stone-200/70 dark:border-white/5 text-[11px]">
+                        <span className="text-stone-500 dark:text-rose-100/50">Merchant Helpline:</span>
+                        <span className="font-mono font-bold text-stone-800 dark:text-rose-100">
+                          {storeSettings?.payments?.bkashNumber || storeSettings?.contact?.phone || "+880 1700-000000"}
+                        </span>
+                      </div>
+
+                      <p className="text-[10px] text-stone-500 dark:text-rose-100/50 flex items-center gap-1 pl-0.5">
+                        <ShieldCheck size={11} className="text-emerald-500 shrink-0" />
+                        <span>No deduction now — place order now and pay after call confirmation.</span>
+                      </p>
                     </div>
-
-                    {/* Expandable clear payment instruction when selected */}
-                    {paymentMethod === "bkash" && (
-                      <div className="mt-1 pt-2.5 border-t border-pink-200/60 dark:border-pink-900/40 space-y-2">
-                        <div className="bg-pink-100/60 dark:bg-pink-950/50 p-2.5 rounded-lg border border-pink-200 dark:border-pink-800/40 text-[11px] text-stone-800 dark:text-rose-100 space-y-1">
-                          <p className="font-bold flex items-center gap-1.5 text-pink-600 dark:text-pink-300">
-                            <PhoneCall size={12} className="shrink-0" />
-                            How it works:
-                          </p>
-                          <p className="text-stone-600 dark:text-rose-100/75 leading-relaxed text-[11px]">
-                            Our team will call you within <strong className="text-pink-600 dark:text-pink-300 font-bold">30 minutes</strong> to confirm your order and provide the direct merchant bKash/Nagad payment number or link.
-                          </p>
-                        </div>
-
-                        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-stone-100 dark:bg-black/40 border border-stone-200/70 dark:border-white/5 text-[11px]">
-                          <span className="text-stone-500 dark:text-rose-100/50">Merchant Helpline:</span>
-                          <span className="font-mono font-bold text-stone-800 dark:text-rose-100">
-                            {storeSettings?.payments?.bkashNumber || storeSettings?.contact?.phone || "+880 1700-000000"}
-                          </span>
-                        </div>
-
-                        <p className="text-[10px] text-stone-500 dark:text-rose-100/50 flex items-center gap-1 pl-0.5">
-                          <ShieldCheck size={11} className="text-emerald-500 shrink-0" />
-                          <span>No deduction now — place order now and pay after call confirmation.</span>
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -1406,72 +1478,24 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Terms and Conditions Checkbox */}
-              <div className="space-y-1.5 pt-1">
-                <label className="flex items-start gap-2.5 cursor-pointer select-none group">
-                  <input
-                    type="checkbox"
-                    checked={agreedToTerms}
-                    onChange={(e) => {
-                      setAgreedToTerms(e.target.checked);
-                      if (e.target.checked) setTermsError("");
-                    }}
-                    className="mt-0.5 w-4 h-4 rounded border-stone-300 dark:border-white/20 text-pink-500 focus:ring-pink-400 focus:ring-offset-0 bg-stone-50 dark:bg-stone-900/80 cursor-pointer accent-pink-500 shrink-0"
-                  />
-                  <span className="text-xs text-stone-600 dark:text-rose-100/70 leading-snug">
-                    I agree to the{" "}
-                    <Link
-                      href="/terms"
-                      target="_blank"
-                      className="font-semibold text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 underline underline-offset-2 transition"
-                    >
-                      Terms &amp; Conditions
-                    </Link>{" "}
-                    and{" "}
-                    <Link
-                      href="/terms"
-                      target="_blank"
-                      className="font-semibold text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 underline underline-offset-2 transition"
-                    >
-                      Return Policy
-                    </Link>
-                    <span className="text-red-500 ml-0.5">*</span>
-                  </span>
-                </label>
-                {termsError && (
-                  <p className="text-[11px] font-medium text-red-500 dark:text-rose-400 flex items-center gap-1 pl-6">
-                    <AlertCircle size={12} className="shrink-0" />
-                    <span>{termsError}</span>
-                  </p>
-                )}
-              </div>
-
               {/* Submit CTA Button */}
-              <div
-                onClick={() => {
-                  if (!agreedToTerms && !loading) {
-                    setTermsError("Please agree to the Terms & Conditions and Return Policy to confirm your order.");
-                  }
-                }}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <button
-                  type="submit"
-                  disabled={loading || !agreedToTerms}
-                  className="w-full h-12 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      {t("processing")}
-                    </span>
-                  ) : (
-                    <>
-                      <CheckCircle2 size={17} />
-                      {t("confirmOrder")}
-                    </>
-                  )}
-                </button>
-              </div>
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    {t("processing")}
+                  </span>
+                ) : (
+                  <>
+                    <CheckCircle2 size={17} />
+                    {t("confirmOrder")}
+                  </>
+                )}
+              </button>
 
               {/* Trust Badges */}
               <div className="pt-2 grid grid-cols-2 gap-2.5 text-[11px] font-medium text-stone-500 dark:text-rose-100/50">

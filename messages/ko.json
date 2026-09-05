@@ -29,7 +29,8 @@
     "support": "고객 센터",
     "privacy": "개인정보 처리방침",
     "terms": "이용약관",
-    "rights": "모든 권리 보유."
+    "rights": "모든 권리 보유.",
+    "developedBy": "개발자:"
   },
   "auth": {
     "loginEyebrow": "다시 오신 것을 환영합니다",
@@ -137,5 +138,30 @@
     "cartEmpty": "장바구니가 비어 있습니다",
     "cartEmptyDesc": "주문을 진행하려면 먼저 상품을 장바구니에 담아주세요.",
     "shopProducts": "상품 쇼핑하기"
+  },
+  "buildCombo": {
+    "customBundleBuilder": "커스텀 세트 만들기",
+    "buildTitle": "나만의 콤보 세트 만들기",
+    "buildSubtitle": "2개 이상의 상품을 선택하여 나만의 K-뷰티 루틴을 완성하고 특별 할인 혜택을 받으세요!",
+    "yourCustomPackage": "선택한 패키지",
+    "availableCatalog": "전체 상품 목록",
+    "title": "나만의 콤보 세트 만들기",
+    "subtext": "2개 이상의 상품을 선택하여 나만의 K-뷰티 루틴을 완성하고 특별 할인 혜택을 받으세요!",
+    "step1": "1단계: 상품 선택하기",
+    "selectedProducts": "선택된 상품",
+    "applyCoupon": "쿠폰 적용",
+    "packageSummary": "패키지 요약",
+    "packageSubtotal": "상품 합계",
+    "totalPayable": "총 결제 금액",
+    "adminCoupons": "쿠폰 목록:",
+    "couponPlaceholder": "쿠폰 코드 입력",
+    "apply": "적용",
+    "emptyState": "콤보 패키지가 비어 있습니다.",
+    "emptyStateSub": "상품의 '+ 담기' 버튼을 눌러 나만의 스킨케어 세트를 만들어보세요!",
+    "bundleDiscount": "세트 할인",
+    "couponDiscount": "쿠폰 할인",
+    "checkout": "주문하기",
+    "totalSavings": "총 할인 금액",
+    "payableTotal": "최종 결제 금액"
   }
 }
