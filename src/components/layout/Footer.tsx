@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import axios from "axios";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -25,6 +26,47 @@ export default function Footer() {
   const tNav = useTranslations("nav");
   const tNewsletter = useTranslations("newsletter");
   const [email, setEmail] = useState("");
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(3000);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiHost =
+          process.env.NEXT_PUBLIC_API_URL ||
+          process.env.NEXT_PUBLIC_API_BASE_URL ||
+          "http://localhost:5000";
+
+        let res;
+        try {
+          res = await axios.get(`${apiHost}/api/settings`);
+        } catch {
+          res = await axios.get(`${apiHost}/settings`);
+        }
+
+        const s = res?.data?.data || res?.data;
+        const threshold =
+          s?.shipping?.freeShippingThreshold ??
+          s?.freeShippingThreshold ??
+          s?.shipping?.freeShippingMinimum ??
+          s?.freeShippingMinimum;
+
+        if (threshold !== undefined && threshold !== null) {
+          setFreeShippingThreshold(Number(threshold));
+        }
+      } catch (err) {}
+    };
+
+    fetchSettings();
+
+    const handleSettingsUpdate = () => {
+      fetchSettings();
+    };
+
+    window.addEventListener("settingsUpdated", handleSettingsUpdate);
+    return () => {
+      window.removeEventListener("settingsUpdated", handleSettingsUpdate);
+    };
+  }, []);
 
   // Do not render public Footer on Admin, Auth (Login/Register), or Checkout pages
   const isAuthPage =
@@ -72,7 +114,9 @@ export default function Footer() {
               </div>
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-white">{tFooter("freeShipping")}</h4>
-                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">{tFooter("freeShippingDesc")}</p>
+                <p className="text-[11px] text-stone-400 dark:text-rose-100/60 mt-0.5">
+                  {tFooter("freeShippingDesc", { threshold: freeShippingThreshold.toLocaleString() })}
+                </p>
               </div>
             </div>
 

@@ -28,7 +28,7 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     storeName: "Cherry Glow",
     storeTagline: "Premium K-Beauty Skincare & Cosmetic Products",
     storeEmail: "support@cherryglowkorea.com",
@@ -82,13 +82,20 @@ export default function AdminSettingsPage() {
       setLoading(true);
       const res = await axios.get(`${API_BASE}/settings`);
       if (res.data.success && res.data.data) {
+        const d = res.data.data;
+        const cleanShipping = {
+          ...d.shipping,
+          insideDhaka: d.shipping?.insideDhaka !== undefined ? Number(d.shipping.insideDhaka) : 60,
+          outsideDhaka: d.shipping?.outsideDhaka !== undefined ? Number(d.shipping.outsideDhaka) : 120,
+          freeShippingThreshold: d.shipping?.freeShippingThreshold !== undefined ? Number(d.shipping.freeShippingThreshold) : 3000,
+        };
         setFormData((prev) => ({
           ...prev,
-          ...res.data.data,
-          shipping: { ...prev.shipping, ...(res.data.data.shipping || {}) },
-          payments: { ...prev.payments, ...(res.data.data.payments || {}) },
-          social: { ...prev.social, ...(res.data.data.social || {}) },
-          seo: { ...prev.seo, ...(res.data.data.seo || {}) },
+          ...d,
+          shipping: { ...prev.shipping, ...cleanShipping },
+          payments: { ...prev.payments, ...(d.payments || {}) },
+          social: { ...prev.social, ...(d.social || {}) },
+          seo: { ...prev.seo, ...(d.seo || {}) },
         }));
       }
     } catch (err) {
@@ -117,11 +124,31 @@ export default function AdminSettingsPage() {
     });
   };
 
+  const handleNumberChange = (path: string, raw: string) => {
+    if (raw === "") {
+      handleChange(path, "");
+      return;
+    }
+    let clean = raw;
+    if (clean.length > 1 && clean.startsWith("0") && !clean.startsWith("0.")) {
+      clean = clean.replace(/^0+/, "");
+      if (clean === "") clean = "0";
+    }
+    const num = Number(clean);
+    handleChange(path, isNaN(num) ? 0 : num);
+  };
+
   const handleSubmit = async (e: any) => {
     if (e) e.preventDefault();
     try {
       setSaving(true);
-      const { _id, ...cleanPayload } = formData as any;
+      const cleanPayload = JSON.parse(JSON.stringify(formData));
+      delete cleanPayload._id;
+      if (cleanPayload.shipping) {
+        cleanPayload.shipping.insideDhaka = Number(cleanPayload.shipping.insideDhaka || 0);
+        cleanPayload.shipping.outsideDhaka = Number(cleanPayload.shipping.outsideDhaka || 0);
+        cleanPayload.shipping.freeShippingThreshold = Number(cleanPayload.shipping.freeShippingThreshold || 0);
+      }
       const authToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
       const res = await axios.put(`${API_BASE}/admin/settings`, cleanPayload, {
@@ -132,6 +159,9 @@ export default function AdminSettingsPage() {
         toast.success("Store settings saved successfully!");
         if (res.data.data) {
           setFormData((prev) => ({ ...prev, ...res.data.data }));
+        }
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("settingsUpdated"));
         }
       }
     } catch (err) {
@@ -352,8 +382,28 @@ export default function AdminSettingsPage() {
                 <input
                   type="number"
                   min="0"
-                  value={formData.shipping?.insideDhaka ?? 60}
-                  onChange={(e) => handleChange("shipping.insideDhaka", Number(e.target.value))}
+                  value={
+                    formData.shipping?.insideDhaka === ""
+                      ? ""
+                      : (formData.shipping?.insideDhaka ?? 60)
+                  }
+                  onChange={(e) => {
+                    let val = e.target.value;
+                    if (val.length > 1 && val.startsWith("0") && !val.startsWith("0.")) {
+                      val = val.replace(/^0+/, "") || "0";
+                      e.target.value = val;
+                    }
+                    handleNumberChange("shipping.insideDhaka", val);
+                  }}
+                  onBlur={() => {
+                    if (
+                      formData.shipping?.insideDhaka === "" ||
+                      formData.shipping?.insideDhaka === undefined ||
+                      formData.shipping?.insideDhaka === null
+                    ) {
+                      handleChange("shipping.insideDhaka", 0);
+                    }
+                  }}
                   className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 font-mono font-bold focus:border-rose-500 focus:outline-none"
                   required
                 />
@@ -367,8 +417,28 @@ export default function AdminSettingsPage() {
                 <input
                   type="number"
                   min="0"
-                  value={formData.shipping?.outsideDhaka ?? 120}
-                  onChange={(e) => handleChange("shipping.outsideDhaka", Number(e.target.value))}
+                  value={
+                    formData.shipping?.outsideDhaka === ""
+                      ? ""
+                      : (formData.shipping?.outsideDhaka ?? 120)
+                  }
+                  onChange={(e) => {
+                    let val = e.target.value;
+                    if (val.length > 1 && val.startsWith("0") && !val.startsWith("0.")) {
+                      val = val.replace(/^0+/, "") || "0";
+                      e.target.value = val;
+                    }
+                    handleNumberChange("shipping.outsideDhaka", val);
+                  }}
+                  onBlur={() => {
+                    if (
+                      formData.shipping?.outsideDhaka === "" ||
+                      formData.shipping?.outsideDhaka === undefined ||
+                      formData.shipping?.outsideDhaka === null
+                    ) {
+                      handleChange("shipping.outsideDhaka", 0);
+                    }
+                  }}
                   className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 font-mono font-bold focus:border-rose-500 focus:outline-none"
                   required
                 />
@@ -382,10 +452,28 @@ export default function AdminSettingsPage() {
                 <input
                   type="number"
                   min="0"
-                  value={formData.shipping?.freeShippingThreshold ?? 3000}
-                  onChange={(e) =>
-                    handleChange("shipping.freeShippingThreshold", Number(e.target.value))
+                  value={
+                    formData.shipping?.freeShippingThreshold === ""
+                      ? ""
+                      : (formData.shipping?.freeShippingThreshold ?? 3000)
                   }
+                  onChange={(e) => {
+                    let val = e.target.value;
+                    if (val.length > 1 && val.startsWith("0") && !val.startsWith("0.")) {
+                      val = val.replace(/^0+/, "") || "0";
+                      e.target.value = val;
+                    }
+                    handleNumberChange("shipping.freeShippingThreshold", val);
+                  }}
+                  onBlur={() => {
+                    if (
+                      formData.shipping?.freeShippingThreshold === "" ||
+                      formData.shipping?.freeShippingThreshold === undefined ||
+                      formData.shipping?.freeShippingThreshold === null
+                    ) {
+                      handleChange("shipping.freeShippingThreshold", 0);
+                    }
+                  }}
                   className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 font-mono font-bold focus:border-rose-500 focus:outline-none"
                 />
               </div>

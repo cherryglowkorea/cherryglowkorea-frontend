@@ -202,7 +202,7 @@
   "footer": {
     "tagline": "Premium Korean beauty and skincare products crafted with purity, innovation, and care to enhance your natural glow.",
     "freeShipping": "Free Express Shipping",
-    "freeShippingDesc": "On all orders over ৳2,000 in BD",
+    "freeShippingDesc": "On all orders over ৳{threshold} in BD",
     "authentic": "100% Authentic Korean",
     "authenticDesc": "Directly imported from South Korea",
     "secureCheckout": "Secure Checkout",

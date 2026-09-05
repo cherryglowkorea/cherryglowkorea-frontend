@@ -39,18 +39,48 @@ export default function Navbar() {
   const tNav = useTranslations("nav");
   const tTopbar = useTranslations("topbar");
 
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState(2000);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(3000);
 
   useEffect(() => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-    axios
-      .get(`${API_BASE}/settings`)
-      .then((res) => {
-        if (res.data?.freeShippingThreshold) {
-          setFreeShippingThreshold(Number(res.data.freeShippingThreshold));
+    const fetchSettings = async () => {
+      try {
+        const apiHost =
+          process.env.NEXT_PUBLIC_API_URL ||
+          process.env.NEXT_PUBLIC_API_BASE_URL ||
+          "http://localhost:5000";
+
+        let res;
+        try {
+          res = await axios.get(`${apiHost}/api/settings`);
+        } catch {
+          res = await axios.get(`${apiHost}/settings`);
         }
-      })
-      .catch(() => {});
+
+        const s = res?.data?.data || res?.data;
+        const threshold =
+          s?.shipping?.freeShippingThreshold ??
+          s?.freeShippingThreshold ??
+          s?.shipping?.freeShippingMinimum ??
+          s?.freeShippingMinimum;
+
+        if (threshold !== undefined && threshold !== null) {
+          setFreeShippingThreshold(Number(threshold));
+        }
+      } catch (err) {
+        console.error("Failed to load settings in Topbar:", err);
+      }
+    };
+
+    fetchSettings();
+
+    const handleSettingsUpdate = () => {
+      fetchSettings();
+    };
+
+    window.addEventListener("settingsUpdated", handleSettingsUpdate);
+    return () => {
+      window.removeEventListener("settingsUpdated", handleSettingsUpdate);
+    };
   }, []);
 
   // Do not render public Navbar on Admin or Checkout pages
