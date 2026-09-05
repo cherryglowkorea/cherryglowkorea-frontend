@@ -1,18 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
 import ProductCard from "../products/ProductCard";
 import { useCart } from "@/context/CartContext";
+
+import "swiper/css";
+import "swiper/css/navigation";
 
 export default function FeaturedComboDeals() {
   const tCombo = useTranslations("comboDeals");
   const [combos, setCombos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const swiperRef = useRef<SwiperType | null>(null);
+  const [isBeginning, setIsBeginning] = useState(true);
+  const [isEnd, setIsEnd] = useState(false);
   const { addToCart } = useCart();
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -21,8 +30,7 @@ export default function FeaturedComboDeals() {
     const fetchCombos = async () => {
       try {
         const res = await axios.get(`${API_BASE}/combos`);
-        // Limit to 4 combos for display on home page
-        setCombos(res.data?.slice(0, 4) || []);
+        setCombos(res.data || []);
       } catch (err) {
         setError("Failed to load combo deals");
       } finally {
@@ -55,12 +63,36 @@ export default function FeaturedComboDeals() {
             </p>
           </div>
 
-          <Link
-            href="/products?type=combo"
-            className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 hover:text-rose-700 transition"
-          >
-            {tCombo("exploreAll")} <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-3 self-center sm:self-end">
+            {/* Swiper Header Navigation Arrow Buttons */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                aria-label="Previous combos"
+                disabled={!combos.length || (combos.length < 4 && isBeginning)}
+                onClick={() => swiperRef.current?.slidePrev()}
+                className="w-8 h-8 rounded-full border border-stone-200 dark:border-white/10 flex items-center justify-center transition cursor-pointer text-stone-700 dark:text-white hover:border-rose-500 hover:text-rose-500 dark:hover:border-rose-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-white/5 disabled:opacity-25 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                aria-label="Next combos"
+                disabled={!combos.length || (combos.length < 4 && isEnd)}
+                onClick={() => swiperRef.current?.slideNext()}
+                className="w-8 h-8 rounded-full border border-stone-200 dark:border-white/10 flex items-center justify-center transition cursor-pointer text-stone-700 dark:text-white hover:border-rose-500 hover:text-rose-500 dark:hover:border-rose-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-white/5 disabled:opacity-25 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <Link
+              href="/products?type=combo"
+              className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 hover:text-rose-700 transition"
+            >
+              {tCombo("exploreAll")} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
 
         {/* Loading State */}
@@ -80,12 +112,54 @@ export default function FeaturedComboDeals() {
           <p className="text-center text-sm font-semibold text-rose-500 py-8">{error}</p>
         )}
 
-        {/* Combos Grid */}
+        {/* Swiper Combos Carousel Slider */}
         {!loading && !error && combos.length > 0 && (
-          <div className="grid gap-3 sm:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {combos.map((combo, idx) => (
-              <ProductCard key={combo._id || idx} product={combo} onAddToCart={addToCart} index={idx} />
-            ))}
+          <div className="relative">
+            <Swiper
+              modules={[Navigation, Autoplay]}
+              autoplay={{
+                delay: 2000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+                reverseDirection: false,
+              }}
+              loop={combos.length >= 4}
+              speed={600}
+              spaceBetween={16}
+              slidesPerView={1.2}
+              onBeforeInit={(swiper) => {
+                swiperRef.current = swiper;
+              }}
+              onSlideChange={(swiper) => {
+                setIsBeginning(swiper.isBeginning);
+                setIsEnd(swiper.isEnd);
+              }}
+              breakpoints={{
+                540: {
+                  slidesPerView: 2,
+                  spaceBetween: 16,
+                },
+                768: {
+                  slidesPerView: 2.5,
+                  spaceBetween: 20,
+                },
+                1024: {
+                  slidesPerView: 3,
+                  spaceBetween: 20,
+                },
+                1280: {
+                  slidesPerView: 4,
+                  spaceBetween: 24,
+                },
+              }}
+              className="cherry-glow-swiper !pt-3 !pb-3 !px-1 -mt-2 -mb-2"
+            >
+              {combos.map((combo, idx) => (
+                <SwiperSlide key={combo._id || idx} className="!h-auto pt-1 pb-1">
+                  <ProductCard key={combo._id || idx} product={combo} onAddToCart={addToCart} index={idx} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         )}
 
@@ -93,3 +167,4 @@ export default function FeaturedComboDeals() {
     </section>
   );
 }
+

@@ -40,8 +40,9 @@ import {
   Wallet,
   Clock,
   Headphones,
+  PhoneCall,
 } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, getVariantLabel } from "@/lib/utils";
 
 const FALLBACK_IMAGE = "/placeholder.jpg";
 
@@ -66,6 +67,29 @@ const BANGLADESH_DISTRICTS = [
   "OTHER"
 ];
 
+/* -------------------------------------------------------------------------- */
+/* 🚚 SHARED DELIVERY FEE CALCULATION & SHIPPING SETTINGS INTERFACE           */
+/* -------------------------------------------------------------------------- */
+export interface ShippingSettings {
+  insideDhakaFee: number;
+  outsideDhakaFee: number;
+  freeShippingMinimum: number;
+  estimatedDaysInside: string;
+  estimatedDaysOutside: string;
+}
+
+export function calculateDeliveryFee(
+  subtotal: number,
+  deliveryArea: "inside" | "outside" | "dhaka",
+  settings: ShippingSettings
+): number {
+  if (settings.freeShippingMinimum > 0 && subtotal >= settings.freeShippingMinimum) {
+    return 0;
+  }
+  const isInside = deliveryArea === "inside" || deliveryArea === "dhaka";
+  return isInside ? settings.insideDhakaFee : settings.outsideDhakaFee;
+}
+
 export default function CheckoutPage() {
   const { cart, isLoaded: isCartLoaded, clearCart, coupon: contextCoupon } = useCart();
   const { setAuthData } = useAuth();
@@ -86,7 +110,7 @@ export default function CheckoutPage() {
   const [password, setPassword] = useState("");
   const [setPasswordLoading, setSetPasswordLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [deliveryArea, setDeliveryArea] = useState("outside"); // "dhaka" | "outside"
+  const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("dhaka"); // "dhaka" | "outside"
   const [district, setDistrict] = useState("Dhaka (ঢাকা)");
   const [isCustomDistrict, setIsCustomDistrict] = useState(false);
   const [customDistrictInput, setCustomDistrictInput] = useState("");
@@ -101,7 +125,12 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+  const [couponStatus, setCouponStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [storeSettings, setStoreSettings] = useState<any>(null);
+
+  // Terms & Conditions State
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [termsError, setTermsError] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -123,10 +152,15 @@ export default function CheckoutPage() {
     const fetchSettings = async () => {
       try {
         const apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const res = await fetch(`${apiHost}/api/settings`);
+        let res = await fetch(`${apiHost}/settings`);
+        if (!res.ok) {
+          res = await fetch(`${apiHost}/api/settings`);
+        }
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.data) {
+            setStoreSettings(data.data);
+          } else if (data.data) {
             setStoreSettings(data.data);
           }
         }
@@ -160,19 +194,90 @@ export default function CheckoutPage() {
     }, 0);
   }, [cart]);
 
-  // Dynamic Delivery Charge from Backend Store Settings
+  // 1. Fetch values from store settings (supports both schema keys)
+  const shippingSettings: ShippingSettings = useMemo(() => {
+    const s = storeSettings?.shipping;
+    return {
+      insideDhakaFee: Number(s?.insideDhakaFee ?? s?.insideDhaka ?? 60),
+      outsideDhakaFee: Number(s?.outsideDhakaFee ?? s?.outsideDhaka ?? 120),
+      freeShippingMinimum: Number(s?.freeShippingMinimum ?? s?.freeShippingThreshold ?? 3000),
+      estimatedDaysInside: s?.estimatedDaysInside || s?.estimatedDhakaDays || "1-2 Days",
+      estimatedDaysOutside: s?.estimatedDaysOutside || s?.estimatedOutsideDays || "3-5 Days",
+    };
+  }, [storeSettings]);
+
+  // 2. Shared function calculateDeliveryFee used for both delivery areas
   const deliveryCharge = useMemo(() => {
-    const insideDhakaCost = Number(storeSettings?.shipping?.insideDhaka ?? 60);
-    const outsideDhakaCost = Number(storeSettings?.shipping?.outsideDhaka ?? 120);
-    const freeThreshold = Number(storeSettings?.shipping?.freeShippingThreshold ?? 3000);
+    return calculateDeliveryFee(subtotal, deliveryArea, shippingSettings);
+  }, [subtotal, deliveryArea, shippingSettings]);
 
-    const baseCharge = deliveryArea === "dhaka" ? insideDhakaCost : outsideDhakaCost;
+  // Total quantity of items in cart
+  const totalItemCount = useMemo(() => {
+    return cart.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+  }, [cart]);
 
-    if (freeThreshold > 0 && subtotal >= freeThreshold) {
-      return 0; // Free shipping threshold met!
+  // Robust unit/size display extractor to prevent "ml x 2" bug
+  const getItemDisplaySize = (item: any) => {
+    const v = item.selectedVariant;
+
+    // 1. If variant explicitly has a size string (e.g. "100ml", "50ml")
+    if (v?.size && String(v.size).trim().length > 0 && String(v.size).trim().toLowerCase() !== "null") {
+      return String(v.size).trim();
     }
-    return baseCharge;
-  }, [storeSettings, deliveryArea, subtotal]);
+
+    // 2. If variant has weight or volume + unit
+    const rawWeight = v?.weight ?? v?.volume ?? v?.amount;
+    const rawUnit = v?.unit ?? "";
+    if (rawWeight !== undefined && rawWeight !== null && String(rawWeight).trim().length > 0) {
+      const weightStr = String(rawWeight).trim();
+      const unitStr = String(rawUnit).trim();
+      if (/[a-zA-Z]/.test(weightStr)) {
+        return weightStr;
+      }
+      return `${weightStr}${unitStr || "ml"}`;
+    }
+
+    // 3. Check variant title or name
+    if (v?.title && String(v.title).trim() && !/^(default|standard|null|option \d+)$/i.test(String(v.title).trim())) {
+      return String(v.title).trim();
+    }
+    if (v?.name && String(v.name).trim() && !/^(default|standard|null|option \d+)$/i.test(String(v.name).trim())) {
+      return String(v.name).trim();
+    }
+
+    // 4. Check product-level size or weight
+    if (item.size && String(item.size).trim()) {
+      return String(item.size).trim();
+    }
+    if (item.weight && String(item.weight).trim()) {
+      return `${String(item.weight).trim()}${item.unit || "ml"}`;
+    }
+
+    // 5. Try extracting size/unit directly from product name (e.g., "100ml", "50ml", "30g", "250ml")
+    if (item.name) {
+      const match = String(item.name).match(/\b(\d+)\s*(ml|g|gm|kg|oz|l|pcs|pc)\b/i);
+      if (match) {
+        return `${match[1]}${match[2].toLowerCase()}`;
+      }
+    }
+
+    // 6. If variant has unit only (e.g. "ml" without weight), search variants list for values
+    if (v?.unit && item.variants && Array.isArray(item.variants)) {
+      const matchVar = item.variants.find((cand: any) => cand.size || cand.weight);
+      if (matchVar?.size) return String(matchVar.size).trim();
+      if (matchVar?.weight) return `${matchVar.weight}${matchVar.unit || v.unit}`;
+    }
+
+    // 7. Fallback to getVariantLabel if meaningful
+    if (v) {
+      const label = getVariantLabel(v);
+      if (label && !label.startsWith("Option") && label.toLowerCase() !== "ml") {
+        return label;
+      }
+    }
+
+    return "Standard";
+  };
 
   // Auto-sync delivery area (dhaka vs outside) with district selection
   useEffect(() => {
@@ -200,20 +305,23 @@ export default function CheckoutPage() {
   const total = Math.max(0, subtotal - discount + deliveryCharge);
 
   // Apply Coupon API Call
-  const handleApplyCoupon = async (e) => {
+  const handleApplyCoupon = async (e?: any) => {
     if (e && e.preventDefault) e.preventDefault();
-    if (!couponCode.trim()) {
+    const cleanCode = couponCode.trim();
+    if (!cleanCode) {
+      setCouponStatus({ type: "error", message: "Please enter a coupon code" });
       toast.error("Please enter a coupon code");
       return;
     }
 
     setCouponLoading(true);
+    setCouponStatus(null);
     try {
       const apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       const res = await fetch(`${apiHost}/coupons/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode, amount: subtotal }),
+        body: JSON.stringify({ code: cleanCode, amount: subtotal }),
       });
 
       const data = await res.json();
@@ -224,19 +332,27 @@ export default function CheckoutPage() {
           discountAmount: data.discountAmount,
           discount: data.discount,
         });
-        toast.success(`Coupon "${data.code}" applied! Saved ৳${data.discount}`);
+        const msg = `Coupon "${data.code}" applied! Saved ৳${data.discount}`;
+        setCouponStatus({ type: "success", message: msg });
+        toast.success(msg);
         setCouponCode("");
       } else {
-        toast.error(data.message || "Invalid coupon code");
+        const errMsg = data.message || "Invalid coupon code";
+        setCouponStatus({ type: "error", message: errMsg });
+        toast.error(errMsg);
       }
     } catch {
       // Fallback demo validation
-      if (couponCode.toUpperCase() === "CHERRY10") {
+      if (cleanCode.toUpperCase() === "CHERRY10") {
         setAppliedCoupon({ code: "CHERRY10", discountType: "percentage", discountAmount: 10 });
-        toast.success("Coupon CHERRY10 applied! (10% OFF)");
+        const msg = "Coupon CHERRY10 applied! (10% OFF)";
+        setCouponStatus({ type: "success", message: msg });
+        toast.success(msg);
         setCouponCode("");
       } else {
-        toast.error("Unable to validate coupon. Please try again.");
+        const errMsg = "Unable to validate coupon. Please try again.";
+        setCouponStatus({ type: "error", message: errMsg });
+        toast.error(errMsg);
       }
     } finally {
       setCouponLoading(false);
@@ -245,6 +361,8 @@ export default function CheckoutPage() {
 
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
+    setCouponStatus(null);
+    setCouponCode("");
     toast.info("Coupon removed");
   };
 
@@ -270,6 +388,12 @@ export default function CheckoutPage() {
     }
     if (cart.length === 0) {
       toast.error("Your cart is empty");
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setTermsError("Please agree to the Terms & Conditions and Return Policy to confirm your order.");
+      toast.error("Please agree to the Terms & Conditions and Return Policy");
       return;
     }
 
@@ -800,6 +924,16 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              {/* 6. Temporary Dev-Only Debug Badge */}
+              {process.env.NODE_ENV === "development" && (
+                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-mono flex items-center justify-between flex-wrap gap-2">
+                  <span>
+                    Subtotal: ৳{subtotal} | Free Shipping Threshold: ৳{shippingSettings.freeShippingMinimum} | Delivery Fee: ৳{deliveryCharge}
+                  </span>
+                  <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-amber-500/20 font-bold">Dev Debug</span>
+                </div>
+              )}
+
               {/* Delivery Area Picker */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-stone-700 dark:text-rose-100/80 block">
@@ -808,39 +942,50 @@ export default function CheckoutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                   {[
-                    { id: "dhaka", label: t("insideDhaka"), price: Number(storeSettings?.shipping?.insideDhaka ?? 60), timeKey: "deliveryTime12" },
-                    { id: "outside", label: t("outsideDhaka"), price: Number(storeSettings?.shipping?.outsideDhaka ?? 120), timeKey: "deliveryTime24" },
+                    {
+                      id: "dhaka",
+                      label: t("insideDhaka"),
+                      price: shippingSettings.insideDhakaFee,
+                      time: shippingSettings.estimatedDaysInside,
+                      isFree: calculateDeliveryFee(subtotal, "inside", shippingSettings) === 0,
+                    },
+                    {
+                      id: "outside",
+                      label: t("outsideDhaka"),
+                      price: shippingSettings.outsideDhakaFee,
+                      time: shippingSettings.estimatedDaysOutside,
+                      isFree: calculateDeliveryFee(subtotal, "outside", shippingSettings) === 0,
+                    },
                   ].map((area) => {
-                    const freeThreshold = Number(storeSettings?.shipping?.freeShippingThreshold ?? 3000);
-                    const isFree = freeThreshold > 0 && subtotal >= freeThreshold;
+                    const isSelected = deliveryArea === area.id;
                     return (
                       <button
                         key={area.id}
                         type="button"
-                        onClick={() => setDeliveryArea(area.id)}
+                        onClick={() => setDeliveryArea(area.id as "dhaka" | "outside")}
                         className={`relative p-3.5 sm:p-4 rounded-xl border-2 text-left transition duration-200 cursor-pointer ${
-                          deliveryArea === area.id
+                          isSelected
                             ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/20 shadow-xs"
                             : "border-stone-200 dark:border-white/10 bg-stone-50/40 dark:bg-white/5 hover:border-stone-300"
                         }`}
                       >
-                        {deliveryArea === area.id && (
+                        {isSelected && (
                           <div className="absolute top-3 right-3 w-4 h-4 bg-pink-500 rounded-full flex items-center justify-center text-white text-[10px]">
                             <CheckCircle2 size={12} />
                           </div>
                         )}
                         <div className="flex items-center gap-2 mb-1">
-                          <MapPin size={15} className={deliveryArea === area.id ? "text-pink-500" : "text-stone-400"} />
-                          <span className={`text-xs font-bold ${deliveryArea === area.id ? "text-pink-600 dark:text-pink-300" : "text-stone-700 dark:text-rose-100/70"}`}>
+                          <MapPin size={15} className={isSelected ? "text-pink-500" : "text-stone-400"} />
+                          <span className={`text-xs font-bold ${isSelected ? "text-pink-600 dark:text-pink-300" : "text-stone-700 dark:text-rose-100/70"}`}>
                             {area.label}
                           </span>
                         </div>
                         <p className="text-[11px] text-stone-400 dark:text-rose-100/40 flex items-center gap-1">
                           <Clock size={11} className="text-stone-400 shrink-0" />
-                          <span>{t(area.timeKey)}</span>
+                          <span>{area.time}</span>
                         </p>
-                        <p className={`text-xs font-extrabold mt-1 flex items-center gap-1 ${isFree ? "text-emerald-600 dark:text-emerald-400" : "text-pink-500"}`}>
-                          {isFree ? (
+                        <p className={`text-xs font-extrabold mt-1 flex items-center gap-1 ${area.isFree ? "text-emerald-600 dark:text-emerald-400" : "text-pink-500"}`}>
+                          {area.isFree ? (
                             <>
                               <Sparkles size={12} className="text-emerald-500" />
                               <span>FREE Shipping</span>
@@ -848,7 +993,7 @@ export default function CheckoutPage() {
                           ) : (
                             <>
                               <Truck size={12} className="text-pink-500" />
-                              <span>৳{area.price} Charge</span>
+                              <span>৳{area.price} Delivery Fee</span>
                             </>
                           )}
                         </p>
@@ -876,16 +1021,16 @@ export default function CheckoutPage() {
                 {/* Thana / Upazila */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-stone-700 dark:text-rose-100/80 flex items-center gap-1.5">
-                    <Building size={13} className="text-pink-500" /> {t("thana")}
+                    <MapPin size={13} className="text-pink-500" /> {t("thana")}
                   </label>
-                  <div className="relative">
-                    <Building size={16} className="absolute left-3.5 top-3.5 text-stone-400 pointer-events-none" />
+                  <div className="relative flex items-center">
+                    <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none shrink-0" />
                     <input
                       type="text"
                       placeholder={t("thanaPlaceholder")}
                       value={thana}
                       onChange={(e) => setThana(e.target.value)}
-                      className="w-full pl-10 pr-4 h-11 text-xs sm:text-sm rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50/50 dark:bg-stone-900/60 text-stone-800 dark:text-rose-50 placeholder-stone-400 dark:placeholder-rose-100/30 outline-none focus:border-pink-500 focus:bg-white dark:focus:bg-stone-900 focus:ring-1 focus:ring-pink-200 transition font-medium"
+                      className="w-full pl-10.5 pr-4 h-11 text-xs sm:text-sm rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50/50 dark:bg-stone-900/60 text-stone-800 dark:text-rose-50 placeholder-stone-400 dark:placeholder-rose-100/30 outline-none focus:border-pink-500 focus:bg-white dark:focus:bg-stone-900 focus:ring-1 focus:ring-pink-200 transition font-medium"
                     />
                   </div>
                 </div>
@@ -939,7 +1084,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center gap-2">
                   <Package size={17} className="text-pink-500" />
                   <h2 className="text-xs font-bold uppercase tracking-wider text-stone-800 dark:text-rose-100">
-                    {t("orderSummary")} ({cart.reduce((sum, item) => sum + item.quantity, 0)} {t("items")})
+                    {t("orderSummary")} ({totalItemCount} {t("items")})
                   </h2>
                 </div>
               </div>
@@ -985,7 +1130,7 @@ export default function CheckoutPage() {
                           )}
                         </div>
                         <p className="text-[11px] text-stone-400 dark:text-rose-100/40 mt-0.5">
-                          {item.selectedVariant ? `${item.selectedVariant.weight || ''}${item.selectedVariant.unit || ''}` : "Standard"} × {item.quantity}
+                          {getItemDisplaySize(item)} × {item.quantity}
                         </p>
                       </div>
 
@@ -1025,47 +1170,92 @@ export default function CheckoutPage() {
               {/* Coupon Accordion / Field */}
               <div className="border-t border-stone-100 dark:border-white/5 pt-3.5 sm:pt-4">
                 {!appliedCoupon ? (
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Tag size={13} className="absolute left-3 top-3 text-stone-400" />
-                      <input
-                        type="text"
-                        placeholder={t("couponPlaceholder")}
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleApplyCoupon(e);
-                          }
-                        }}
-                        className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-stone-900/60 text-stone-800 dark:text-rose-100 outline-none uppercase font-mono"
-                      />
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Tag size={13} className="absolute left-3 top-3 text-stone-400" />
+                        <input
+                          type="text"
+                          placeholder={t("couponPlaceholder")}
+                          value={couponCode}
+                          onChange={(e) => {
+                            setCouponCode(e.target.value);
+                            if (couponStatus) setCouponStatus(null);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              if (couponCode.trim() && !couponLoading) {
+                                handleApplyCoupon(e);
+                              }
+                            }
+                          }}
+                          className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-stone-900/60 text-stone-800 dark:text-rose-100 outline-none uppercase font-mono focus:border-pink-500 focus:ring-1 focus:ring-pink-300 transition"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={couponLoading || !couponCode.trim()}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
+                          couponLoading || !couponCode.trim()
+                            ? "bg-stone-200 dark:bg-white/5 text-stone-400 dark:text-stone-500 opacity-50 cursor-not-allowed"
+                            : "bg-stone-800 dark:bg-pink-600 hover:bg-stone-900 dark:hover:bg-pink-500 text-white cursor-pointer shadow-xs active:scale-95"
+                        }`}
+                      >
+                        {couponLoading ? (
+                          <>
+                            <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                            <span>Applying...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={12} className={couponCode.trim() ? "text-pink-300" : "text-stone-400"} />
+                            <span>{t("apply")}</span>
+                          </>
+                        )}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleApplyCoupon}
-                      disabled={couponLoading}
-                      className="px-4 py-2 bg-stone-800 dark:bg-white/10 hover:bg-stone-900 text-white rounded-xl text-xs font-bold transition cursor-pointer shrink-0 flex items-center gap-1.5"
-                    >
-                      <Sparkles size={12} className="text-pink-400" />
-                      {couponLoading ? "..." : t("apply")}
-                    </button>
+
+                    {/* Inline Coupon Status Message */}
+                    {couponStatus && (
+                      <div
+                        className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg font-medium transition ${
+                          couponStatus.type === "success"
+                            ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40"
+                            : "bg-red-50 dark:bg-rose-950/40 text-red-600 dark:text-rose-400 border border-red-200 dark:border-rose-900/40"
+                        }`}
+                      >
+                        {couponStatus.type === "success" ? (
+                          <CheckCircle2 size={13} className="shrink-0 text-emerald-500" />
+                        ) : (
+                          <AlertCircle size={13} className="shrink-0 text-red-500" />
+                        )}
+                        <span>{couponStatus.message}</span>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 p-2.5 rounded-xl">
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs">
-                      <Tag size={12} />
-                      <span className="font-bold font-mono uppercase">{appliedCoupon.code}</span>
-                      <span>(-৳{discount})</span>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 p-2.5 rounded-xl">
+                      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs">
+                        <Tag size={12} />
+                        <span className="font-bold font-mono uppercase">{appliedCoupon.code}</span>
+                        <span>(-৳{discount})</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveCoupon}
+                        className="text-[10px] font-bold text-red-500 hover:underline cursor-pointer"
+                      >
+                        {t("remove")}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleRemoveCoupon}
-                      className="text-[10px] font-bold text-red-500 hover:underline cursor-pointer"
-                    >
-                      {t("remove")}
-                    </button>
+                    {couponStatus?.type === "success" && (
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium px-1 flex items-center gap-1">
+                        <CheckCircle2 size={11} /> {couponStatus.message}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -1111,29 +1301,58 @@ export default function CheckoutPage() {
                   {/* Online Payment / Digital Wallet Option */}
                   <div
                     onClick={() => setPaymentMethod("bkash")}
-                    className={`p-3 rounded-xl border-2 transition cursor-pointer flex items-start gap-3 ${
+                    className={`p-3 rounded-xl border-2 transition cursor-pointer flex flex-col gap-2 ${
                       paymentMethod === "bkash"
                         ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/30 shadow-2xs"
                         : "border-stone-200 dark:border-white/10 hover:border-stone-300 opacity-80"
                     }`}
                   >
-                    <div className="w-4 h-4 rounded-full border-2 border-stone-300 dark:border-white/20 flex items-center justify-center shrink-0 mt-0.5">
-                      {paymentMethod === "bkash" && <div className="w-2 h-2 bg-pink-500 rounded-full" />}
+                    <div className="flex items-start gap-3">
+                      <div className="w-4 h-4 rounded-full border-2 border-stone-300 dark:border-white/20 flex items-center justify-center shrink-0 mt-0.5">
+                        {paymentMethod === "bkash" && <div className="w-2 h-2 bg-pink-500 rounded-full" />}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-stone-800 dark:text-rose-50 flex items-center gap-1.5">
+                            <Wallet size={14} className="text-pink-500" /> {t("bkash")}
+                          </span>
+                          <span className="text-[9px] font-bold text-stone-400 flex items-center gap-1">
+                            <CreditCard size={10} /> {t("digitalWallet")}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-stone-500 dark:text-rose-100/50 mt-0.5 leading-tight">
+                          Pay securely via bKash, Nagad, or Card
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-stone-800 dark:text-rose-50 flex items-center gap-1.5">
-                          <Wallet size={14} className="text-pink-500" /> {t("bkash")}
-                        </span>
-                        <span className="text-[9px] font-bold text-stone-400 flex items-center gap-1">
-                          <CreditCard size={10} /> {t("digitalWallet")}
-                        </span>
+                    {/* Expandable clear payment instruction when selected */}
+                    {paymentMethod === "bkash" && (
+                      <div className="mt-1 pt-2.5 border-t border-pink-200/60 dark:border-pink-900/40 space-y-2">
+                        <div className="bg-pink-100/60 dark:bg-pink-950/50 p-2.5 rounded-lg border border-pink-200 dark:border-pink-800/40 text-[11px] text-stone-800 dark:text-rose-100 space-y-1">
+                          <p className="font-bold flex items-center gap-1.5 text-pink-600 dark:text-pink-300">
+                            <PhoneCall size={12} className="shrink-0" />
+                            How it works:
+                          </p>
+                          <p className="text-stone-600 dark:text-rose-100/75 leading-relaxed text-[11px]">
+                            Our team will call you within <strong className="text-pink-600 dark:text-pink-300 font-bold">30 minutes</strong> to confirm your order and provide the direct merchant bKash/Nagad payment number or link.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-stone-100 dark:bg-black/40 border border-stone-200/70 dark:border-white/5 text-[11px]">
+                          <span className="text-stone-500 dark:text-rose-100/50">Merchant Helpline:</span>
+                          <span className="font-mono font-bold text-stone-800 dark:text-rose-100">
+                            {storeSettings?.payments?.bkashNumber || storeSettings?.contact?.phone || "+880 1700-000000"}
+                          </span>
+                        </div>
+
+                        <p className="text-[10px] text-stone-500 dark:text-rose-100/50 flex items-center gap-1 pl-0.5">
+                          <ShieldCheck size={11} className="text-emerald-500 shrink-0" />
+                          <span>No deduction now — place order now and pay after call confirmation.</span>
+                        </p>
                       </div>
-                      <p className="text-[10px] text-stone-500 dark:text-rose-100/50 mt-0.5 leading-tight">
-                        {t("bkashDesc")}
-                      </p>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1169,7 +1388,7 @@ export default function CheckoutPage() {
                         <Sparkles size={10} /> FREE
                       </span>
                     ) : (
-                      `৳${deliveryCharge}`
+                      <span className="font-bold text-stone-800 dark:text-rose-100 font-mono">৳{deliveryCharge}</span>
                     )}
                   </span>
                 </div>
@@ -1187,24 +1406,72 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Submit CTA Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                    {t("processing")}
+              {/* Terms and Conditions Checkbox */}
+              <div className="space-y-1.5 pt-1">
+                <label className="flex items-start gap-2.5 cursor-pointer select-none group">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => {
+                      setAgreedToTerms(e.target.checked);
+                      if (e.target.checked) setTermsError("");
+                    }}
+                    className="mt-0.5 w-4 h-4 rounded border-stone-300 dark:border-white/20 text-pink-500 focus:ring-pink-400 focus:ring-offset-0 bg-stone-50 dark:bg-stone-900/80 cursor-pointer accent-pink-500 shrink-0"
+                  />
+                  <span className="text-xs text-stone-600 dark:text-rose-100/70 leading-snug">
+                    I agree to the{" "}
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      className="font-semibold text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 underline underline-offset-2 transition"
+                    >
+                      Terms &amp; Conditions
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      className="font-semibold text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 underline underline-offset-2 transition"
+                    >
+                      Return Policy
+                    </Link>
+                    <span className="text-red-500 ml-0.5">*</span>
                   </span>
-                ) : (
-                  <>
-                    <CheckCircle2 size={17} />
-                    {t("confirmOrder")}
-                  </>
+                </label>
+                {termsError && (
+                  <p className="text-[11px] font-medium text-red-500 dark:text-rose-400 flex items-center gap-1 pl-6">
+                    <AlertCircle size={12} className="shrink-0" />
+                    <span>{termsError}</span>
+                  </p>
                 )}
-              </button>
+              </div>
+
+              {/* Submit CTA Button */}
+              <div
+                onClick={() => {
+                  if (!agreedToTerms && !loading) {
+                    setTermsError("Please agree to the Terms & Conditions and Return Policy to confirm your order.");
+                  }
+                }}
+              >
+                <button
+                  type="submit"
+                  disabled={loading || !agreedToTerms}
+                  className="w-full h-12 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest shadow-md hover:shadow-lg transition duration-300 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      {t("processing")}
+                    </span>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={17} />
+                      {t("confirmOrder")}
+                    </>
+                  )}
+                </button>
+              </div>
 
               {/* Trust Badges */}
               <div className="pt-2 grid grid-cols-2 gap-2.5 text-[11px] font-medium text-stone-500 dark:text-rose-100/50">

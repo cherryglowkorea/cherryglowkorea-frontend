@@ -1,18 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowRight, Flame } from "lucide-react";
+import { ArrowRight, Flame, ChevronLeft, ChevronRight } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
 import { useCart } from "@/context/CartContext";
 import ProductCard from "../products/ProductCard";
+
+import "swiper/css";
+import "swiper/css/navigation";
 
 export default function BestSoldProducts() {
   const tBest = useTranslations("bestSellers");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const swiperRef = useRef<SwiperType | null>(null);
+  const [isBeginning, setIsBeginning] = useState(true);
+  const [isEnd, setIsEnd] = useState(false);
 
   const { addToCart } = useCart();
 
@@ -36,19 +45,19 @@ export default function BestSoldProducts() {
           // Ignore error if featured endpoint fails, proceed with best products
         }
 
-        // 2. Fetch best products excluding featured product IDs
+        // 2. Fetch best products excluding featured product IDs (fetch up to 12 items for slide carousel)
         const excludeStr = excludeIds.join(",");
         const res = await axios.get(
-          `${API_BASE}/products/best?limit=4${excludeStr ? `&exclude=${excludeStr}` : ""}`
+          `${API_BASE}/products/best?limit=12${excludeStr ? `&exclude=${excludeStr}` : ""}`
         );
         let fetched = res.data?.data || res.data || [];
         if (!Array.isArray(fetched)) fetched = [];
 
-        // Fallback if backend returns fewer than 4 items
-        if (fetched.length < 4) {
+        // Fallback if backend returns fewer items
+        if (fetched.length < 8) {
           try {
             const fallbackRes = await axios.get(
-              `${API_BASE}/products/allProduct/public?limit=12`
+              `${API_BASE}/products/allProduct/public?limit=16`
             );
             const fallbackData =
               fallbackRes.data?.products ||
@@ -61,7 +70,7 @@ export default function BestSoldProducts() {
                 ...fetched.map((p: any) => p._id),
               ]);
               for (const p of fallbackData) {
-                if (fetched.length >= 4) break;
+                if (fetched.length >= 12) break;
                 if (
                   p &&
                   p._id &&
@@ -78,7 +87,7 @@ export default function BestSoldProducts() {
           }
         }
 
-        setProducts(fetched.slice(0, 4));
+        setProducts(fetched.slice(0, 12));
       } catch (err) {
         setError("Failed to load best seller products");
       } finally {
@@ -109,12 +118,36 @@ export default function BestSoldProducts() {
             </p>
           </div>
 
-          <Link
-            href="/products"
-            className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 hover:text-rose-700 transition"
-          >
-            {tBest("browseAll")} <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-3 self-center sm:self-end">
+            {/* Swiper Header Navigation Arrow Buttons */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                aria-label="Previous products"
+                disabled={!products.length || (products.length < 4 && isBeginning)}
+                onClick={() => swiperRef.current?.slidePrev()}
+                className="w-8 h-8 rounded-full border border-stone-200 dark:border-white/10 flex items-center justify-center transition cursor-pointer text-stone-700 dark:text-white hover:border-rose-500 hover:text-rose-500 dark:hover:border-rose-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-white/5 disabled:opacity-25 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                aria-label="Next products"
+                disabled={!products.length || (products.length < 4 && isEnd)}
+                onClick={() => swiperRef.current?.slideNext()}
+                className="w-8 h-8 rounded-full border border-stone-200 dark:border-white/10 flex items-center justify-center transition cursor-pointer text-stone-700 dark:text-white hover:border-rose-500 hover:text-rose-500 dark:hover:border-rose-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-white/5 disabled:opacity-25 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 hover:text-rose-700 transition"
+            >
+              {tBest("browseAll")} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
 
         {/* Loading Skeletons */}
@@ -134,20 +167,62 @@ export default function BestSoldProducts() {
           <p className="text-center text-sm font-semibold text-rose-500 py-8">{error}</p>
         )}
 
-        {/* 4-Column Uniform Products Grid */}
+        {/* Swiper Products Carousel Slider */}
         {!loading && !error && products.length > 0 && (
-          <div className="grid gap-3 sm:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {products.map((product, idx) => (
-              <ProductCard
-                key={product._id || idx}
-                product={product}
-                onAddToCart={addToCart}
-                index={idx}
-              />
-            ))}
+          <div className="relative">
+            <Swiper
+              modules={[Navigation, Autoplay]}
+              autoplay={{
+                delay: 2000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+                reverseDirection: false,
+              }}
+              loop={products.length >= 4}
+              speed={600}
+              spaceBetween={16}
+              slidesPerView={1.2}
+              onBeforeInit={(swiper) => {
+                swiperRef.current = swiper;
+              }}
+              onSlideChange={(swiper) => {
+                setIsBeginning(swiper.isBeginning);
+                setIsEnd(swiper.isEnd);
+              }}
+              breakpoints={{
+                540: {
+                  slidesPerView: 2,
+                  spaceBetween: 16,
+                },
+                768: {
+                  slidesPerView: 2.5,
+                  spaceBetween: 20,
+                },
+                1024: {
+                  slidesPerView: 3,
+                  spaceBetween: 20,
+                },
+                1280: {
+                  slidesPerView: 4,
+                  spaceBetween: 24,
+                },
+              }}
+              className="cherry-glow-swiper !pt-3 !pb-3 !px-1 -mt-2 -mb-2"
+            >
+              {products.map((product, idx) => (
+                <SwiperSlide key={product._id || idx} className="!h-auto pt-1 pb-1">
+                  <ProductCard
+                    product={product}
+                    onAddToCart={addToCart}
+                    index={idx}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         )}
       </div>
     </section>
   );
 }
+

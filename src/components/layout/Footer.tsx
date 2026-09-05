@@ -26,14 +26,19 @@ export default function Footer() {
   const tNewsletter = useTranslations("newsletter");
   const [email, setEmail] = useState("");
 
-  // Do not render public Footer on Admin or Auth (Login/Register) pages
+  // Do not render public Footer on Admin, Auth (Login/Register), or Checkout pages
   const isAuthPage =
     pathname === "/login" ||
     pathname === "/register" ||
     pathname?.startsWith("/login") ||
     pathname?.startsWith("/register");
 
-  if (pathname?.startsWith("/admin") || isAuthPage) {
+  const isCheckoutPage =
+    pathname === "/checkout" ||
+    pathname?.startsWith("/checkout") ||
+    pathname?.includes("checkout");
+
+  if (pathname?.startsWith("/admin") || isAuthPage || isCheckoutPage) {
     return null;
   }
 
