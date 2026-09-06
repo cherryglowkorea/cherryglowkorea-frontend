@@ -8,7 +8,6 @@ import { Tag, Sparkles, CheckCircle2, X } from "lucide-react";
 
 import ComboSelected from "./ComboSelected";
 import ComboList from "./ComboList";
-import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import FloatingSummary from "./FloatingSummary";
 import { cleanProductName } from "@/lib/utils";
@@ -28,9 +27,7 @@ export default function BuildComboClient({ initialProducts }: Props) {
   const [couponLoading, setCouponLoading] = useState(false);
 
   const router = useRouter();
-  const { addToCart, removeFromCart, selectVariant } = useCart();
-
-  const { user } = useAuth();
+  const { cart, addToCart, removeFromCart, selectVariant } = useCart();
 
   // Load combo from localStorage
   useEffect(() => {
@@ -212,12 +209,6 @@ export default function BuildComboClient({ initialProducts }: Props) {
 
   // Direct Checkout
   const handleCheckout = () => {
-    if (!user) {
-      toast.error("Please login first");
-      router.push("/login");
-      return;
-    }
-
     if (combo.length === 0) {
       toast.error("Select at least one product");
       return;
@@ -230,7 +221,11 @@ export default function BuildComboClient({ initialProducts }: Props) {
     }
 
     combo.forEach((product: any) => {
-      addToCart(product);
+      const pId = product._id || product.productId;
+      const exists = cart.find((i) => i.productId === pId || i._id === pId);
+      if (!exists) {
+        addToCart(product);
+      }
     });
 
     toast.success("Proceeding to Checkout...");

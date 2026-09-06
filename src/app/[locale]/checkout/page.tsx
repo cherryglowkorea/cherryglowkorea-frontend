@@ -1497,26 +1497,6 @@ export default function CheckoutPage() {
                 )}
               </button>
 
-              {/* Trust Badges */}
-              <div className="pt-2 grid grid-cols-2 gap-2.5 text-[11px] font-medium text-stone-500 dark:text-rose-100/50">
-                <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 p-2 rounded-xl border border-stone-100 dark:border-white/5">
-                  <ShieldCheck size={14} className="text-pink-500 shrink-0" />
-                  <span className="truncate">{t("originalProduct")}</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 p-2 rounded-xl border border-stone-100 dark:border-white/5">
-                  <Truck size={14} className="text-pink-500 shrink-0" />
-                  <span className="truncate">{t("codTag")}</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 p-2 rounded-xl border border-stone-100 dark:border-white/5">
-                  <Lock size={14} className="text-pink-500 shrink-0" />
-                  <span className="truncate">100% Safe Checkout</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 p-2 rounded-xl border border-stone-100 dark:border-white/5">
-                  <Headphones size={14} className="text-pink-500 shrink-0" />
-                  <span className="truncate">24/7 Support Care</span>
-                </div>
-              </div>
-
             </div>
 
           </div>
