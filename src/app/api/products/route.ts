@@ -1,4 +1,7 @@
 // Rendering Strategy: Route Handler — Dynamic API proxy endpoint for client-side filtering, searching, sorting, and pagination.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { NextResponse } from "next/server";
 
 const API_BASE =
@@ -13,6 +16,10 @@ export async function GET(request: Request) {
 
     const res = await fetch(backendUrl, {
       cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+      },
     });
 
     if (!res.ok) {
@@ -23,7 +30,12 @@ export async function GET(request: Request) {
     }
 
     const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+      },
+    });
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: error.message || "Internal server error" },
@@ -31,3 +43,4 @@ export async function GET(request: Request) {
     );
   }
 }
+

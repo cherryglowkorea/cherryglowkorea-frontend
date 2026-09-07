@@ -52,7 +52,13 @@ const defaultCategories = [
   "Hair Care",
 ];
 
-export default function ProductsClient({ initialData }: { initialData?: any }) {
+export default function ProductsClient({
+  initialData,
+  initialSearchParams,
+}: {
+  initialData?: any;
+  initialSearchParams?: any;
+}) {
   const tF = useTranslations("productFilters");
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -157,20 +163,26 @@ export default function ProductsClient({ initialData }: { initialData?: any }) {
   useEffect(() => {
     let isCancelled = false;
 
-    // Skip redundant fetch on initial mount if ISR data is already provided and no custom query filters are applied
+    // Check if initialData from server already matches the active filters
     if (isFirstMount.current) {
       isFirstMount.current = false;
-      const hasCustomFilters =
-        debouncedSearch.trim() !== "" ||
-        category !== "All" ||
-        brand !== "All" ||
-        sortOption !== "default" ||
-        typeFilter !== "all" ||
-        minPrice !== "" ||
-        maxPrice !== "" ||
-        limit !== 12;
+      const initialType = initialSearchParams?.type || "all";
+      const initialCat = initialSearchParams?.category || "All";
+      const initialBrand = initialSearchParams?.brand || "All";
+      const initialSort = initialSearchParams?.sort || "default";
 
-      if (!hasCustomFilters && initialList.length > 0) {
+      const matchesInitialServerData =
+        typeFilter === initialType &&
+        category === initialCat &&
+        brand === initialBrand &&
+        sortOption === initialSort &&
+        debouncedSearch.trim() === "" &&
+        minPrice === "" &&
+        maxPrice === "" &&
+        limit === 12;
+
+      // When the server pre-rendered data matches current filter state, reuse without duplicate fetch
+      if (matchesInitialServerData && initialList.length > 0) {
         return;
       }
     }
@@ -201,7 +213,16 @@ export default function ProductsClient({ initialData }: { initialData?: any }) {
           endpoint = "/api/products/free-orders";
         }
 
-        const res = await axios.get(`${endpoint}?${params.toString()}`);
+        // Cache-busting parameter and header to guarantee instant fresh stock/inventory
+        const res = await axios.get(`${endpoint}?${params.toString()}`, {
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+          params: {
+            _t: Date.now(),
+          },
+        });
 
         if (isCancelled) return;
 
@@ -259,7 +280,15 @@ export default function ProductsClient({ initialData }: { initialData?: any }) {
         endpoint = "/api/products/free-orders";
       }
 
-      const res = await axios.get(`${endpoint}?${params.toString()}`);
+      const res = await axios.get(`${endpoint}?${params.toString()}`, {
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+        params: {
+          _t: Date.now(),
+        },
+      });
 
       if (res.data && typeof res.data === "object" && Array.isArray(res.data.products)) {
         setProducts((prev) => {
