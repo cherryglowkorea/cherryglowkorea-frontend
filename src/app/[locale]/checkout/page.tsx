@@ -44,6 +44,7 @@ import {
   Trash2,
   Plus,
   Minus,
+  AlertTriangle,
 } from "lucide-react";
 import { formatPrice, getVariantLabel } from "@/lib/utils";
 
@@ -123,6 +124,40 @@ export default function CheckoutPage() {
 
   // Payment Method State ("cod" | "bkash")
   const [paymentMethod, setPaymentMethod] = useState("cod");
+
+  // Blacklist Enforcement State
+  const [isBlacklistedPhone, setIsBlacklistedPhone] = useState(false);
+  const [blacklistMessage, setBlacklistMessage] = useState("");
+
+  // Check if customer phone is blacklisted whenever phone changes
+  useEffect(() => {
+    const cleanDigits = (phone || "").replace(/\D/g, "");
+    if (cleanDigits.length >= 10) {
+      const timer = setTimeout(async () => {
+        try {
+          const apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+          const res = await fetch(`${apiHost}/orders/check-phone/${encodeURIComponent(phone.trim())}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.isBlacklisted) {
+              setIsBlacklistedPhone(true);
+              setBlacklistMessage(data.message || "");
+              setPaymentMethod("bkash"); // Force switch away from COD
+            } else {
+              setIsBlacklistedPhone(false);
+              setBlacklistMessage("");
+            }
+          }
+        } catch (e) {
+          // Ignore network errors
+        }
+      }, 400);
+      return () => clearTimeout(timer);
+    } else {
+      setIsBlacklistedPhone(false);
+      setBlacklistMessage("");
+    }
+  }, [phone]);
 
   // Coupon & Store Settings State
   const [couponCode, setCouponCode] = useState("");
@@ -1345,29 +1380,55 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                     {/* Cash on Delivery Option */}
                     <div
-                      onClick={() => setPaymentMethod("cod")}
-                      className={`p-2.5 sm:p-3 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between gap-1 sm:gap-1.5 ${
-                        paymentMethod === "cod"
-                          ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/30 shadow-2xs"
-                          : "border-stone-200 dark:border-white/10 hover:border-stone-300"
+                      onClick={() => {
+                        if (isBlacklistedPhone) {
+                          toast.error(
+                            "Cash on Delivery is unavailable for this phone number due to past delivery cancellations. Please use online payment."
+                          );
+                          return;
+                        }
+                        setPaymentMethod("cod");
+                      }}
+                      className={`p-2.5 sm:p-3 rounded-xl border-2 transition flex flex-col justify-between gap-1 sm:gap-1.5 ${
+                        isBlacklistedPhone
+                          ? "opacity-50 cursor-not-allowed border-stone-200 dark:border-white/10 bg-stone-100/60 dark:bg-white/5"
+                          : paymentMethod === "cod"
+                          ? "border-pink-500 bg-pink-50/40 dark:bg-pink-950/30 shadow-2xs cursor-pointer"
+                          : "border-stone-200 dark:border-white/10 hover:border-stone-300 cursor-pointer"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-1">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 border-pink-500 flex items-center justify-center shrink-0">
-                            {paymentMethod === "cod" && <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-pink-500 rounded-full" />}
+                          <div
+                            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                              isBlacklistedPhone
+                                ? "border-stone-300 dark:border-white/20"
+                                : "border-pink-500"
+                            }`}
+                          >
+                            {!isBlacklistedPhone && paymentMethod === "cod" && (
+                              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-pink-500 rounded-full" />
+                            )}
                           </div>
                           <span className="font-bold text-[11px] sm:text-xs text-stone-800 dark:text-rose-50 flex items-center gap-1 truncate">
                             <Banknote size={13} className="text-emerald-500 shrink-0" />
                             <span className="truncate">{t("cod")}</span>
                           </span>
                         </div>
-                        <span className="text-[8px] sm:text-[9px] font-bold uppercase bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 px-1 sm:px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0">
-                          <Sparkles size={9} /> {t("recommended")}
-                        </span>
+                        {isBlacklistedPhone ? (
+                          <span className="text-[8px] sm:text-[9px] font-bold uppercase bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 px-1 sm:px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0">
+                            Unavailable
+                          </span>
+                        ) : (
+                          <span className="text-[8px] sm:text-[9px] font-bold uppercase bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 px-1 sm:px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0">
+                            <Sparkles size={9} /> {t("recommended")}
+                          </span>
+                        )}
                       </div>
                       <p className="text-[9.5px] sm:text-[10px] text-stone-500 dark:text-rose-100/50 mt-0.5 leading-tight pl-5 sm:pl-6 line-clamp-1 sm:line-clamp-none">
-                        {t("codDesc")}
+                        {isBlacklistedPhone
+                          ? "Unavailable for this phone number"
+                          : t("codDesc")}
                       </p>
                     </div>
 
@@ -1399,6 +1460,22 @@ export default function CheckoutPage() {
                       </p>
                     </div>
                   </div>
+
+                  {/* Blacklist Explanation Notice */}
+                  {isBlacklistedPhone && (
+                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 animate-fadeIn">
+                      <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <strong className="font-bold block text-amber-800 dark:text-amber-300 text-xs">
+                          Cash on Delivery is unavailable for this number
+                        </strong>
+                        <p className="text-[11px] opacity-90 leading-relaxed">
+                          {blacklistMessage ||
+                            "Due to past delivery cancellations or returns, orders to this phone number require online pre-payment. Please complete your order using bKash, Nagad, or contact customer support."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Expandable clear payment instruction when selected */}
                   {paymentMethod === "bkash" && (

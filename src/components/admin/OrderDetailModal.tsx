@@ -29,8 +29,13 @@ import {
   Clock,
   Sparkles,
   FileText,
+  ShieldAlert,
+  AlertTriangle,
+  XCircle,
+  Archive,
 } from "lucide-react";
 import { toast } from "sonner";
+import { CustomerRiskInfo } from "@/lib/phoneUtils";
 
 export default function OrderDetailModal({
   order,
@@ -39,6 +44,21 @@ export default function OrderDetailModal({
   onUpdateStatus,
   statusList = [],
   statusStyles = {},
+  riskInfo,
+  onOpenCancelModal,
+  onOpenFlagModal,
+  onToggleArchive,
+}: {
+  order: any;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdateStatus: (id: string, status: string) => void;
+  statusList?: string[];
+  statusStyles?: Record<string, string>;
+  riskInfo?: CustomerRiskInfo;
+  onOpenCancelModal?: (order: any) => void;
+  onOpenFlagModal?: (order: any) => void;
+  onToggleArchive?: (order: any) => void;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -250,15 +270,26 @@ export default function OrderDetailModal({
               </DialogTitle>
             </div>
 
-            {/* Actions: Print & Quick Status Changer */}
-            <div className="flex items-center gap-3">
+            {/* Actions: Print, Archive & Quick Status Changer */}
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-800 bg-white dark:bg-[#0d0709] text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-800 bg-white dark:bg-[#0d0709] text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all shadow-xs cursor-pointer"
               >
                 <Printer className="h-4 w-4 text-rose-500" />
                 Print Invoice
               </button>
+
+              {onToggleArchive && (
+                <button
+                  onClick={() => onToggleArchive(order)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-800 bg-white dark:bg-[#0d0709] text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all shadow-xs cursor-pointer"
+                  title={order.isArchived ? "Unarchive order" : "Archive order (soft delete from active list)"}
+                >
+                  <Archive className="h-4 w-4 text-amber-500" />
+                  {order.isArchived ? "Unarchive" : "Archive"}
+                </button>
+              )}
 
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-stone-500 dark:text-rose-300/70">
@@ -266,7 +297,13 @@ export default function OrderDetailModal({
                 </span>
                 <Select
                   value={order.status}
-                  onValueChange={(val) => onUpdateStatus(order._id, val)}
+                  onValueChange={(val) => {
+                    if (val === "cancelled") {
+                      onOpenCancelModal?.(order);
+                    } else {
+                      onUpdateStatus(order._id, val);
+                    }
+                  }}
                 >
                   <SelectTrigger className="h-8 border-stone-300 dark:border-rose-800/60 rounded-xl px-2.5 text-xs bg-white dark:bg-rose-950">
                     <span
@@ -298,12 +335,125 @@ export default function OrderDetailModal({
 
         {/* Content Body */}
         <div className="p-6 space-y-6">
+          {/* HIGH-RISK / BLACKLIST ALERT BANNER */}
+          {riskInfo?.isHighRisk && (
+            <div
+              className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                riskInfo.isBlacklisted
+                  ? "bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800/80 text-rose-900 dark:text-rose-200"
+                  : "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800/80 text-amber-900 dark:text-amber-200"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className={`p-2 rounded-xl mt-0.5 ${
+                    riskInfo.isBlacklisted
+                      ? "bg-rose-200 dark:bg-rose-900 text-rose-700 dark:text-rose-300"
+                      : "bg-amber-200 dark:bg-amber-900 text-amber-800 dark:text-amber-300"
+                  }`}
+                >
+                  {riskInfo.isBlacklisted ? (
+                    <ShieldAlert className="h-5 w-5" />
+                  ) : (
+                    <AlertTriangle className="h-5 w-5" />
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-sm uppercase tracking-wide">
+                      {riskInfo.isBlacklisted
+                        ? "🚨 Blacklisted Customer Phone"
+                        : "⚠️ Customer Risk / Watchlist Warning"}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        riskInfo.isBlacklisted
+                          ? "bg-rose-600 text-white"
+                          : "bg-amber-600 text-white"
+                      }`}
+                    >
+                      {riskInfo.isBlacklisted ? "COD Blocked" : "Verify Before Shipping"}
+                    </span>
+                  </div>
+                  <p className="text-xs mt-1 opacity-90">
+                    {riskInfo.flagReason ||
+                      `Customer has ${riskInfo.cancelledOrders} cancelled orders (${riskInfo.cancellationRate}% rate) out of ${riskInfo.totalOrders} total orders.`}
+                  </p>
+                </div>
+              </div>
+
+              {onOpenFlagModal && (
+                <button
+                  onClick={() => onOpenFlagModal(order)}
+                  className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-xs ${
+                    riskInfo.isBlacklisted
+                      ? "bg-white dark:bg-rose-900/60 border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-200 hover:bg-rose-100"
+                      : "bg-white dark:bg-amber-900/60 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 hover:bg-amber-100"
+                  }`}
+                >
+                  Manage Flag / Standing
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* CANCELLATION DETAILS BOX (Preserving sales audit trail) */}
+          {order.status === "cancelled" && (
+            <div className="p-4 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/60 dark:bg-rose-950/30 space-y-2">
+              <div className="flex items-center justify-between border-b border-rose-200/80 dark:border-rose-900/40 pb-2">
+                <div className="flex items-center gap-2 text-rose-700 dark:text-rose-300 font-bold text-sm">
+                  <XCircle className="h-4 w-4 text-rose-600" />
+                  Order Cancelled Record
+                </div>
+                <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                  {order.cancelledAt
+                    ? new Date(order.cancelledAt).toLocaleString("en-US", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })
+                    : "Archived in Cancelled Tab"}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+                <div>
+                  <span className="text-stone-500 dark:text-stone-400 block text-[11px]">
+                    Reason for Cancellation:
+                  </span>
+                  <span className="font-semibold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/40 px-2 py-0.5 rounded-md inline-block mt-0.5">
+                    {order.cancellationReason || "Not specified by admin"}
+                  </span>
+                </div>
+                {order.cancellationNote && (
+                  <div>
+                    <span className="text-stone-500 dark:text-stone-400 block text-[11px]">
+                      Admin Audit Note:
+                    </span>
+                    <p className="text-stone-700 dark:text-rose-200 italic mt-0.5">
+                      "{order.cancellationNote}"
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Customer & Address Information Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Customer Info */}
             <div className="p-4 rounded-xl border border-stone-200 dark:border-rose-900/40 bg-stone-50/70 dark:bg-rose-950/20 space-y-3">
-              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold text-sm border-b border-stone-200 dark:border-rose-900/40 pb-2">
-                <User className="h-4 w-4" /> Customer Information
+              <div className="flex items-center justify-between border-b border-stone-200 dark:border-rose-900/40 pb-2">
+                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold text-sm">
+                  <User className="h-4 w-4" /> Customer Information
+                </div>
+                {onOpenFlagModal && (
+                  <button
+                    onClick={() => onOpenFlagModal(order)}
+                    className="text-[11px] font-semibold text-stone-500 hover:text-rose-600 flex items-center gap-1 transition-colors cursor-pointer"
+                    title="Change customer watchlist / blacklist standing"
+                  >
+                    <ShieldAlert className="h-3 w-3" /> Flag/Status
+                  </button>
+                )}
               </div>
 
               <div className="space-y-1.5 text-sm">
@@ -312,15 +462,24 @@ export default function OrderDetailModal({
                 </p>
 
                 {customer.phone && (
-                  <p className="flex items-center gap-2 text-stone-600 dark:text-rose-200/80">
-                    <Phone className="h-3.5 w-3.5 text-stone-400" />
-                    <a
-                      href={`tel:${customer.phone}`}
-                      className="hover:underline text-rose-600 dark:text-rose-300 font-medium"
-                    >
-                      {customer.phone}
-                    </a>
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="flex items-center gap-2 text-stone-600 dark:text-rose-200/80">
+                      <Phone className="h-3.5 w-3.5 text-stone-400" />
+                      <a
+                        href={`tel:${customer.phone}`}
+                        className="hover:underline text-rose-600 dark:text-rose-300 font-medium font-mono"
+                      >
+                        {customer.phone}
+                      </a>
+                    </p>
+                    {riskInfo?.badgeText && (
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${riskInfo.badgeClass}`}
+                      >
+                        {riskInfo.badgeText}
+                      </span>
+                    )}
+                  </div>
                 )}
 
                 {customer.email && (

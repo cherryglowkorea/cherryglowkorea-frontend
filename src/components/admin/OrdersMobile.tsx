@@ -17,9 +17,14 @@ import {
   CreditCard,
   Copy,
   Check,
+  Archive,
+  RotateCcw,
+  XCircle,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import OrderDetailModal from "./OrderDetailModal";
+import { evaluateCustomerRisk } from "@/lib/phoneUtils";
 
 export default function OrdersMobile({
   orders,
@@ -27,11 +32,27 @@ export default function OrdersMobile({
   onUpdateStatus,
   status,
   statusStyles,
+  phoneStatsMap = {},
+  flaggedCustomersMap = {},
+  onOpenCancelModal,
+  onOpenFlagModal,
+  onToggleArchive,
+}: {
+  orders: any[];
+  loading: boolean;
+  onUpdateStatus: (id: string, status: string) => void;
+  status: string[];
+  statusStyles: Record<string, string>;
+  phoneStatsMap?: Record<string, any>;
+  flaggedCustomersMap?: Record<string, any>;
+  onOpenCancelModal?: (order: any) => void;
+  onOpenFlagModal?: (order: any) => void;
+  onToggleArchive?: (order: any) => void;
 }) {
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [copiedId, setCopiedId] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const handleCopyId = (e, orderNo) => {
+  const handleCopyId = (e: React.MouseEvent, orderNo: string) => {
     e.stopPropagation();
     navigator.clipboard.writeText(orderNo);
     setCopiedId(orderNo);
@@ -39,7 +60,7 @@ export default function OrdersMobile({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const getCustomerInitial = (name) => {
+  const getCustomerInitial = (name?: string) => {
     if (!name) return "G";
     return name.charAt(0).toUpperCase();
   };
@@ -66,16 +87,19 @@ export default function OrdersMobile({
             const customer = o.customer || {};
             const pricing = o.pricing || {};
             const payment = o.payment || {};
+            const risk = evaluateCustomerRisk(customer.phone, phoneStatsMap, flaggedCustomersMap);
 
             return (
               <Card
                 key={o._id}
                 onClick={() => setSelectedOrder(o)}
-                className="p-4 rounded-2xl border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] text-stone-800 dark:text-rose-100 shadow-xs hover:shadow-md transition-all space-y-3 cursor-pointer relative overflow-hidden"
+                className={`p-4 rounded-2xl border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] text-stone-800 dark:text-rose-100 shadow-xs hover:shadow-md transition-all space-y-3 cursor-pointer relative overflow-hidden ${
+                  o.isArchived ? "opacity-60 bg-stone-50/40 dark:bg-stone-900/20" : ""
+                }`}
               >
                 {/* Top Row: Order ID & Date */}
                 <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-900/30 pb-2.5">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-stone-100 dark:bg-rose-950 text-stone-900 dark:text-rose-100 border border-stone-200 dark:border-rose-900/50">
                       {orderNo}
                     </span>
@@ -89,6 +113,11 @@ export default function OrdersMobile({
                         <Copy className="h-3.5 w-3.5" />
                       )}
                     </button>
+                    {o.isArchived && (
+                      <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                        <Archive className="h-3 w-3" /> Archived
+                      </span>
+                    )}
                   </div>
 
                   <span className="text-[11px] text-stone-400 dark:text-rose-300/60 flex items-center gap-1">
@@ -113,14 +142,30 @@ export default function OrdersMobile({
                         {customer.name || "Guest"}
                       </h4>
                       {customer.phone && (
-                        <a
-                          href={`tel:${customer.phone}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-mono hover:underline mt-0.5"
-                        >
-                          <Phone className="h-3 w-3" />
-                          {customer.phone}
-                        </a>
+                        <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                          <a
+                            href={`tel:${customer.phone}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-mono hover:underline"
+                          >
+                            <Phone className="h-3 w-3" />
+                            {customer.phone}
+                          </a>
+
+                          {/* Customer Risk Badge */}
+                          {risk.badgeText && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onOpenFlagModal?.(o);
+                              }}
+                              className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border cursor-pointer ${risk.badgeClass}`}
+                            >
+                              {risk.badgeText}
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -149,11 +194,31 @@ export default function OrdersMobile({
                       e.stopPropagation();
                       setSelectedOrder(o);
                     }}
-                    className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400 shrink-0 hover:underline"
+                    className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400 shrink-0 hover:underline cursor-pointer"
                   >
                     Details <Eye className="h-3 w-3" />
                   </button>
                 </div>
+
+                {/* Cancellation Details if Cancelled */}
+                {o.status === "cancelled" && (
+                  <div className="bg-rose-50/70 dark:bg-rose-950/30 p-2 rounded-xl border border-rose-200/70 dark:border-rose-900/40 text-[11px] text-rose-700 dark:text-rose-300 flex items-center justify-between">
+                    <span className="truncate">
+                      🚫 {o.cancellationReason || "Cancelled"}
+                    </span>
+                    {onToggleArchive && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleArchive(o);
+                        }}
+                        className="text-[10px] font-semibold text-amber-600 hover:underline shrink-0 ml-2"
+                      >
+                        {o.isArchived ? "Unarchive" : "Archive"}
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {/* Bottom Row: Status Dropdown */}
                 <div
@@ -165,7 +230,13 @@ export default function OrdersMobile({
                   </span>
                   <Select
                     value={o.status}
-                    onValueChange={(v) => onUpdateStatus(o._id, v)}
+                    onValueChange={(v) => {
+                      if (v === "cancelled") {
+                        onOpenCancelModal?.(o);
+                      } else {
+                        onUpdateStatus(o._id, v);
+                      }
+                    }}
                   >
                     <SelectTrigger className="w-[130px] h-8 text-xs border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950 rounded-xl">
                       <span
@@ -206,6 +277,19 @@ export default function OrdersMobile({
           onUpdateStatus={onUpdateStatus}
           statusList={status}
           statusStyles={statusStyles}
+          riskInfo={evaluateCustomerRisk(
+            selectedOrder.customer?.phone,
+            phoneStatsMap,
+            flaggedCustomersMap
+          )}
+          onOpenCancelModal={(ord) => {
+            setSelectedOrder(null);
+            onOpenCancelModal?.(ord);
+          }}
+          onOpenFlagModal={(ord) => {
+            onOpenFlagModal?.(ord);
+          }}
+          onToggleArchive={onToggleArchive}
         />
       )}
     </>

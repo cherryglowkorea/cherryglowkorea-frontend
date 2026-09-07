@@ -18,18 +18,19 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Eye,
-  Printer,
   Copy,
   Check,
   Phone,
-  MapPin,
   ShoppingBag,
-  CreditCard,
   Calendar,
-  Sparkles,
+  XCircle,
+  Archive,
+  RotateCcw,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import OrderDetailModal from "./OrderDetailModal";
+import { evaluateCustomerRisk } from "@/lib/phoneUtils";
 
 export default function OrdersTable({
   orders,
@@ -37,11 +38,27 @@ export default function OrdersTable({
   onUpdateStatus,
   status,
   statusStyles,
+  phoneStatsMap = {},
+  flaggedCustomersMap = {},
+  onOpenCancelModal,
+  onOpenFlagModal,
+  onToggleArchive,
+}: {
+  orders: any[];
+  loading: boolean;
+  onUpdateStatus: (id: string, status: string) => void;
+  status: string[];
+  statusStyles: Record<string, string>;
+  phoneStatsMap?: Record<string, any>;
+  flaggedCustomersMap?: Record<string, any>;
+  onOpenCancelModal?: (order: any) => void;
+  onOpenFlagModal?: (order: any) => void;
+  onToggleArchive?: (order: any) => void;
 }) {
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [copiedId, setCopiedId] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const handleCopyId = (e, orderNo) => {
+  const handleCopyId = (e: React.MouseEvent, orderNo: string) => {
     e.stopPropagation();
     navigator.clipboard.writeText(orderNo);
     setCopiedId(orderNo);
@@ -49,12 +66,12 @@ export default function OrdersTable({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const getCustomerInitial = (name) => {
+  const getCustomerInitial = (name?: string) => {
     if (!name) return "G";
     return name.charAt(0).toUpperCase();
   };
 
-  const getRandomGradient = (name = "") => {
+  const getRandomGradient = (name: string = "") => {
     const gradients = [
       "from-rose-500 to-pink-600 text-white",
       "from-purple-500 to-indigo-600 text-white",
@@ -76,7 +93,7 @@ export default function OrdersTable({
                 Order ID
               </TableHead>
               <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-stone-400">
-                Customer Info
+                Customer Info & Standing
               </TableHead>
               <TableHead className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-stone-600 dark:text-stone-400">
                 Items Summary
@@ -127,11 +144,14 @@ export default function OrdersTable({
                 const customer = o.customer || {};
                 const pricing = o.pricing || {};
                 const payment = o.payment || {};
+                const risk = evaluateCustomerRisk(customer.phone, phoneStatsMap, flaggedCustomersMap);
 
                 return (
                   <TableRow
                     key={o._id}
-                    className="hover:bg-stone-50/80 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                    className={`hover:bg-stone-50/80 dark:hover:bg-white/5 transition-colors group cursor-pointer ${
+                      o.isArchived ? "opacity-60 bg-stone-50/40 dark:bg-stone-900/20" : ""
+                    }`}
                     onClick={() => setSelectedOrder(o)}
                   >
                     {/* Order ID */}
@@ -152,9 +172,14 @@ export default function OrdersTable({
                           )}
                         </button>
                       </div>
+                      {o.isArchived && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 mt-1">
+                          <Archive className="h-3 w-3" /> Archived
+                        </span>
+                      )}
                     </TableCell>
 
-                    {/* Customer Info */}
+                    {/* Customer Info & Standing */}
                     <TableCell className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
                         <div
@@ -168,16 +193,34 @@ export default function OrdersTable({
                           <p className="font-semibold text-sm text-stone-900 dark:text-stone-100 truncate">
                             {customer.name || "Guest"}
                           </p>
-                          {customer.phone && (
-                            <a
-                              href={`tel:${customer.phone}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="text-xs text-stone-500 dark:text-stone-400 hover:text-rose-500 flex items-center gap-1 font-mono transition-colors"
-                            >
-                              <Phone className="h-3 w-3 shrink-0" />
-                              {customer.phone}
-                            </a>
-                          )}
+
+                          <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                            {customer.phone && (
+                              <a
+                                href={`tel:${customer.phone}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-stone-500 dark:text-stone-400 hover:text-rose-500 flex items-center gap-1 font-mono transition-colors"
+                              >
+                                <Phone className="h-3 w-3 shrink-0" />
+                                {customer.phone}
+                              </a>
+                            )}
+
+                            {/* Risk / Watchlist / Blacklist Badge */}
+                            {risk.badgeText && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onOpenFlagModal?.(o);
+                                }}
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border cursor-pointer hover:opacity-80 transition-opacity ${risk.badgeClass}`}
+                                title={risk.flagReason || "Click to view/manage customer standing"}
+                              >
+                                {risk.badgeText}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -195,7 +238,7 @@ export default function OrdersTable({
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-stone-600 dark:text-stone-300 truncate max-w-[200px]" title={items.map((i) => i.name).join(", ")}>
+                        <p className="text-xs text-stone-600 dark:text-stone-300 truncate max-w-[200px]" title={items.map((i: any) => i.name).join(", ")}>
                           {items[0]?.name || "N/A"}
                           {items.length > 1 && (
                             <span className="text-stone-400 dark:text-stone-500 font-normal">
@@ -230,39 +273,57 @@ export default function OrdersTable({
                       </div>
                     </TableCell>
 
-                    {/* Status Dropdown */}
+                    {/* Status Dropdown & Cancellation Details */}
                     <TableCell
                       className="py-3.5 px-4"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <Select
-                        value={o.status}
-                        onValueChange={(v) => onUpdateStatus(o._id, v)}
-                      >
-                        <SelectTrigger className="w-[130px] h-8 text-xs border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950/80 rounded-xl hover:border-rose-400 transition-colors">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${
-                              statusStyles[o.status] || "bg-gray-100 text-gray-700"
-                            }`}
-                          >
-                            {o.status}
-                          </span>
-                        </SelectTrigger>
+                      <div className="space-y-1">
+                        <Select
+                          value={o.status}
+                          onValueChange={(v) => {
+                            if (v === "cancelled") {
+                              onOpenCancelModal?.(o);
+                            } else {
+                              onUpdateStatus(o._id, v);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[130px] h-8 text-xs border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950/80 rounded-xl hover:border-rose-400 transition-colors">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${
+                                statusStyles[o.status] || "bg-gray-100 text-gray-700"
+                              }`}
+                            >
+                              {o.status}
+                            </span>
+                          </SelectTrigger>
 
-                        <SelectContent className="dark:bg-[#1c1218] dark:border-rose-900/60">
-                          {status?.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${
-                                  statusStyles[s] || ""
-                                }`}
-                              >
-                                {s}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                          <SelectContent className="dark:bg-[#1c1218] dark:border-rose-900/60">
+                            {status?.map((s) => (
+                              <SelectItem key={s} value={s}>
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${
+                                    statusStyles[s] || ""
+                                  }`}
+                                >
+                                  {s}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        {/* Cancellation Reason Badge */}
+                        {o.status === "cancelled" && (
+                          <div
+                            className="text-[10px] font-medium text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/50 px-2 py-0.5 rounded-md truncate max-w-[135px]"
+                            title={`Reason: ${o.cancellationReason || "Not specified"}${o.cancellationNote ? ` (${o.cancellationNote})` : ""}`}
+                          >
+                            🚫 {o.cancellationReason || "Cancelled"}
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
 
                     {/* Date */}
@@ -285,13 +346,40 @@ export default function OrdersTable({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-end gap-1.5">
+                        {/* Quick View Button */}
                         <button
                           onClick={() => setSelectedOrder(o)}
-                          className="p-1.5 rounded-lg border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950 text-stone-700 dark:text-rose-200 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white transition-all shadow-2xs"
+                          className="p-1.5 rounded-lg border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950 text-stone-700 dark:text-rose-200 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white transition-all shadow-2xs cursor-pointer"
                           title="View Order Details"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
+
+                        {/* Quick Cancel Button if active */}
+                        {o.status !== "cancelled" && onOpenCancelModal && (
+                          <button
+                            onClick={() => onOpenCancelModal(o)}
+                            className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 text-stone-500 hover:text-rose-600 hover:border-rose-300 transition-all shadow-2xs cursor-pointer"
+                            title="Cancel Order"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </button>
+                        )}
+
+                        {/* Archive / Unarchive Button for Cancelled orders */}
+                        {o.status === "cancelled" && onToggleArchive && (
+                          <button
+                            onClick={() => onToggleArchive(o)}
+                            className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 text-stone-500 hover:text-amber-600 hover:border-amber-300 transition-all shadow-2xs cursor-pointer"
+                            title={o.isArchived ? "Unarchive order" : "Archive order (soft delete from active view)"}
+                          >
+                            {o.isArchived ? (
+                              <RotateCcw className="h-4 w-4 text-amber-500" />
+                            ) : (
+                              <Archive className="h-4 w-4 text-stone-400 hover:text-amber-500" />
+                            )}
+                          </button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -311,6 +399,19 @@ export default function OrdersTable({
           onUpdateStatus={onUpdateStatus}
           statusList={status}
           statusStyles={statusStyles}
+          riskInfo={evaluateCustomerRisk(
+            selectedOrder.customer?.phone,
+            phoneStatsMap,
+            flaggedCustomersMap
+          )}
+          onOpenCancelModal={(ord) => {
+            setSelectedOrder(null);
+            onOpenCancelModal?.(ord);
+          }}
+          onOpenFlagModal={(ord) => {
+            onOpenFlagModal?.(ord);
+          }}
+          onToggleArchive={onToggleArchive}
         />
       )}
     </>

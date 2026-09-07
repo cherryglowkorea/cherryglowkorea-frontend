@@ -9,34 +9,48 @@ import {
   Search,
   RefreshCw,
   Plus,
-  Filter,
   DollarSign,
   Clock,
   CheckCircle2,
-  Package,
   XCircle,
-  Truck,
-  ArrowUpDown,
+  Archive,
+  RotateCcw,
+  ShieldAlert,
+  AlertTriangle,
   X,
+  Filter,
 } from "lucide-react";
 
 import OrdersMobile from "@/components/admin/OrdersMobile";
 import OrdersTable from "@/components/admin/OrdersTable";
+import CancelOrderModal from "@/components/admin/CancelOrderModal";
+import FlagCustomerModal from "@/components/admin/FlagCustomerModal";
+import { normalizePhone } from "@/lib/phoneUtils";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters & Search State
+  // Risk Intelligence & Phone Aggregation Maps from Backend
+  const [phoneStatsMap, setPhoneStatsMap] = useState<Record<string, any>>({});
+  const [flaggedCustomersMap, setFlaggedCustomersMap] = useState<Record<string, any>>({});
+
+  // Modals State
+  const [orderToCancel, setOrderToCancel] = useState<any>(null);
+  const [orderForFlagModal, setOrderForFlagModal] = useState<any>(null);
+
+  // Filters, Sub-filters & Search State
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [cancelReasonFilter, setCancelReasonFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [showArchived, setShowArchived] = useState(false);
 
   const API = `${process.env.NEXT_PUBLIC_API_URL}/orders`;
   const STATUS = ["pending", "processing", "shipped", "delivered", "cancelled"];
 
-  const statusStyles = {
+  const statusStyles: Record<string, string> = {
     pending:
       "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
     processing:
@@ -54,22 +68,43 @@ export default function OrdersPage() {
     return localStorage.getItem("token");
   };
 
-  /* ---------------- Fetch Orders ---------------- */
+  /* ---------------- Fetch All Data (Orders + Backend Aggregation) ---------------- */
   const fetchOrders = async () => {
     try {
       setLoading(true);
       const token = getToken();
+      const headers = { Authorization: `Bearer ${token}` };
 
-      const res = await axios.get(`${API}/allOrders`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // Parallel fetch: allOrders, backend phone aggregation stats, and flagged customers
+      const [ordersRes, statsRes, flaggedRes] = await Promise.allSettled([
+        axios.get(`${API}/allOrders`, { headers }),
+        axios.get(`${API}/phone-stats`, { headers }),
+        axios.get(`${API}/flagged-customers`, { headers }),
+      ]);
 
-      setOrders(res.data || []);
+      if (ordersRes.status === "fulfilled") {
+        setOrders(ordersRes.value.data || []);
+      } else {
+        toast.error("Failed to load orders");
+      }
+
+      if (statsRes.status === "fulfilled" && statsRes.value.data?.phoneStats) {
+        setPhoneStatsMap(statsRes.value.data.phoneStats);
+      }
+
+      if (flaggedRes.status === "fulfilled" && flaggedRes.value.data?.flaggedCustomers) {
+        const flagList = flaggedRes.value.data.flaggedCustomers || [];
+        const dict: Record<string, any> = {};
+        for (const f of flagList) {
+          if (f.normalizedPhone) {
+            dict[f.normalizedPhone] = f;
+          }
+        }
+        setFlaggedCustomersMap(dict);
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load orders");
+      toast.error("Failed to load orders data");
     } finally {
       setLoading(false);
     }
@@ -79,14 +114,22 @@ export default function OrdersPage() {
     fetchOrders();
   }, []);
 
-  /* ---------------- Update Status ---------------- */
-  const updateStatus = async (id, status) => {
+  /* ---------------- Update Status (Standard) ---------------- */
+  const updateStatus = async (id: string, newStatus: string) => {
+    if (newStatus === "cancelled") {
+      const targetOrder = orders.find((o) => o._id === id);
+      if (targetOrder) {
+        setOrderToCancel(targetOrder);
+        return;
+      }
+    }
+
     try {
       const token = getToken();
 
       await axios.patch(
         `${API}/updateStatus/${id}`,
-        { status },
+        { status: newStatus },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -94,15 +137,46 @@ export default function OrdersPage() {
         }
       );
 
-      toast.success(`Order status updated to ${status}`);
+      toast.success(`Order status updated to ${newStatus}`);
 
       // Optimistic update
       setOrders((prev) =>
-        prev.map((o) => (o._id === id ? { ...o, status } : o))
+        prev.map((o) => (o._id === id ? { ...o, status: newStatus } : o))
       );
     } catch (err) {
       console.error(err);
       toast.error("Status update failed");
+    }
+  };
+
+  /* ---------------- Toggle Soft Delete / Archive ---------------- */
+  const toggleArchive = async (order: any) => {
+    try {
+      const token = getToken();
+      const newArchived = !order.isArchived;
+
+      await axios.patch(
+        `${API}/updateStatus/${order._id}`,
+        { isArchived: newArchived },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success(
+        newArchived
+          ? `Order #${order.orderNumber || order._id} archived (hidden from main list)`
+          : `Order #${order.orderNumber || order._id} restored to main list`
+      );
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === order._id ? { ...o, isArchived: newArchived } : o
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to archive/unarchive order");
     }
   };
 
@@ -113,8 +187,32 @@ export default function OrdersPage() {
     const processingCount = orders.filter((o) => o.status === "processing").length;
     const shippedCount = orders.filter((o) => o.status === "shipped").length;
     const deliveredCount = orders.filter((o) => o.status === "delivered").length;
-    const cancelledCount = orders.filter((o) => o.status === "cancelled").length;
+    const cancelledOrders = orders.filter((o) => o.status === "cancelled");
+    const cancelledCount = cancelledOrders.length;
+    const archivedCount = orders.filter((o) => o.isArchived).length;
 
+    // Calculate cancellation rate
+    const cancellationRate =
+      totalCount > 0 ? Math.round((cancelledCount / totalCount) * 100) : 0;
+
+    // Count fake orders specifically
+    const fakeOrdersCount = cancelledOrders.filter((o) =>
+      /fake|prank/i.test(o.cancellationReason || "")
+    ).length;
+
+    const notReachableCount = cancelledOrders.filter((o) =>
+      /not reachable|phone|switch/i.test(o.cancellationReason || "")
+    ).length;
+
+    const changedMindCount = cancelledOrders.filter((o) =>
+      /changed mind/i.test(o.cancellationReason || "")
+    ).length;
+
+    const outOfStockCount = cancelledOrders.filter((o) =>
+      /out of stock|stock/i.test(o.cancellationReason || "")
+    ).length;
+
+    // Total Revenue safely excludes cancelled orders
     const totalRevenue = orders
       .filter((o) => o.status !== "cancelled")
       .reduce((sum, o) => sum + (Number(o?.pricing?.total) || 0), 0);
@@ -123,7 +221,7 @@ export default function OrdersPage() {
       (o) =>
         o.orderType === "pre-order" ||
         o.fulfillmentStatus === "awaiting-stock" ||
-        (o.items || o.products || []).some((i) => i.isPreOrder)
+        (o.items || o.products || []).some((i: any) => i.isPreOrder)
     ).length;
 
     return {
@@ -133,6 +231,12 @@ export default function OrdersPage() {
       shippedCount,
       deliveredCount,
       cancelledCount,
+      archivedCount,
+      cancellationRate,
+      fakeOrdersCount,
+      notReachableCount,
+      changedMindCount,
+      outOfStockCount,
       preOrderCount,
       totalRevenue,
     };
@@ -142,15 +246,42 @@ export default function OrdersPage() {
   const filteredOrders = useMemo(() => {
     return orders
       .filter((o) => {
+        // Soft delete filter: hide archived orders unless showArchived is checked
+        if (!showArchived && o.isArchived) {
+          return false;
+        }
+
         // Status / Tab Filter
         if (activeTab === "pre-order") {
           const isPreOrder =
             o.orderType === "pre-order" ||
             o.fulfillmentStatus === "awaiting-stock" ||
-            (o.items || o.products || []).some((i) => i.isPreOrder);
+            (o.items || o.products || []).some((i: any) => i.isPreOrder);
           if (!isPreOrder) return false;
         } else if (activeTab !== "all" && o.status !== activeTab) {
           return false;
+        }
+
+        // Cancellation Reason Sub-filter (active only inside "cancelled" tab)
+        if (activeTab === "cancelled" && cancelReasonFilter !== "all") {
+          const reason = (o.cancellationReason || "").toLowerCase();
+          if (cancelReasonFilter === "fake") {
+            if (!/fake|prank/.test(reason)) return false;
+          } else if (cancelReasonFilter === "not_reachable") {
+            if (!/not reachable|phone|switch/.test(reason)) return false;
+          } else if (cancelReasonFilter === "changed_mind") {
+            if (!/changed mind/.test(reason)) return false;
+          } else if (cancelReasonFilter === "out_of_stock") {
+            if (!/out of stock|stock/.test(reason)) return false;
+          } else if (cancelReasonFilter === "other") {
+            if (
+              /fake|prank|not reachable|phone|switch|changed mind|out of stock|stock/.test(
+                reason
+              )
+            ) {
+              return false;
+            }
+          }
         }
 
         // Payment Filter
@@ -172,7 +303,7 @@ export default function OrdersPage() {
           const phone = (o.customer?.phone || "").toLowerCase();
           const address = (o.customer?.address || "").toLowerCase();
           const items = (o.items || o.products || [])
-            .map((i) => i.name || "")
+            .map((i: any) => i.name || "")
             .join(" ")
             .toLowerCase();
 
@@ -188,7 +319,8 @@ export default function OrdersPage() {
         return true;
       })
       .sort((a, b) => {
-        const effectiveSort = activeTab === "pre-order" && sortBy === "newest" ? "oldest" : sortBy;
+        const effectiveSort =
+          activeTab === "pre-order" && sortBy === "newest" ? "oldest" : sortBy;
         if (effectiveSort === "newest") {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         }
@@ -203,20 +335,32 @@ export default function OrdersPage() {
         }
         return 0;
       });
-  }, [orders, activeTab, paymentFilter, searchQuery, sortBy]);
+  }, [
+    orders,
+    activeTab,
+    cancelReasonFilter,
+    paymentFilter,
+    searchQuery,
+    sortBy,
+    showArchived,
+  ]);
 
   const clearFilters = () => {
     setSearchQuery("");
     setActiveTab("all");
+    setCancelReasonFilter("all");
     setPaymentFilter("all");
     setSortBy("newest");
+    setShowArchived(false);
   };
 
   const isFiltered =
     searchQuery !== "" ||
     activeTab !== "all" ||
+    cancelReasonFilter !== "all" ||
     paymentFilter !== "all" ||
-    sortBy !== "newest";
+    sortBy !== "newest" ||
+    showArchived;
 
   return (
     <div className="w-full space-y-8">
@@ -232,7 +376,7 @@ export default function OrdersPage() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
-            Track, filter, update status, and manage all customer orders in real-time.
+            Track, filter, prevent fraud, record cancellation reasons, and preserve sales audit history.
           </p>
         </div>
 
@@ -241,9 +385,13 @@ export default function OrdersPage() {
             onClick={fetchOrders}
             disabled={loading}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#0d0709] text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all shadow-2xs cursor-pointer"
-            title="Refresh orders"
+            title="Refresh orders and risk intelligence"
           >
-            <RefreshCw className={`h-3.5 w-3.5 text-stone-400 ${loading ? "animate-spin text-rose-500" : ""}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 text-stone-400 ${
+                loading ? "animate-spin text-rose-500" : ""
+              }`}
+            />
             <span className="hidden sm:inline">Refresh</span>
           </button>
 
@@ -257,8 +405,8 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* 2. Metrics & Analytics Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* 2. Metrics & Analytics Bar (5 Core Business Metrics) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {/* Metric 1: Total Orders */}
         <div
           onClick={() => setActiveTab("all")}
@@ -280,7 +428,7 @@ export default function OrdersPage() {
             {metrics.totalCount}
           </div>
           <div className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">
-            All recorded orders
+            Complete order history
           </div>
         </div>
 
@@ -351,11 +499,42 @@ export default function OrdersPage() {
             Successfully completed
           </div>
         </div>
+
+        {/* Metric 5: Cancelled Orders & Rate (Analytics Protected) */}
+        <div
+          onClick={() => setActiveTab("cancelled")}
+          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+            activeTab === "cancelled"
+              ? "border-rose-500 ring-1 ring-rose-500/20 bg-white dark:bg-[#161113]"
+              : "border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] hover:border-rose-500/50"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-rose-700 dark:text-rose-400">
+              Cancelled Orders
+            </span>
+            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
+              <XCircle className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-2xl font-black text-rose-600 dark:text-rose-400">
+              {metrics.cancelledCount}
+            </span>
+            <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+              {metrics.cancellationRate}% Rate
+            </span>
+          </div>
+          <div className="text-[10px] text-rose-500/80 dark:text-rose-400/60 mt-1 truncate">
+            {metrics.fakeOrdersCount > 0 ? `${metrics.fakeOrdersCount} fake • ` : ""}
+            Preserved for audit
+          </div>
+        </div>
       </div>
 
       {/* 3. Search & Filter Bar */}
       <div className="space-y-4 bg-white dark:bg-[#161113] p-4 sm:p-5 rounded-2xl border border-stone-200 dark:border-stone-800/80 shadow-xs">
-        {/* Top Controls: Search, Payment Filter & Sort */}
+        {/* Top Controls: Search, Payment Filter, Sort & Archive Toggle */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
@@ -370,7 +549,7 @@ export default function OrdersPage() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -378,7 +557,7 @@ export default function OrdersPage() {
           </div>
 
           {/* Payment Method Selector */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <select
               value={paymentFilter}
               onChange={(e) => setPaymentFilter(e.target.value)}
@@ -402,6 +581,21 @@ export default function OrdersPage() {
               <option value="highest">Highest Amount</option>
               <option value="lowest">Lowest Amount</option>
             </select>
+
+            {/* Soft Delete / Archive Filter Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowArchived(!showArchived)}
+              className={`flex items-center gap-1.5 px-3 py-2.5 rounded-2xl border text-xs font-semibold transition-all cursor-pointer ${
+                showArchived
+                  ? "bg-amber-500 text-white border-amber-600 shadow-xs"
+                  : "border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] text-stone-600 dark:text-stone-400 hover:bg-stone-100"
+              }`}
+              title="Soft-delete archive view"
+            >
+              <Archive className="h-3.5 w-3.5" />
+              <span>{showArchived ? "Archived Orders Visible" : `Archived (${metrics.archivedCount})`}</span>
+            </button>
           </div>
         </div>
 
@@ -420,7 +614,10 @@ export default function OrdersPage() {
             return (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  if (tab.key !== "cancelled") setCancelReasonFilter("all");
+                }}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   isActive
                     ? "bg-rose-600 text-white shadow-xs"
@@ -450,12 +647,45 @@ export default function OrdersPage() {
             </button>
           )}
         </div>
+
+        {/* Cancelled Tab Sub-filter by Reason (Auditing & Fraud Analysis) */}
+        {activeTab === "cancelled" && (
+          <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-dashed border-rose-200 dark:border-rose-900/40 text-xs">
+            <span className="text-[11px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
+              <Filter className="h-3 w-3" /> Reason:
+            </span>
+            {[
+              { id: "all", label: "All Cancelled", count: metrics.cancelledCount },
+              { id: "fake", label: "🚫 Fake / Prank", count: metrics.fakeOrdersCount },
+              { id: "not_reachable", label: "📵 Phone Off / Unreachable", count: metrics.notReachableCount },
+              { id: "changed_mind", label: "👤 Changed Mind", count: metrics.changedMindCount },
+              { id: "out_of_stock", label: "📦 Out of Stock", count: metrics.outOfStockCount },
+              { id: "other", label: "💬 Other Reasons", count: null },
+            ].map((sub) => {
+              const isSubActive = cancelReasonFilter === sub.id;
+              return (
+                <button
+                  key={sub.id}
+                  onClick={() => setCancelReasonFilter(sub.id)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                    isSubActive
+                      ? "bg-rose-600 text-white shadow-2xs font-bold"
+                      : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100"
+                  }`}
+                >
+                  {sub.label} {sub.count !== null ? `(${sub.count})` : ""}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 4. Filter Results Summary */}
       <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
         <span>
           Showing <strong className="text-stone-900 dark:text-stone-100 font-mono">{filteredOrders.length}</strong> of {orders.length} orders
+          {showArchived && " (including archived)"}
         </span>
       </div>
 
@@ -467,6 +697,11 @@ export default function OrdersPage() {
           onUpdateStatus={updateStatus}
           status={STATUS}
           statusStyles={statusStyles}
+          phoneStatsMap={phoneStatsMap}
+          flaggedCustomersMap={flaggedCustomersMap}
+          onOpenCancelModal={(ord) => setOrderToCancel(ord)}
+          onOpenFlagModal={(ord) => setOrderForFlagModal(ord)}
+          onToggleArchive={toggleArchive}
         />
       </div>
 
@@ -478,8 +713,69 @@ export default function OrdersPage() {
           onUpdateStatus={updateStatus}
           status={STATUS}
           statusStyles={statusStyles}
+          phoneStatsMap={phoneStatsMap}
+          flaggedCustomersMap={flaggedCustomersMap}
+          onOpenCancelModal={(ord) => setOrderToCancel(ord)}
+          onOpenFlagModal={(ord) => setOrderForFlagModal(ord)}
+          onToggleArchive={toggleArchive}
         />
       </div>
+
+      {/* Cancel Order Modal (Records audit reason & prevents hard delete) */}
+      {orderToCancel && (
+        <CancelOrderModal
+          order={orderToCancel}
+          isOpen={Boolean(orderToCancel)}
+          onClose={() => setOrderToCancel(null)}
+          onSuccess={(orderId, finalReason, note, flagStatus) => {
+            setOrders((prev) =>
+              prev.map((o) =>
+                o._id === orderId
+                  ? {
+                      ...o,
+                      status: "cancelled",
+                      cancellationReason: finalReason,
+                      cancellationNote: note,
+                      cancelledAt: new Date().toISOString(),
+                    }
+                  : o
+              )
+            );
+            // Refresh stats & flags in background
+            fetchOrders();
+          }}
+        />
+      )}
+
+      {/* Flag / Blacklist Customer Modal */}
+      {orderForFlagModal && (
+        <FlagCustomerModal
+          isOpen={Boolean(orderForFlagModal)}
+          onClose={() => setOrderForFlagModal(null)}
+          customerName={orderForFlagModal.customer?.name}
+          phone={orderForFlagModal.customer?.phone}
+          riskInfo={
+            orderForFlagModal.customer?.phone
+              ? {
+                  ...phoneStatsMap[normalizePhone(orderForFlagModal.customer.phone)],
+                  isBlacklisted:
+                    flaggedCustomersMap[normalizePhone(orderForFlagModal.customer.phone)]?.status ===
+                    "blacklisted",
+                  isFlagged:
+                    flaggedCustomersMap[normalizePhone(orderForFlagModal.customer.phone)]?.status ===
+                    "flagged",
+                  flagReason:
+                    flaggedCustomersMap[normalizePhone(orderForFlagModal.customer.phone)]?.reason,
+                  flagNotes:
+                    flaggedCustomersMap[normalizePhone(orderForFlagModal.customer.phone)]?.notes,
+                }
+              : undefined
+          }
+          onStatusChanged={() => {
+            fetchOrders();
+          }}
+        />
+      )}
     </div>
   );
 }
