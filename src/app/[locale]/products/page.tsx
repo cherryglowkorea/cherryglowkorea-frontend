@@ -5,6 +5,24 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 import ProductsClient from "./ProductsClient";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5000";
+
+async function getInitialProducts() {
+  try {
+    const res = await fetch(`${API_BASE}/products/allProduct/public?page=1&limit=12`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error("ISR initial products fetch error:", error);
+    return null;
+  }
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "All Products & Skincare Collection | Cherry Glow Korea",
@@ -12,7 +30,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const initialData = await getInitialProducts();
+
   return (
     <Suspense
       fallback={
@@ -21,7 +41,8 @@ export default function ProductsPage() {
         </div>
       }
     >
-      <ProductsClient />
+      <ProductsClient initialData={initialData} />
     </Suspense>
   );
 }
+

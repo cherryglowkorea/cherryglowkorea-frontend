@@ -52,21 +52,21 @@ const defaultCategories = [
   "Hair Care",
 ];
 
-export default function ProductsClient() {
+export default function ProductsClient({ initialData }: { initialData?: any }) {
   const tF = useTranslations("productFilters");
-  const { addToCart } = useCart();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const { addToCart } = useCart();
 
   const productsSectionRef = useRef(null);
 
   // View Mode: 'grid' or 'list'
   const [viewMode, setViewMode] = useState("grid");
 
-  const [limit, setLimit] = useState(() => {
-    const l = searchParams.get("limit");
-    return l ? parseInt(l, 10) : 12;
+  const [limit, setLimit] = useState<number>(() => {
+    const rawLimit = Number(searchParams.get("limit"));
+    return rawLimit > 0 ? rawLimit : 12;
   });
 
   const [search, setSearch] = useState(() => searchParams.get("search") || "");
@@ -79,13 +79,20 @@ export default function ProductsClient() {
   const [maxPrice, setMaxPrice] = useState(() => searchParams.get("maxPrice") || "");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Data fetching states
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialList = useMemo(() => {
+    if (!initialData) return [];
+    if (Array.isArray(initialData)) return initialData;
+    if (Array.isArray(initialData.products)) return initialData.products;
+    return [];
+  }, [initialData]);
+
+  // Data fetching states - initialized from ISR pre-rendered data
+  const [products, setProducts] = useState<any[]>(initialList);
+  const [loading, setLoading] = useState(initialList.length === 0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(initialData?.totalPages || 1);
+  const [totalProducts, setTotalProducts] = useState(initialData?.totalProducts || initialData?.total || initialList.length);
 
   const { data: dbCategories } = useGetCategoriesQuery();
   const { data: dbBrands } = useGetBrandsQuery();
@@ -144,9 +151,29 @@ export default function ProductsClient() {
     }
   }, [limit, debouncedSearch, category, brand, sortOption, typeFilter, minPrice, maxPrice, pathname]);
 
+  const isFirstMount = useRef(true);
+
   /* ---------------- CLIENT-SIDE INITIAL & FILTER FETCH ---------------- */
   useEffect(() => {
     let isCancelled = false;
+
+    // Skip redundant fetch on initial mount if ISR data is already provided and no custom query filters are applied
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      const hasCustomFilters =
+        debouncedSearch.trim() !== "" ||
+        category !== "All" ||
+        brand !== "All" ||
+        sortOption !== "default" ||
+        typeFilter !== "all" ||
+        minPrice !== "" ||
+        maxPrice !== "" ||
+        limit !== 12;
+
+      if (!hasCustomFilters && initialList.length > 0) {
+        return;
+      }
+    }
 
     const fetchInitialProducts = async () => {
       try {

@@ -14,10 +14,14 @@ import { useCart } from "@/context/CartContext";
 import "swiper/css";
 import "swiper/css/navigation";
 
-export default function FeaturedComboDeals() {
+export default function FeaturedComboDeals({
+  initialCombos = [],
+}: {
+  initialCombos?: any[];
+}) {
   const tCombo = useTranslations("comboDeals");
-  const [combos, setCombos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [combos, setCombos] = useState<any[]>(initialCombos);
+  const [loading, setLoading] = useState(initialCombos.length === 0);
   const [error, setError] = useState("");
   const swiperRef = useRef<SwiperType | null>(null);
   const [isBeginning, setIsBeginning] = useState(true);
@@ -27,6 +31,8 @@ export default function FeaturedComboDeals() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   useEffect(() => {
+    if (initialCombos.length > 0) return; // Skip client fetch if provided via ISR
+
     const fetchCombos = async () => {
       try {
         const res = await axios.get(`${API_BASE}/combos`);
@@ -39,7 +45,7 @@ export default function FeaturedComboDeals() {
     };
 
     fetchCombos();
-  }, [API_BASE]);
+  }, [API_BASE, initialCombos.length]);
 
   if (!loading && combos.length === 0) {
     return null; // Don't render the section if no combos exist

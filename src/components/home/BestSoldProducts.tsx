@@ -14,10 +14,14 @@ import ProductCard from "../products/ProductCard";
 import "swiper/css";
 import "swiper/css/navigation";
 
-export default function BestSoldProducts() {
+export default function BestSoldProducts({
+  initialProducts = [],
+}: {
+  initialProducts?: any[];
+}) {
   const tBest = useTranslations("bestSellers");
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<any[]>(initialProducts);
+  const [loading, setLoading] = useState(initialProducts.length === 0);
   const [error, setError] = useState("");
   const swiperRef = useRef<SwiperType | null>(null);
   const [isBeginning, setIsBeginning] = useState(true);
@@ -31,6 +35,8 @@ export default function BestSoldProducts() {
     "http://localhost:5000";
 
   useEffect(() => {
+    if (initialProducts.length > 0) return; // Skip client fetch if provided via ISR
+
     const fetchBestProducts = async () => {
       try {
         // 1. Fetch featured product IDs to exclude duplicates across homepage sections

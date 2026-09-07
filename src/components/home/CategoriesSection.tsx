@@ -22,16 +22,24 @@ const defaultCategories = [
   { id: 12, name: "Hair Care", nameBn: "হেয়ার কেয়ার", image: "https://i.ibb.co/jPVqmVjK/hair-care.jpg" },
 ];
 
-export default function CategoriesSection() {
+export default function CategoriesSection({
+  initialCategories = [],
+}: {
+  initialCategories?: any[];
+}) {
   const locale = useLocale();
   const tCat = useTranslations("categories");
   const { data: dbCategories, isLoading } = useGetCategoriesQuery() as any;
   const scrollRef = useRef(null);
 
-  // Safely extract categories array from API response (supports [] or { data: [] })
+  // Safely extract categories array from API response or ISR initialCategories
   const rawCategories = Array.isArray(dbCategories)
     ? dbCategories
-    : (dbCategories && Array.isArray(dbCategories?.data) ? dbCategories.data : []);
+    : (dbCategories && Array.isArray(dbCategories?.data)
+    ? dbCategories.data
+    : initialCategories.length > 0
+    ? initialCategories
+    : []);
 
   // Filter only active categories if status exists
   const activeCategories = rawCategories.filter((c) => c.status !== "inactive");

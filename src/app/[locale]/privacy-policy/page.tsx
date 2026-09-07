@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { ShieldCheck, Lock, FileText, Truck, HelpCircle, ChevronRight, CheckCircle2 } from "lucide-react";
 
+// Rendering Strategy: ISR (revalidate: 86400s / 24h) — Pre-renders privacy policy.
+export const revalidate = 86400;
+
 export const metadata = {
   title: "Privacy Policy | Cherry Glow Korea",
   description: "Learn how Cherry Glow Korea collects, uses, and safeguards your personal information.",

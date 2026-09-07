@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Truck, RotateCcw, ShieldCheck, Clock, FileText, Lock, HelpCircle, ChevronRight, CheckCircle2 } from "lucide-react";
 
+// Rendering Strategy: ISR (revalidate: 86400s / 24h) — Pre-renders shipping policy.
+export const revalidate = 86400;
+
 export const metadata = {
   title: "Shipping & Return Policy | Cherry Glow Korea",
   description: "Learn about Cherry Glow Korea shipping charges, delivery timelines, and 7-day easy return policy.",

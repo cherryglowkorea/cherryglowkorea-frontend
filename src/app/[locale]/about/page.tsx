@@ -3,6 +3,9 @@ import Link from "next/link";
 import ProfileCard from "@/components/about/ProfileCard";
 import { Sparkles, ShieldCheck, Heart, Leaf, Award, ArrowRight, CheckCircle2 } from "lucide-react";
 
+// Rendering Strategy: ISR (revalidate: 86400s / 24h) — Pre-renders static brand story and team info.
+export const revalidate = 86400;
+
 export const metadata = {
   title: "About Us - Cherry Glow Korea",
   description:

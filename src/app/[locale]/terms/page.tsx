@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { FileText, Lock, Truck, HelpCircle, ChevronRight, CheckCircle2 } from "lucide-react";
 
+// Rendering Strategy: ISR (revalidate: 86400s / 24h) — Pre-renders terms and conditions.
+export const revalidate = 86400;
+
 export const metadata = {
   title: "Terms & Conditions | Cherry Glow Korea",
   description: "Read the official terms and conditions governing purchases and usage on Cherry Glow Korea.",

@@ -8,10 +8,14 @@ import ProductCard from "../products/ProductCard";
 import { useCart } from "@/context/CartContext";
 import { Sparkles, ArrowRight } from "lucide-react";
 
-export default function FeaturedProducts() {
+export default function FeaturedProducts({
+  initialProducts = [],
+}: {
+  initialProducts?: any[];
+}) {
   const tFeat = useTranslations("featuredProducts");
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>(initialProducts);
+  const [loading, setLoading] = useState(initialProducts.length === 0);
   const [error, setError] = useState("");
   const { addToCart } = useCart();
 
@@ -19,6 +23,8 @@ export default function FeaturedProducts() {
   const API = `${API_BASE}/products/featured?limit=8`;
 
   useEffect(() => {
+    if (initialProducts.length > 0) return; // Skip client-side fetch if provided via ISR
+
     const fetchFeaturedProducts = async () => {
       try {
         const res = await axios.get(API);
@@ -32,7 +38,7 @@ export default function FeaturedProducts() {
     };
 
     fetchFeaturedProducts();
-  }, [API]);
+  }, [API, initialProducts.length]);
 
   return (
     <section className="py-12 sm:py-16 border-b border-rose-100/60 dark:border-white/5 bg-gradient-to-b from-white via-rose-50/20 to-white dark:from-[#160d10] dark:via-[#1e1215] dark:to-[#160d10]">
