@@ -151,7 +151,7 @@ export default function AdminReviewsPage() {
   };
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full space-y-8 pb-12">
       {/* 1. Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113]">
         <div>
@@ -270,7 +270,7 @@ export default function AdminReviewsPage() {
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             statusFilter === "approved"
               ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/40"
-              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-emerald-300"
+              : "border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] hover:border-emerald-500/50"
           }`}
         >
           <div className="flex items-center justify-between">
@@ -294,8 +294,8 @@ export default function AdminReviewsPage() {
           onClick={() => setStatusFilter("rejected")}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             statusFilter === "rejected"
-              ? "border-rose-600 ring-2 ring-rose-600/20 bg-rose-100/50 dark:bg-rose-950/60"
-              : "border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] hover:border-rose-300"
+              ? "border-rose-600 ring-2 ring-rose-600/20 bg-rose-100/50 dark:bg-rose-950/40"
+              : "border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] hover:border-rose-500/50"
           }`}
         >
           <div className="flex items-center justify-between">
@@ -316,22 +316,22 @@ export default function AdminReviewsPage() {
       </div>
 
       {/* 3. Search, Filters & View Toggle Bar */}
-      <div className="space-y-4 bg-white dark:bg-[#180f14] p-4 sm:p-5 rounded-2xl border border-stone-200 dark:border-rose-900/40 shadow-xs">
+      <div className="space-y-4 bg-white dark:bg-[#161113] p-4 sm:p-5 rounded-3xl border border-stone-200 dark:border-stone-800/80 shadow-xs">
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-rose-300/50" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by customer name, product name, or review comment..."
-              className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 pl-10 pr-10 text-xs sm:text-sm text-stone-900 dark:text-rose-100 placeholder-stone-400 dark:placeholder-rose-300/40 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all"
+              className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 pl-10 pr-10 text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-stone-400 hover:text-stone-600 dark:hover:text-rose-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -343,7 +343,7 @@ export default function AdminReviewsPage() {
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
-              className="rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 px-3 py-2.5 text-xs text-stone-800 dark:text-rose-200 focus:border-rose-500 focus:outline-none"
+              className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] px-3 py-2.5 text-xs text-stone-800 dark:text-stone-200 focus:border-rose-500 focus:outline-none"
             >
               <option value="all">All Ratings (1-5 Stars)</option>
               <option value="5">5 Stars Only ★★★★★</option>
@@ -354,13 +354,13 @@ export default function AdminReviewsPage() {
             </select>
 
             {/* Layout View Mode Toggle */}
-            <div className="flex items-center rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 p-1">
+            <div className="flex items-center rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] p-1">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-1.5 rounded-xl transition-all ${
                   viewMode === "grid"
                     ? "bg-rose-600 text-white shadow-xs"
-                    : "text-stone-500 dark:text-rose-300/70 hover:text-stone-900"
+                    : "text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100"
                 }`}
                 title="Grid View"
               >
@@ -371,7 +371,7 @@ export default function AdminReviewsPage() {
                 className={`p-1.5 rounded-xl transition-all ${
                   viewMode === "table"
                     ? "bg-rose-600 text-white shadow-xs"
-                    : "text-stone-500 dark:text-rose-300/70 hover:text-stone-900"
+                    : "text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100"
                 }`}
                 title="Table View"
               >
@@ -382,7 +382,7 @@ export default function AdminReviewsPage() {
             {isFiltered && (
               <button
                 onClick={clearFilters}
-                className="p-2 rounded-2xl border border-stone-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 text-xs font-semibold shrink-0"
+                className="p-2 rounded-2xl border border-stone-200 dark:border-stone-800 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 text-xs font-semibold shrink-0"
                 title="Clear Filters"
               >
                 <X className="h-4 w-4" />
@@ -392,7 +392,7 @@ export default function AdminReviewsPage() {
         </div>
 
         {/* Status Filter Pill Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-stone-100 dark:border-rose-900/30">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-stone-100 dark:border-stone-800/60">
           {[
             { key: "all", label: "All Reviews", count: metrics.total },
             { key: "pending", label: "Pending", count: metrics.pending },
@@ -407,7 +407,7 @@ export default function AdminReviewsPage() {
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive
                     ? "bg-rose-600 text-white shadow-xs"
-                    : "bg-stone-100 dark:bg-rose-950/60 text-stone-600 dark:text-rose-300 hover:bg-stone-200 dark:hover:bg-rose-900/40"
+                    : "bg-stone-100 dark:bg-stone-800/80 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800"
                 }`}
               >
                 <span>{tab.label}</span>
@@ -415,7 +415,7 @@ export default function AdminReviewsPage() {
                   className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                     isActive
                       ? "bg-white/20 text-white"
-                      : "bg-stone-200 dark:bg-rose-900/60 text-stone-700 dark:text-rose-200"
+                      : "bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200"
                   }`}
                 >
                   {tab.count}
@@ -427,7 +427,7 @@ export default function AdminReviewsPage() {
       </div>
 
       {/* 4. Results Info Bar */}
-      <div className="flex items-center justify-between text-xs text-stone-500 dark:text-rose-300/70">
+      <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
         <span>
           Showing <strong>{filteredReviews.length}</strong> of {reviews.length} customer reviews
         </span>
@@ -437,13 +437,13 @@ export default function AdminReviewsPage() {
       {loading ? (
         <div className="py-20 text-center space-y-3">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto text-rose-500" />
-          <p className="text-xs text-stone-500 dark:text-rose-300/70">Loading customer reviews...</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Loading customer reviews...</p>
         </div>
       ) : filteredReviews.length === 0 ? (
-        <div className="p-12 text-center bg-white dark:bg-[#180f14] rounded-3xl border border-stone-200 dark:border-rose-900/40 space-y-2">
-          <MessageSquare className="h-10 w-10 text-stone-300 dark:text-rose-950 mx-auto" />
-          <p className="text-sm font-bold text-stone-900 dark:text-rose-100">No customer reviews found</p>
-          <p className="text-xs text-stone-500 dark:text-rose-300/60">Try adjusting your search query or status filter.</p>
+        <div className="p-12 text-center bg-white dark:bg-[#161113] rounded-3xl border border-stone-200 dark:border-stone-800/80 space-y-2">
+          <MessageSquare className="h-10 w-10 text-stone-300 dark:text-stone-700 mx-auto" />
+          <p className="text-sm font-bold text-stone-900 dark:text-stone-100">No customer reviews found</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Try adjusting your search query or status filter.</p>
         </div>
       ) : viewMode === "grid" ? (
         /* GRID VIEW */
@@ -456,7 +456,7 @@ export default function AdminReviewsPage() {
             return (
               <div
                 key={rev._id}
-                className="p-5 rounded-3xl bg-white dark:bg-[#180f14] border border-stone-200 dark:border-rose-900/40 shadow-xs hover:shadow-md space-y-4 flex flex-col justify-between transition-all relative overflow-hidden group"
+                className="p-5 rounded-3xl bg-white dark:bg-[#161113] border border-stone-200 dark:border-stone-800/80 shadow-xs hover:shadow-md space-y-4 flex flex-col justify-between transition-all relative overflow-hidden group"
               >
                 <div className="space-y-3">
                   {/* Top Row: User Avatar, Name & Status Badge */}
@@ -466,10 +466,10 @@ export default function AdminReviewsPage() {
                         {getInitial(rev.userName)}
                       </div>
                       <div>
-                        <h4 className="font-bold text-sm text-stone-900 dark:text-rose-100">
+                        <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
                           {rev.userName || "Customer"}
                         </h4>
-                        <p className="text-[11px] text-stone-400 dark:text-rose-300/60">
+                        <p className="text-[11px] text-stone-400 dark:text-stone-400">
                           {rev.createdAt
                             ? new Date(rev.createdAt).toLocaleDateString("en-US", {
                                 month: "short",
@@ -503,7 +503,7 @@ export default function AdminReviewsPage() {
                           className={`h-4 w-4 ${
                             i < (rev.rating || 5)
                               ? "fill-amber-400 text-amber-400"
-                              : "text-stone-200 dark:text-rose-950"
+                              : "text-stone-200 dark:text-stone-800"
                           }`}
                         />
                       ))}
@@ -515,24 +515,24 @@ export default function AdminReviewsPage() {
 
                   {/* Attached Product Card (If any) */}
                   {rev.productName && (
-                    <div className="p-2.5 rounded-2xl bg-stone-50 dark:bg-rose-950/40 border border-stone-100 dark:border-rose-900/30 flex items-center gap-2.5 text-xs">
+                    <div className="p-2.5 rounded-2xl bg-stone-50 dark:bg-[#0d0709] border border-stone-100 dark:border-stone-800/60 flex items-center gap-2.5 text-xs">
                       <ShoppingBag className="h-4 w-4 text-rose-500 shrink-0" />
-                      <span className="font-semibold text-stone-800 dark:text-rose-100 truncate">
+                      <span className="font-semibold text-stone-800 dark:text-stone-100 truncate">
                         {rev.productName}
                       </span>
                     </div>
                   )}
 
                   {/* Review Comment Quote */}
-                  <div className="p-3.5 rounded-2xl bg-stone-50/70 dark:bg-rose-950/20 border border-stone-100 dark:border-rose-900/30">
-                    <p className="text-xs text-stone-700 dark:text-rose-200/90 leading-relaxed italic">
+                  <div className="p-3.5 rounded-2xl bg-stone-50/70 dark:bg-[#0d0709]/60 border border-stone-100 dark:border-stone-800/60">
+                    <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed italic">
                       “{rev.comment}”
                     </p>
                   </div>
                 </div>
 
                 {/* Balanced Actions Row */}
-                <div className="pt-3 border-t border-stone-100 dark:border-rose-900/30 flex items-center justify-between gap-2">
+                <div className="pt-3 border-t border-stone-100 dark:border-stone-800/60 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     {!isApproved && (
                       <button
@@ -548,7 +548,7 @@ export default function AdminReviewsPage() {
                       <button
                         onClick={() => handleStatusChange(rev._id, "rejected")}
                         disabled={updatingId === rev._id}
-                        className="px-3 py-1.5 rounded-xl border border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950 text-stone-700 dark:text-rose-200 hover:bg-stone-100 dark:hover:bg-rose-900/50 font-semibold text-xs transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                        className="px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-800/50 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 font-semibold text-xs transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
                       >
                         <X className="h-3.5 w-3.5 text-stone-400" /> Reject
                       </button>
@@ -558,7 +558,7 @@ export default function AdminReviewsPage() {
                   <button
                     onClick={() => handleDelete(rev._id)}
                     disabled={updatingId === rev._id}
-                    className="p-1.5 rounded-xl border border-stone-200 dark:border-rose-900/50 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/80 transition-all cursor-pointer"
+                    className="p-1.5 rounded-xl border border-stone-200 dark:border-stone-800 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer"
                     title="Delete Review"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -570,11 +570,11 @@ export default function AdminReviewsPage() {
         </div>
       ) : (
         /* TABLE VIEW */
-        <div className="overflow-hidden rounded-2xl border border-stone-200 dark:border-rose-900/40 bg-white dark:bg-[#180f14] shadow-xs">
+        <div className="overflow-hidden rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113] shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-stone-50 dark:bg-rose-950/40 border-b border-stone-200 dark:border-rose-900/40">
-                <tr className="text-stone-600 dark:text-rose-200 font-bold uppercase tracking-wider text-[11px]">
+              <thead className="bg-stone-50 dark:bg-[#0d0709] border-b border-stone-200 dark:border-stone-800">
+                <tr className="text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider text-[11px]">
                   <th className="py-3.5 px-4">Customer</th>
                   <th className="py-3.5 px-4">Product</th>
                   <th className="py-3.5 px-4 text-center">Rating</th>
@@ -583,28 +583,28 @@ export default function AdminReviewsPage() {
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100 dark:divide-rose-900/30">
+              <tbody className="divide-y divide-stone-100 dark:divide-stone-800/60">
                 {filteredReviews.map((rev) => {
                   const isApproved = rev.status === "approved";
                   const isRejected = rev.status === "rejected";
 
                   return (
-                    <tr key={rev._id} className="hover:bg-rose-500/5 dark:hover:bg-rose-900/20 transition-colors">
+                    <tr key={rev._id} className="hover:bg-stone-50/80 dark:hover:bg-white/5 transition-colors">
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
                           <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-rose-500 to-pink-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
                             {getInitial(rev.userName)}
                           </div>
                           <div>
-                            <p className="font-bold text-stone-900 dark:text-rose-100">{rev.userName}</p>
-                            <p className="text-[10px] text-stone-400 dark:text-rose-300/60">
+                            <p className="font-bold text-stone-900 dark:text-stone-100">{rev.userName}</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-400">
                               {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : "Recent"}
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-stone-800 dark:text-rose-200 font-medium">
+                      <td className="py-3.5 px-4 text-stone-800 dark:text-stone-200 font-medium">
                         {rev.productName || "General Store Review"}
                       </td>
 
@@ -615,7 +615,7 @@ export default function AdminReviewsPage() {
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-stone-700 dark:text-rose-200/90 max-w-xs truncate">
+                      <td className="py-3.5 px-4 text-stone-700 dark:text-stone-300 max-w-xs truncate">
                         “{rev.comment}”
                       </td>
 
@@ -623,10 +623,10 @@ export default function AdminReviewsPage() {
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider capitalize ${
                             isApproved
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
                               : isRejected
-                              ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
-                              : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                              ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800"
+                              : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800"
                           }`}
                         >
                           {rev.status}
@@ -647,7 +647,7 @@ export default function AdminReviewsPage() {
                           {!isRejected && (
                             <button
                               onClick={() => handleStatusChange(rev._id, "rejected")}
-                              className="p-1.5 rounded-lg border border-stone-200 dark:border-rose-900/50 text-stone-600 dark:text-rose-200 hover:bg-stone-100"
+                              className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition"
                               title="Reject Review"
                             >
                               <X className="h-3.5 w-3.5" />
@@ -655,7 +655,7 @@ export default function AdminReviewsPage() {
                           )}
                           <button
                             onClick={() => handleDelete(rev._id)}
-                            className="p-1.5 rounded-lg border border-stone-200 dark:border-rose-900/50 text-stone-400 hover:text-rose-600"
+                            className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-800 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
                             title="Delete Review"
                           >
                             <Trash2 className="h-3.5 w-3.5" />

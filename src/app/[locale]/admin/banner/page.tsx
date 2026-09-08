@@ -206,7 +206,7 @@ export default function AdminBannerPage() {
   };
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full space-y-8 pb-12">
       {/* 1. Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113]">
         <div>
@@ -268,7 +268,7 @@ export default function AdminBannerPage() {
                 <div className="lg:col-span-7 space-y-4">
                   {/* Title */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                    <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                       Banner Title <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -276,7 +276,7 @@ export default function AdminBannerPage() {
                       placeholder="e.g. Clean K-Beauty Glow Naturally"
                       value={heroTitle}
                       onChange={(e) => setHeroTitle(e.target.value)}
-                      className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                      className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
                       required
                     />
                   </div>
@@ -291,7 +291,7 @@ export default function AdminBannerPage() {
 
                   {/* Description */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                    <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                       Description / Subtitle
                     </label>
                     <textarea
@@ -299,7 +299,7 @@ export default function AdminBannerPage() {
                       placeholder="Authentic Korean skincare crafted to hydrate, nourish, and protect your skin."
                       value={heroDesc}
                       onChange={(e) => setHeroDesc(e.target.value)}
-                      className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 resize-none"
+                      className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 resize-none"
                     />
                   </div>
 
@@ -307,7 +307,7 @@ export default function AdminBannerPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Primary Button */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                      <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                         Primary CTA Button
                       </label>
                       <div className="flex gap-2">
@@ -316,21 +316,21 @@ export default function AdminBannerPage() {
                           placeholder="Label (Shop Now)"
                           value={primaryBtnText}
                           onChange={(e) => setPrimaryBtnText(e.target.value)}
-                          className="w-1/2 rounded-xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2 px-3 text-xs text-stone-900 dark:text-rose-100"
+                          className="w-1/2 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2 px-3 text-xs text-stone-900 dark:text-stone-100"
                         />
                         <input
                           type="text"
                           placeholder="Link (/products)"
                           value={primaryBtnLink}
                           onChange={(e) => setPrimaryBtnLink(e.target.value)}
-                          className="w-1/2 rounded-xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2 px-3 text-xs text-stone-900 dark:text-rose-100 font-mono"
+                          className="w-1/2 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2 px-3 text-xs text-stone-900 dark:text-stone-100 font-mono"
                         />
                       </div>
                     </div>
 
                     {/* Secondary Button */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                      <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                         Secondary CTA Button
                       </label>
                       <div className="flex gap-2">
@@ -339,14 +339,14 @@ export default function AdminBannerPage() {
                           placeholder="Label (Explore)"
                           value={secondaryBtnText}
                           onChange={(e) => setSecondaryBtnText(e.target.value)}
-                          className="w-1/2 rounded-xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2 px-3 text-xs text-stone-900 dark:text-rose-100"
+                          className="w-1/2 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2 px-3 text-xs text-stone-900 dark:text-stone-100"
                         />
                         <input
                           type="text"
                           placeholder="Link (/combo)"
                           value={secondaryBtnLink}
                           onChange={(e) => setSecondaryBtnLink(e.target.value)}
-                          className="w-1/2 rounded-xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2 px-3 text-xs text-stone-900 dark:text-rose-100 font-mono"
+                          className="w-1/2 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2 px-3 text-xs text-stone-900 dark:text-stone-100 font-mono"
                         />
                       </div>
                     </div>
@@ -355,11 +355,11 @@ export default function AdminBannerPage() {
 
                 {/* Live Preview Box (5 Cols) */}
                 <div className="lg:col-span-5 space-y-2">
-                  <span className="text-xs font-semibold text-stone-500 dark:text-rose-300/70 flex items-center gap-1">
+                  <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 flex items-center gap-1">
                     <Eye className="h-3.5 w-3.5 text-rose-500" /> Live Banner Preview
                   </span>
 
-                  <div className="relative rounded-2xl overflow-hidden border border-stone-200 dark:border-rose-900/50 bg-stone-900 text-white h-56 flex flex-col justify-end p-5 shadow-inner group">
+                  <div className="relative rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-900 text-white h-56 flex flex-col justify-end p-5 shadow-inner group">
                     {heroImage ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
@@ -400,7 +400,7 @@ export default function AdminBannerPage() {
               </div>
 
               {/* Submit Button */}
-              <div className="pt-2 border-t border-stone-100 dark:border-rose-900/30 flex justify-end">
+              <div className="pt-2 border-t border-stone-100 dark:border-stone-800/60 flex justify-end">
                 <button
                   type="submit"
                   disabled={isSubmittingHero}
@@ -413,23 +413,23 @@ export default function AdminBannerPage() {
           </div>
 
           {/* Hero Banners Active Grid */}
-          <div className="bg-white dark:bg-[#180f14] p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 shadow-xs space-y-5">
-            <div className="flex items-center justify-between border-b border-stone-100 dark:border-rose-900/30 pb-3">
-              <h2 className="font-bold text-base text-stone-900 dark:text-rose-100">
+          <div className="bg-white dark:bg-[#161113] p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 shadow-xs space-y-5">
+            <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800/60 pb-3">
+              <h2 className="font-bold text-base text-stone-900 dark:text-stone-100">
                 Active Hero Slides ({heroBanners.length})
               </h2>
-              <span className="text-xs text-stone-400 dark:text-rose-300/60">
+              <span className="text-xs text-stone-400 dark:text-stone-400">
                 Managed Carousel Slides
               </span>
             </div>
 
             {loadingHero ? (
-              <div className="py-12 text-center text-stone-500 dark:text-rose-300/70 text-xs">
+              <div className="py-12 text-center text-stone-500 dark:text-stone-400 text-xs">
                 <RefreshCw className="h-5 w-5 animate-spin mx-auto text-rose-500 mb-2" />
                 Loading hero banners...
               </div>
             ) : heroBanners.length === 0 ? (
-              <div className="text-center py-10 text-xs text-stone-500 dark:text-rose-300/60 bg-stone-50 dark:bg-rose-950/40 rounded-2xl border border-stone-200 dark:border-rose-900/40 p-6">
+              <div className="text-center py-10 text-xs text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-[#0d0709] rounded-2xl border border-stone-200 dark:border-stone-800 p-6">
                 No custom hero banners configured yet. Default hero slides are currently displaying on homepage.
               </div>
             ) : (
@@ -437,11 +437,11 @@ export default function AdminBannerPage() {
                 {heroBanners.map((slide) => (
                   <div
                     key={slide._id}
-                    className="p-4 rounded-2xl border border-stone-200 dark:border-rose-900/40 bg-stone-50/70 dark:bg-rose-950/20 flex flex-col justify-between gap-4 transition-all hover:border-rose-300"
+                    className="p-4 rounded-2xl border border-stone-200 dark:border-stone-800/80 bg-stone-50/70 dark:bg-[#0d0709]/60 flex flex-col justify-between gap-4 transition-all hover:border-rose-500/50"
                   >
                     <div className="flex gap-4 items-start">
                       {/* Image Thumbnail */}
-                      <div className="relative w-36 h-24 rounded-xl overflow-hidden bg-stone-900 shrink-0 border border-stone-200 dark:border-rose-900/40">
+                      <div className="relative w-36 h-24 rounded-xl overflow-hidden bg-stone-900 shrink-0 border border-stone-200 dark:border-stone-800">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={slide.image}
@@ -451,27 +451,27 @@ export default function AdminBannerPage() {
                       </div>
 
                       <div className="min-w-0 flex-1 space-y-1">
-                        <h3 className="font-bold text-sm text-stone-900 dark:text-rose-100 truncate">
+                        <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100 truncate">
                           {slide.title}
                         </h3>
-                        <p className="text-xs text-stone-500 dark:text-rose-300/70 line-clamp-2">
+                        <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2">
                           {slide.description || "No description provided"}
                         </p>
 
                         <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[11px]">
-                          <span className="bg-stone-200 dark:bg-rose-950 px-2 py-0.5 rounded-md font-mono font-semibold text-stone-700 dark:text-rose-200 border border-stone-300 dark:border-rose-900/40">
+                          <span className="bg-stone-200 dark:bg-stone-800 px-2 py-0.5 rounded-md font-mono font-semibold text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700">
                             {slide.primaryBtnText} → {slide.primaryBtnLink}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-stone-200 dark:border-rose-900/30">
+                    <div className="flex items-center justify-between pt-3 border-t border-stone-200 dark:border-stone-800/60">
                       <span
                         className={`text-xs font-bold px-2.5 py-0.5 rounded-full capitalize ${
                           slide.status === "active"
                             ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
-                            : "bg-stone-200 text-stone-600 dark:bg-rose-950 dark:text-rose-300 border border-stone-300 dark:border-rose-900/40"
+                            : "bg-stone-200 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border border-stone-300 dark:border-stone-700"
                         }`}
                       >
                         {slide.status === "active" ? "Active" : "Inactive"}
@@ -480,7 +480,7 @@ export default function AdminBannerPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleToggleHeroBanner(slide._id, slide.status)}
-                          className="p-1.5 rounded-xl border border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950 text-stone-700 dark:text-rose-200 hover:bg-stone-100 transition cursor-pointer"
+                          className="p-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-800/50 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition cursor-pointer"
                           title="Toggle Active Status"
                         >
                           {slide.status === "active" ? (
@@ -492,7 +492,7 @@ export default function AdminBannerPage() {
 
                         <button
                           onClick={() => handleDeleteHeroBanner(slide._id)}
-                          className="p-1.5 rounded-xl border border-stone-200 dark:border-rose-900/50 text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-950 transition cursor-pointer"
+                          className="p-1.5 rounded-xl border border-stone-200 dark:border-stone-800 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
                           title="Delete Slide"
                         >
                           <Trash2 size={16} />
@@ -512,14 +512,14 @@ export default function AdminBannerPage() {
         <div className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Form (6 Cols) */}
-            <div className="lg:col-span-6 bg-white dark:bg-[#180f14] p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 shadow-xs space-y-4">
-              <h2 className="font-bold text-base text-stone-900 dark:text-rose-100 border-b border-stone-100 dark:border-rose-900/30 pb-3 flex items-center gap-2">
+            <div className="lg:col-span-6 bg-white dark:bg-[#161113] p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 shadow-xs space-y-4">
+              <h2 className="font-bold text-base text-stone-900 dark:text-stone-100 border-b border-stone-100 dark:border-stone-800/60 pb-3 flex items-center gap-2">
                 <Tag className="text-rose-500" size={18} /> Add New Promo Banner
               </h2>
 
               <form onSubmit={handleAddPromo} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                  <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                     Offer Title
                   </label>
                   <input
@@ -527,7 +527,7 @@ export default function AdminBannerPage() {
                     placeholder="e.g. Special Weekend Skincare Offer - 20% OFF"
                     value={promoTitle}
                     onChange={(e) => setPromoTitle(e.target.value)}
-                    className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                    className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                   />
                 </div>
 
@@ -539,7 +539,7 @@ export default function AdminBannerPage() {
                 />
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                  <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                     Target Destination Link
                   </label>
                   <input
@@ -547,7 +547,7 @@ export default function AdminBannerPage() {
                     placeholder="/products"
                     value={promoLink}
                     onChange={(e) => setPromoLink(e.target.value)}
-                    className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 font-mono focus:border-rose-500 focus:outline-none"
+                    className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 font-mono focus:border-rose-500 focus:outline-none"
                   />
                 </div>
 
@@ -563,11 +563,11 @@ export default function AdminBannerPage() {
 
             {/* Live Preview (6 Cols) */}
             <div className="lg:col-span-6 space-y-2">
-              <span className="text-xs font-semibold text-stone-500 dark:text-rose-300/70 flex items-center gap-1">
+              <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 flex items-center gap-1">
                 <Eye className="h-3.5 w-3.5 text-rose-500" /> Promo Banner Preview
               </span>
 
-              <div className="relative rounded-2xl overflow-hidden border border-stone-200 dark:border-rose-900/50 bg-stone-900 text-white h-60 flex flex-col justify-end p-5 shadow-inner">
+              <div className="relative rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-900 text-white h-60 flex flex-col justify-end p-5 shadow-inner">
                 {promoImage ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -597,15 +597,15 @@ export default function AdminBannerPage() {
           </div>
 
           {/* Existing Promo Banners Table */}
-          <div className="bg-white dark:bg-[#180f14] p-6 rounded-3xl border border-stone-200 dark:border-rose-900/40 shadow-xs space-y-4">
-            <h2 className="font-bold text-base text-stone-900 dark:text-rose-100 border-b border-stone-100 dark:border-rose-900/30 pb-3">
+          <div className="bg-white dark:bg-[#161113] p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 shadow-xs space-y-4">
+            <h2 className="font-bold text-base text-stone-900 dark:text-stone-100 border-b border-stone-100 dark:border-stone-800/60 pb-3">
               Existing Promo Banners ({promoBanners.length})
             </h2>
 
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-left border-b border-stone-200 dark:border-rose-900/40 text-stone-600 dark:text-rose-200 font-bold uppercase">
+                  <tr className="text-left border-b border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 font-bold uppercase">
                     <th className="py-3 px-4">Image</th>
                     <th className="py-3 px-4">Offer Title</th>
                     <th className="py-3 px-4 text-center">Status</th>
@@ -613,10 +613,10 @@ export default function AdminBannerPage() {
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-stone-100 dark:divide-rose-900/30">
+                <tbody className="divide-y divide-stone-100 dark:divide-stone-800/60">
                   {promoBanners.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-8 text-stone-400 dark:text-rose-300/60">
+                      <td colSpan={4} className="text-center py-8 text-stone-400 dark:text-stone-500">
                         No promo banners configured yet.
                       </td>
                     </tr>
@@ -624,18 +624,18 @@ export default function AdminBannerPage() {
                     promoBanners.map((banner) => (
                       <tr
                         key={banner._id}
-                        className="hover:bg-rose-500/5 dark:hover:bg-rose-900/20 transition-colors"
+                        className="hover:bg-stone-50/80 dark:hover:bg-white/5 transition-colors"
                       >
                         <td className="py-3 px-4">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={banner.image}
                             alt="banner"
-                            className="h-12 w-24 object-cover rounded-xl border border-stone-200 dark:border-rose-900/40"
+                            className="h-12 w-24 object-cover rounded-xl border border-stone-200 dark:border-stone-800"
                           />
                         </td>
 
-                        <td className="py-3 px-4 font-bold text-stone-900 dark:text-rose-100">
+                        <td className="py-3 px-4 font-bold text-stone-900 dark:text-stone-100">
                           {banner.title || "Promotional Deal"}
                         </td>
 
@@ -643,8 +643,8 @@ export default function AdminBannerPage() {
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold capitalize ${
                               banner.isActive
-                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300"
-                                : "bg-stone-200 text-stone-600 dark:bg-rose-950 dark:text-rose-300 border border-stone-300"
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
+                                : "bg-stone-200 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border border-stone-300 dark:border-stone-700"
                             }`}
                           >
                             {banner.isActive ? "Active (ON)" : "Inactive (OFF)"}
@@ -655,7 +655,7 @@ export default function AdminBannerPage() {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => togglePromoBanner(banner._id, banner.isActive)}
-                              className="p-1.5 rounded-xl border border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950 text-stone-700 dark:text-rose-200 hover:bg-stone-100 transition cursor-pointer"
+                              className="p-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-800/50 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition cursor-pointer"
                               title="Toggle Active Status"
                             >
                               {banner.isActive ? (
@@ -667,7 +667,7 @@ export default function AdminBannerPage() {
 
                             <button
                               onClick={() => deletePromoBanner(banner._id)}
-                              className="p-1.5 rounded-xl border border-stone-200 dark:border-rose-900/50 text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-950 transition cursor-pointer"
+                              className="p-1.5 rounded-xl border border-stone-200 dark:border-stone-800 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
                               title="Delete Banner"
                             >
                               <Trash2 size={16} />

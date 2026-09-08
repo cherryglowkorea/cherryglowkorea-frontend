@@ -235,9 +235,17 @@ export default function CreateProductPage() {
           sku: v.sku || form.sku,
         }));
 
+      const cleanSlug = form.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
       const payload = {
         name: form.name,
         nameBn: form.nameBn,
+        slug: cleanSlug,
         brand: form.brand || "Cherry Glow",
         category: form.category,
         sku: form.sku || `CG-${Date.now().toString().slice(-6)}`,
@@ -255,6 +263,7 @@ export default function CreateProductPage() {
         thumbnail,
         image: thumbnail,
         images: validImages.map((url) => ({ url })),
+        gallery: validImages,
 
         price: Number(form.price) || (form.type === "combo" ? calculatedRegularPrice : 0),
         salePrice: Number(form.salePrice) || (form.type === "combo" ? calculatedSalePrice : 0),
@@ -275,6 +284,7 @@ export default function CreateProductPage() {
 
         isFeatured: form.isFeatured,
         isBestSelling: form.isBestSelling,
+        isBestSeller: form.isBestSelling,
         isNewArrival: form.isNewArrival,
         allowPreOrder: form.allowPreOrder,
         status: form.status,

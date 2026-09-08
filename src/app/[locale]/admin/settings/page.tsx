@@ -185,7 +185,7 @@ export default function AdminSettingsPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <RefreshCw className="h-8 w-8 animate-spin text-rose-500" />
-          <p className="text-sm font-medium text-stone-600 dark:text-rose-200">
+          <p className="text-sm font-medium text-stone-600 dark:text-stone-300">
             Loading Store Settings...
           </p>
         </div>
@@ -194,7 +194,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full space-y-8 pb-12">
       {/* 1. Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-stone-200 dark:border-stone-800/80 bg-white dark:bg-[#161113]">
         <div>
@@ -259,7 +259,7 @@ export default function AdminSettingsPage() {
               <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Store className="h-4.5 w-4.5 text-rose-500" /> Store Branding & Contact
               </h2>
-              <p className="text-xs text-stone-500 dark:text-rose-300/70 mt-0.5">
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                 Main business information displayed on invoices, footer, and emails.
               </p>
             </div>
@@ -364,11 +364,11 @@ export default function AdminSettingsPage() {
         {/* TAB 2: SHIPPING & LOGISTICS */}
         {activeTab === "shipping" && (
           <div className="space-y-6">
-            <div className="border-b border-stone-100 dark:border-rose-900/30 pb-3">
-              <h2 className="text-base font-bold text-stone-900 dark:text-rose-100 flex items-center gap-2">
+            <div className="border-b border-stone-100 dark:border-stone-800/60 pb-3">
+              <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Truck className="h-4.5 w-4.5 text-amber-500" /> Logistics & Shipping Rates
               </h2>
-              <p className="text-xs text-stone-500 dark:text-rose-300/70 mt-0.5">
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                 Set shipping fees, free shipping order thresholds, and estimated delivery times.
               </p>
             </div>
@@ -376,7 +376,7 @@ export default function AdminSettingsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {/* Inside Dhaka */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Inside Dhaka Shipping (৳) <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -404,14 +404,14 @@ export default function AdminSettingsPage() {
                       handleChange("shipping.insideDhaka", 0);
                     }
                   }}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 font-mono font-bold focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 font-mono font-bold focus:border-rose-500 focus:outline-none"
                   required
                 />
               </div>
 
               {/* Outside Dhaka */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Outside Dhaka Shipping (৳) <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -439,14 +439,14 @@ export default function AdminSettingsPage() {
                       handleChange("shipping.outsideDhaka", 0);
                     }
                   }}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 font-mono font-bold focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 font-mono font-bold focus:border-rose-500 focus:outline-none"
                   required
                 />
               </div>
 
               {/* Free Shipping Threshold */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Free Shipping Order Minimum (৳)
                 </label>
                 <input
@@ -474,13 +474,13 @@ export default function AdminSettingsPage() {
                       handleChange("shipping.freeShippingThreshold", 0);
                     }
                   }}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-rose-100 font-mono font-bold focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs sm:text-sm text-stone-900 dark:text-stone-100 font-mono font-bold focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
               {/* Delivery Days Estimate Inside */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Estimated Delivery Days (Inside Dhaka)
                 </label>
                 <input
@@ -488,13 +488,13 @@ export default function AdminSettingsPage() {
                   placeholder="1-2 Days"
                   value={formData.shipping?.estimatedDhakaDays || "1-2 Days"}
                   onChange={(e) => handleChange("shipping.estimatedDhakaDays", e.target.value)}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
               {/* Delivery Days Estimate Outside */}
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Estimated Delivery Days (Outside Dhaka)
                 </label>
                 <input
@@ -502,7 +502,7 @@ export default function AdminSettingsPage() {
                   placeholder="3-5 Days"
                   value={formData.shipping?.estimatedOutsideDays || "3-5 Days"}
                   onChange={(e) => handleChange("shipping.estimatedOutsideDays", e.target.value)}
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -512,23 +512,23 @@ export default function AdminSettingsPage() {
         {/* TAB 3: PAYMENTS */}
         {activeTab === "payments" && (
           <div className="space-y-6">
-            <div className="border-b border-stone-100 dark:border-rose-900/30 pb-3">
-              <h2 className="text-base font-bold text-stone-900 dark:text-rose-100 flex items-center gap-2">
+            <div className="border-b border-stone-100 dark:border-stone-800/60 pb-3">
+              <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <CreditCard className="h-4.5 w-4.5 text-rose-500" /> Payment Methods & Toggles
               </h2>
-              <p className="text-xs text-stone-500 dark:text-rose-300/70 mt-0.5">
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                 Enable or disable specific payment options shown during checkout.
               </p>
             </div>
 
             <div className="space-y-4">
               {/* COD Toggle Card */}
-              <label className="flex items-center justify-between p-4 rounded-2xl border border-stone-200 dark:border-rose-900/40 bg-stone-50/70 dark:bg-rose-950/20 cursor-pointer hover:border-rose-400 transition-all">
+              <label className="flex items-center justify-between p-4 rounded-2xl border border-stone-200 dark:border-stone-800/80 bg-stone-50/70 dark:bg-[#0d0709]/60 cursor-pointer hover:border-rose-500/50 transition-all">
                 <div>
-                  <p className="text-sm font-bold text-stone-900 dark:text-rose-100">
+                  <p className="text-sm font-bold text-stone-900 dark:text-stone-100">
                     Cash On Delivery (COD)
                   </p>
-                  <p className="text-xs text-stone-500 dark:text-rose-300/70">
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
                     Allow customers to pay in cash upon delivery at their door.
                   </p>
                 </div>
@@ -541,12 +541,12 @@ export default function AdminSettingsPage() {
               </label>
 
               {/* Online Payment Toggle Card */}
-              <label className="flex items-center justify-between p-4 rounded-2xl border border-stone-200 dark:border-rose-900/40 bg-stone-50/70 dark:bg-rose-950/20 cursor-pointer hover:border-rose-400 transition-all">
+              <label className="flex items-center justify-between p-4 rounded-2xl border border-stone-200 dark:border-stone-800/80 bg-stone-50/70 dark:bg-[#0d0709]/60 cursor-pointer hover:border-rose-500/50 transition-all">
                 <div>
-                  <p className="text-sm font-bold text-stone-900 dark:text-rose-100">
+                  <p className="text-sm font-bold text-stone-900 dark:text-stone-100">
                     Online Digital Payment (bKash / Nagad / Cards / SSLCommerz)
                   </p>
-                  <p className="text-xs text-stone-500 dark:text-rose-300/70">
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
                     Enable digital card, mobile banking, and gateway payments.
                   </p>
                 </div>
@@ -561,7 +561,7 @@ export default function AdminSettingsPage() {
               {/* bKash Merchant Number */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                  <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                     bKash / Nagad Merchant Number
                   </label>
                   <input
@@ -569,12 +569,12 @@ export default function AdminSettingsPage() {
                     value={formData.payments?.bkashNumber || ""}
                     onChange={(e) => handleChange("payments.bkashNumber", e.target.value)}
                     placeholder="+8801700000000"
-                    className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 font-mono focus:border-rose-500 focus:outline-none"
+                    className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 font-mono focus:border-rose-500 focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                  <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                     Payment Note / Instructions
                   </label>
                   <input
@@ -582,7 +582,7 @@ export default function AdminSettingsPage() {
                     value={formData.payments?.paymentInstructions || ""}
                     onChange={(e) => handleChange("payments.paymentInstructions", e.target.value)}
                     placeholder="Pay via bKash Merchant or Cash on Delivery"
-                    className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                    className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -593,11 +593,11 @@ export default function AdminSettingsPage() {
         {/* TAB 4: SOCIAL LINKS */}
         {activeTab === "social" && (
           <div className="space-y-6">
-            <div className="border-b border-stone-100 dark:border-rose-900/30 pb-3">
-              <h2 className="text-base font-bold text-stone-900 dark:text-rose-100 flex items-center gap-2">
+            <div className="border-b border-stone-100 dark:border-stone-800/60 pb-3">
+              <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Share2 className="h-4.5 w-4.5 text-rose-500" /> Social & Communication Links
               </h2>
-              <p className="text-xs text-stone-500 dark:text-rose-300/70 mt-0.5">
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                 Links displayed in the site footer, contact page, and floating chat button.
               </p>
             </div>
@@ -605,7 +605,7 @@ export default function AdminSettingsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Facebook */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Facebook Page URL
                 </label>
                 <input
@@ -613,13 +613,13 @@ export default function AdminSettingsPage() {
                   value={formData.social?.facebook || ""}
                   onChange={(e) => handleChange("social.facebook", e.target.value)}
                   placeholder="https://facebook.com/cherryglow"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
               {/* Instagram */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Instagram Profile URL
                 </label>
                 <input
@@ -627,13 +627,13 @@ export default function AdminSettingsPage() {
                   value={formData.social?.instagram || ""}
                   onChange={(e) => handleChange("social.instagram", e.target.value)}
                   placeholder="https://instagram.com/cherryglow"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
               {/* WhatsApp */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   WhatsApp Support Number
                 </label>
                 <input
@@ -641,13 +641,13 @@ export default function AdminSettingsPage() {
                   value={formData.social?.whatsapp || ""}
                   onChange={(e) => handleChange("social.whatsapp", e.target.value)}
                   placeholder="+8801700000000"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 font-mono focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 font-mono focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
               {/* TikTok */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   TikTok Channel URL
                 </label>
                 <input
@@ -655,7 +655,7 @@ export default function AdminSettingsPage() {
                   value={formData.social?.tiktok || ""}
                   onChange={(e) => handleChange("social.tiktok", e.target.value)}
                   placeholder="https://tiktok.com/@cherryglow"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -665,11 +665,11 @@ export default function AdminSettingsPage() {
         {/* TAB 5: SEO & META */}
         {activeTab === "seo" && (
           <div className="space-y-6">
-            <div className="border-b border-stone-100 dark:border-rose-900/30 pb-3">
-              <h2 className="text-base font-bold text-stone-900 dark:text-rose-100 flex items-center gap-2">
+            <div className="border-b border-stone-100 dark:border-stone-800/60 pb-3">
+              <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Globe className="h-4.5 w-4.5 text-blue-500" /> SEO & Search Engine Metadata
               </h2>
-              <p className="text-xs text-stone-500 dark:text-rose-300/70 mt-0.5">
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                 Search engine optimization tags for Google search results and Meta Pixel tracking.
               </p>
             </div>
@@ -677,7 +677,7 @@ export default function AdminSettingsPage() {
             <div className="space-y-4">
               {/* Meta Title */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Global Meta Title
                 </label>
                 <input
@@ -685,13 +685,13 @@ export default function AdminSettingsPage() {
                   value={formData.seo?.metaTitle || ""}
                   onChange={(e) => handleChange("seo.metaTitle", e.target.value)}
                   placeholder="Cherry Glow - Authentic Korean Beauty & Skincare in Bangladesh"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
               {/* Meta Description */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Global Meta Description
                 </label>
                 <textarea
@@ -699,13 +699,13 @@ export default function AdminSettingsPage() {
                   value={formData.seo?.metaDescription || ""}
                   onChange={(e) => handleChange("seo.metaDescription", e.target.value)}
                   placeholder="Shop authentic Korean skincare, serums, moisturizers & sunscreens in Bangladesh with fast nationwide delivery."
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none resize-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none resize-none"
                 />
               </div>
 
               {/* Keywords */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-stone-700 dark:text-rose-200">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
                   Meta Keywords (Comma separated)
                 </label>
                 <input
@@ -713,14 +713,14 @@ export default function AdminSettingsPage() {
                   value={formData.seo?.keywords || ""}
                   onChange={(e) => handleChange("seo.keywords", e.target.value)}
                   placeholder="K-Beauty, Korean Skincare Bangladesh, Cherry Glow, Sunscreen"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-stone-50 dark:bg-rose-950/40 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
               {/* Meta Pixel ID */}
               <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-100 dark:border-blue-900/40 space-y-3 mt-4">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-stone-900 dark:text-rose-100 flex items-center gap-1.5">
+                  <label className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
                     <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     Meta Pixel (Facebook Pixel ID)
                   </label>
@@ -728,7 +728,7 @@ export default function AdminSettingsPage() {
                     <CheckCircle2 className="h-3 w-3" /> Tracking Active
                   </span>
                 </div>
-                <p className="text-[11px] text-stone-500 dark:text-rose-300/70">
+                <p className="text-[11px] text-stone-500 dark:text-stone-400">
                   Enter your Meta/Facebook Pixel ID to track PageViews, AddToCart, Checkout, and Purchase events in Meta Events Manager.
                 </p>
                 <input
@@ -736,7 +736,7 @@ export default function AdminSettingsPage() {
                   value={formData.seo?.pixelId !== undefined ? formData.seo.pixelId : "2122589755279030"}
                   onChange={(e) => handleChange("seo.pixelId", e.target.value)}
                   placeholder="2122589755279030"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-rose-900/50 bg-white dark:bg-rose-950/60 py-2.5 px-3.5 text-xs text-stone-900 dark:text-rose-100 font-mono focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#0d0709] py-2.5 px-3.5 text-xs text-stone-900 dark:text-stone-100 font-mono focus:border-blue-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -744,7 +744,7 @@ export default function AdminSettingsPage() {
         )}
 
         {/* Form Submit Footer */}
-        <div className="pt-4 border-t border-stone-100 dark:border-rose-900/30 flex justify-end">
+        <div className="pt-4 border-t border-stone-100 dark:border-stone-800/60 flex justify-end">
           <button
             type="submit"
             disabled={saving}
