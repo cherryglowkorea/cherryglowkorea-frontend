@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   TrendingUp,
   ShoppingBag,
@@ -27,49 +28,20 @@ import {
   Filter,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
 
-// Custom Tooltip Component for Recharts (Adapts to Light & Dark Theme)
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="rounded-xl border border-stone-200 dark:border-rose-500/20 bg-white/95 dark:bg-[#1A0F13]/95 p-3 shadow-xl backdrop-blur-md text-xs">
-        <p className="font-bold text-stone-900 dark:text-rose-300 mb-1">{label}</p>
-        {payload.map((entry, index) => (
-          <div key={`item-${index}`} className="flex items-center justify-between gap-4 py-0.5">
-            <span className="flex items-center gap-1.5 text-stone-600 dark:text-slate-300">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: entry.color || entry.fill }}
-              />
-              {entry.name}:
-            </span>
-            <span className="font-mono font-bold text-stone-900 dark:text-white">
-              {entry.name.toLowerCase().includes("revenue") || entry.name.toLowerCase().includes("sales")
-                ? `৳${Number(entry.value).toLocaleString()}`
-                : entry.value}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
+// Lazy-load heavy recharts components (reduces initial bundle by ~500KB)
+const SalesAreaChart = dynamic(
+  () => import("@/components/admin/DashboardCharts").then((mod) => mod.SalesAreaChart),
+  { ssr: false, loading: () => <div className="h-full w-full animate-pulse bg-stone-100 dark:bg-stone-900/50 rounded-xl" /> }
+);
+const OrderPieChart = dynamic(
+  () => import("@/components/admin/DashboardCharts").then((mod) => mod.OrderPieChart),
+  { ssr: false, loading: () => <div className="h-full w-full animate-pulse bg-stone-100 dark:bg-stone-900/50 rounded-xl" /> }
+);
+const ProductTypeBarChart = dynamic(
+  () => import("@/components/admin/DashboardCharts").then((mod) => mod.ProductTypeBarChart),
+  { ssr: false, loading: () => <div className="h-full w-full animate-pulse bg-stone-100 dark:bg-stone-900/50 rounded-xl" /> }
+);
 
 export default function DashboardOverviewPage() {
   const [loading, setLoading] = useState(true);
@@ -438,57 +410,7 @@ export default function DashboardOverviewPage() {
 
           {/* Recharts Area Chart Container */}
           <div className="h-[280px] w-full pt-2 [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none [&_*]:outline-none focus:outline-none">
-            {isMounted && (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={charts.salesOverview}
-                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#F43F5E" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#F43F5E" stopOpacity={0.0} />
-                    </linearGradient>
-                    <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#332A2E" strokeOpacity={0.5} vertical={false} />
-                  <XAxis
-                    dataKey="day"
-                    stroke="#78716C"
-                    tick={{ fill: "#A8A29E", fontSize: 11 }}
-                    axisLine={{ stroke: "#292524" }}
-                  />
-                  <YAxis
-                    stroke="#78716C"
-                    tick={{ fill: "#A8A29E", fontSize: 11 }}
-                    axisLine={{ stroke: "#292524" }}
-                    tickFormatter={(val) => `৳${val}`}
-                  />
-                  <Tooltip content={(props: any) => <CustomTooltip {...props} />} />
-                  <Area
-                    type="monotone"
-                    dataKey="revenue"
-                    name="Revenue"
-                    stroke="#F43F5E"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorRevenue)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="orders"
-                    name="Orders"
-                    stroke="#3B82F6"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorOrders)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
+            {isMounted && <SalesAreaChart data={charts.salesOverview} />}
           </div>
         </div>
 
@@ -504,26 +426,7 @@ export default function DashboardOverviewPage() {
 
           {/* Donut Chart */}
           <div className="h-[200px] w-full relative flex items-center justify-center [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none [&_*]:outline-none focus:outline-none">
-            {isMounted && (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={formattedOrderDistribution.length > 0 ? formattedOrderDistribution : [{ name: "No Orders", value: 1, color: "#94A3B8" }]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={80}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {formattedOrderDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#161113" strokeWidth={2} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={(props: any) => <CustomTooltip {...props} />} />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
+            {isMounted && <OrderPieChart data={formattedOrderDistribution} />}
             {/* Center Summary */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <span className="text-2xl font-black text-stone-900 dark:text-stone-100">{ord.total}</span>
@@ -559,21 +462,7 @@ export default function DashboardOverviewPage() {
           </div>
 
           <div className="h-[200px] w-full [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none [&_*]:outline-none focus:outline-none">
-            {isMounted && (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={productTypeData} margin={{ top: 20, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#332A2E" strokeOpacity={0.5} vertical={false} />
-                  <XAxis dataKey="name" stroke="#78716C" tick={{ fill: "#A8A29E", fontSize: 11 }} />
-                  <YAxis stroke="#78716C" tick={{ fill: "#A8A29E", fontSize: 11 }} />
-                  <Tooltip content={(props: any) => <CustomTooltip {...props} />} />
-                  <Bar dataKey="count" name="Products Count" radius={[8, 8, 0, 0]}>
-                    {productTypeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+            {isMounted && <ProductTypeBarChart data={productTypeData} />}
           </div>
         </div>
 

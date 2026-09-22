@@ -697,6 +697,23 @@ export default function ProductDetailsClient({
                   );
                 })}
               </div>
+
+              {/* Notice: 100ml not available */}
+              {(() => {
+                const has100ml = product.variants.some((v: any) => {
+                  const label = getVariantLabel(v).toLowerCase().replace(/\s/g, "");
+                  return label === "100ml" || label === "100g";
+                });
+                if (!has100ml) {
+                  return (
+                    <div className="mt-2.5 px-3.5 py-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/40 flex items-center gap-2 text-[11px] text-amber-700 dark:text-amber-300 font-semibold">
+                      <svg className="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+                      <span>100ml is not available for this product</span>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           )}
 
