@@ -182,11 +182,11 @@ export default function Navbar() {
         {/* Right Action Icons (Wishlist, Cart, Profile) */}
         <div className="flex items-center gap-2 sm:gap-3">
 
-          {/* Wishlist Button */}
+          {/* Wishlist Button (Desktop Only - on mobile it's in bottom nav) */}
           <Link
             href="/wishlist"
             title="Wishlist"
-            className="group relative flex h-10 items-center gap-1.5 px-3.5 rounded-full border border-stone-200/80 bg-stone-50/60 hover:bg-rose-50 hover:border-rose-200 text-stone-700 dark:border-white/10 dark:bg-white/5 dark:text-rose-100 dark:hover:bg-white/10 transition-all cursor-pointer"
+            className="hidden md:flex group relative h-10 items-center gap-1.5 px-3.5 rounded-full border border-stone-200/80 bg-stone-50/60 hover:bg-rose-50 hover:border-rose-200 text-stone-700 dark:border-white/10 dark:bg-white/5 dark:text-rose-100 dark:hover:bg-white/10 transition-all cursor-pointer"
           >
             <div className="relative flex items-center justify-center">
               <Heart size={18} className="text-rose-500 dark:text-rose-400 transition-transform group-hover:scale-110" />
@@ -199,8 +199,10 @@ export default function Navbar() {
             <span className="hidden lg:inline text-xs font-semibold">{tNav("wishlist")}</span>
           </Link>
 
-          {/* Cart Drawer */}
-          <Cart />
+          {/* Cart Drawer (Desktop Only - on mobile it's in bottom nav) */}
+          <div className="hidden md:block">
+            <Cart />
+          </div>
 
           {/* User Profile Avatar & Dropdown */}
           <div className="hidden md:block">
