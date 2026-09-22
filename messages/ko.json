@@ -1,4 +1,11 @@
 {
+  "bottomNav": {
+    "home": "홈",
+    "categories": "카테고리",
+    "cart": "장바구니",
+    "wishlist": "위시리스트",
+    "account": "계정"
+  },
   "nav": {
     "home": "홈",
     "products": "제품",

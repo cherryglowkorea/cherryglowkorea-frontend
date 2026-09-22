@@ -14,6 +14,7 @@ import {
 const languages = [
   { code: "bn", label: "বাংলা", name: "বাংলা" },
   { code: "en", label: "English", name: "English" },
+  { code: "ko", label: "한국어", name: "한국어" },
 ];
 
 export function LanguageSwitcher({ variant = "default" }) {

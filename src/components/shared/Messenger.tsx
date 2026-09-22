@@ -18,7 +18,7 @@ export default function Messenger() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with us on Messenger"
-      className="fixed bottom-6 right-4 sm:bottom-7 sm:right-6 z-40 flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center
+      className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] right-4 sm:bottom-7 sm:right-6 z-30 flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center
                  rounded-full bg-[#0084FF] shadow-lg shadow-blue-500/25
                  messenger-float
                  transition-transform hover:scale-105 active:scale-95"

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import ClientNavbar from "@/components/layout/ClientNavbar";
 import Footer from "@/components/layout/Footer";
 import Messenger from "@/components/shared/Messenger";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
@@ -29,13 +30,16 @@ export default async function LocaleLayout({ children, params }) {
       <AuthProvider>
         <WishlistProvider>
           <CartProvider>
-            <div lang={locale} className={locale === "bn" ? "font-bangla" : ""}>
-              <ClientNavbar />
-              <PromoPopup />
-              {children}
+            <div lang={locale} className={`${locale === "bn" ? "font-bangla" : ""} pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-0 min-h-screen flex flex-col justify-between`}>
+              <div className="flex-1 flex flex-col">
+                <ClientNavbar />
+                <PromoPopup />
+                {children}
+              </div>
               <Toaster richColors position="top-right" />
               <Messenger />
               <Footer />
+              <MobileBottomNav />
             </div>
           </CartProvider>
         </WishlistProvider>

@@ -1,4 +1,11 @@
 {
+  "bottomNav": {
+    "home": "Home",
+    "categories": "Categories",
+    "cart": "Cart",
+    "wishlist": "Wishlist",
+    "account": "Account"
+  },
   "topbar": {
     "authentic": "100% Authentic Korean Skincare",
     "cod": "Cash On Delivery Available",
