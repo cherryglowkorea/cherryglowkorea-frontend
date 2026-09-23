@@ -28,12 +28,36 @@ const nextConfig = {
         hostname: "res.cloudinary.com",
       },
       {
+        protocol: "http",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.cloudinary.com",
+      },
+      {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
       {
+        protocol: "http",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.unsplash.com",
+      },
+      {
         protocol: "https",
         hostname: "i.ibb.co",
+      },
+      {
+        protocol: "http",
+        hostname: "i.ibb.co",
+      },
+      {
+        protocol: "https",
+        hostname: "**.ibb.co",
       },
       {
         protocol: "https",

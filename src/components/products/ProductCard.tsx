@@ -4,17 +4,21 @@ import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag, Sparkles } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import AnimatedDiscountBorder from "../shared/AnimatedDiscountBorder";
 import { cleanProductName, getVariantLabel, formatPrice } from "@/lib/utils";
+import {
+  getProductDisplayImage,
+  DEFAULT_FALLBACK_IMAGE,
+} from "@/lib/imageUtils";
 
 export default function ProductCard({ product, onAddToCart = null, index = 0, viewMode = "grid", layout = "grid" }: any) {
   const tCard = useTranslations("productCard");
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { addToCart: contextAddToCart } = useCart();
-  const isWishlisted = isInWishlist(product._id || product.id);
+  const isWishlisted = isInWishlist(product?._id || product?.id);
 
   const {
     _id,
@@ -39,18 +43,25 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
 
   const productId = _id || id;
 
-  const displayImage = thumbnail || image || images?.[0]?.url || "/placeholder.jpg";
+  const displayImage = useMemo(
+    () => getProductDisplayImage(product, { width: 600, optimize: true }),
+    [product]
+  );
 
-  const optimizedImage =
-    displayImage && typeof displayImage === "string" && displayImage.includes("/upload/")
-      ? displayImage.replace("/upload/", "/upload/w_600,f_auto,q_auto:good/")
-      : displayImage || "/placeholder.jpg";
-
-  const [imgSrc, setImgSrc] = useState(optimizedImage);
+  const [imgSrc, setImgSrc] = useState(displayImage);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    setImgSrc(optimizedImage);
-  }, [optimizedImage]);
+    setImgSrc(displayImage);
+    setHasError(false);
+  }, [displayImage]);
+
+  const handleImageError = () => {
+    if (!hasError) {
+      setHasError(true);
+      setImgSrc(DEFAULT_FALLBACK_IMAGE);
+    }
+  };
 
   // 👉 Default variant (lowest price or first)
   const [selectedVariant, setSelectedVariant] = useState(variants[0] || null);
@@ -123,7 +134,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
       _id: productId,
       productId: productId,
       name,
-      image: thumbnail || image || images?.[0]?.url || "/placeholder.jpg",
+      image: getProductDisplayImage(product, { optimize: false }),
       variants,
       selectedVariant,
       price: finalPrice,
@@ -147,21 +158,19 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
         className={`flex flex-col sm:flex-row items-center gap-5 rounded-2xl p-4 border-2 transition-all duration-200 w-full group ${
           canPreOrder
             ? "bg-amber-500/5 dark:bg-amber-950/10 border-amber-500/70 dark:border-amber-500/60 hover:border-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]"
-            : "bg-white dark:bg-[#1e1215] border-stone-200/60 dark:border-white/10 hover:border-pink-500/80 dark:hover:border-pink-500/70 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)]"
+            : "bg-white dark:bg-[#1f1317] border-stone-200/80 dark:border-white/12 hover:border-pink-500/70 dark:hover:border-rose-500/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-lg"
         }`}
       >
         {/* Full-Bleed Image Container */}
-        <div className="relative w-full sm:w-48 h-44 shrink-0 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden">
+        <div className="relative w-full sm:w-48 h-44 shrink-0 bg-stone-50 dark:bg-[#25171d] border border-stone-100 dark:border-white/5 rounded-xl overflow-hidden">
           <Link href={`/products/${productId}`} className="block w-full h-full relative group/img cursor-pointer">
             <Image
-              src={imgSrc || "/placeholder.jpg"}
-              alt={name}
+              src={imgSrc || DEFAULT_FALLBACK_IMAGE}
+              alt={cleanProductName(name)}
               fill
               sizes="(max-width: 768px) 100vw, 220px"
               priority={index < 4}
-              onError={() => {
-                if (imgSrc !== "/placeholder.jpg") setImgSrc("/placeholder.jpg");
-              }}
+              onError={handleImageError}
               className="object-cover transition-transform duration-500 group-hover/img:scale-105"
             />
 
@@ -188,7 +197,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
               )}
 
               {hasDiscount && (
-                <span className="text-[10px] font-black text-white bg-red-600/90 backdrop-blur-md px-2 py-0.5 rounded-md shadow-xs">
+                <span className="text-[10px] font-black text-white bg-gradient-to-r from-red-600 to-rose-600 px-2 py-0.5 rounded-md shadow-sm">
                   -{calculatedDiscountPercent}% OFF
                 </span>
               )}
@@ -206,7 +215,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
             className={`absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
               isWishlisted
                 ? "bg-rose-50 dark:bg-rose-950/90 border-rose-200 dark:border-rose-900/50 text-rose-500"
-                : "bg-white/90 dark:bg-[#1e1215]/90 border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-rose-100 hover:text-rose-500"
+                : "bg-white/90 dark:bg-[#1f1317]/90 border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-rose-100 hover:text-rose-500"
             }`}
           >
             <Heart className={`w-4 h-4 transition ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
@@ -306,23 +315,22 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
   /* ---------------- GRID VIEW LAYOUT (FULL-BLEED BEAUTY CARDS) ---------------- */
   const CardContent = (
     <div
-      className={`flex h-full flex-col rounded-2xl p-2.5 sm:p-3.5 border-2 hover:-translate-y-0.5 transition-all duration-200 group ${
+      className={`flex h-full flex-col rounded-2xl p-2.5 sm:p-3.5 border-2 hover:-translate-y-1 transition-all duration-300 group ${
         canPreOrder
           ? "bg-amber-500/5 dark:bg-amber-950/10 border-amber-500/70 dark:border-amber-500/60 hover:border-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]"
-          : "bg-white dark:bg-[#1e1215] border-stone-200/60 dark:border-white/10 hover:border-pink-500/80 dark:hover:border-pink-500/70 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)]"
+          : "bg-white dark:bg-[#1f1317] border-stone-200/80 dark:border-white/12 hover:border-pink-500/70 dark:hover:border-rose-500/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-lg"
       }`}
     >
-      
       {/* Full-Bleed Image Banner */}
-      <div className="relative w-full h-36 sm:h-52 md:h-56 mb-2 sm:mb-3 bg-stone-100 dark:bg-stone-900/60 rounded-xl overflow-hidden group/img">
+      <div className="relative w-full h-36 sm:h-52 md:h-56 mb-2.5 sm:mb-3 bg-stone-50 dark:bg-[#25171d] border border-stone-100 dark:border-white/5 rounded-xl overflow-hidden group/img">
         <Link href={`/products/${productId}`} className="block w-full h-full relative cursor-pointer">
           <Image
-            src={imgSrc || "/placeholder.jpg"}
-            alt={name}
+            src={imgSrc || DEFAULT_FALLBACK_IMAGE}
+            alt={cleanProductName(name)}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={index < 4}
-            onError={() => setImgSrc("/placeholder.jpg")}
+            onError={handleImageError}
             className="object-cover transition-transform duration-500 group-hover/img:scale-105"
           />
 
@@ -349,7 +357,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
             )}
 
             {hasDiscount && (
-              <span className="text-[9px] sm:text-[10px] font-black text-white bg-red-600/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md shadow-xs">
+              <span className="text-[10px] sm:text-[11px] font-black text-white bg-gradient-to-r from-red-600 to-rose-600 px-2 py-0.5 rounded-md shadow-sm">
                 -{calculatedDiscountPercent}%
               </span>
             )}
@@ -357,18 +365,33 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
 
           {/* Combo Bundle Component Product Image Collage Stack */}
           {type === "combo" && product.comboProducts && product.comboProducts.length > 0 && (
-            <div className="absolute bottom-2 left-2 z-20 flex items-center bg-white/90 dark:bg-black/80 backdrop-blur-md px-2 py-1 rounded-full shadow-md border border-stone-200/80 dark:border-rose-900/50">
+            <div className="absolute bottom-2 left-2 z-20 flex items-center bg-white/95 dark:bg-[#1f1317]/95 backdrop-blur-md px-2.5 py-1 rounded-full shadow-md border border-stone-200/80 dark:border-rose-900/50">
               <div className="flex -space-x-2 overflow-hidden">
-                {product.comboProducts.slice(0, 3).map((cp: any, i: number) => (
-                  <img
-                    key={i}
-                    src={cp.image || "/placeholder.jpg"}
-                    alt={cp.name || "Item"}
-                    className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-rose-950 object-cover"
-                  />
-                ))}
+                {product.comboProducts.slice(0, 3).map((cp: any, i: number) => {
+                  const cpImg = getProductDisplayImage(cp, { width: 100 });
+                  const hasRealImg = cp.image || cp.thumbnail;
+                  return hasRealImg ? (
+                    <img
+                      key={i}
+                      src={cpImg}
+                      alt={cp.name || "Item"}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = DEFAULT_FALLBACK_IMAGE;
+                      }}
+                      className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-rose-950 object-cover"
+                    />
+                  ) : (
+                    <div
+                      key={i}
+                      title={cp.name}
+                      className="inline-flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white dark:ring-rose-950 bg-gradient-to-tr from-pink-500 to-rose-500 text-white text-[9px] font-extrabold shadow-2xs"
+                    >
+                      {cp.name ? cp.name.charAt(0).toUpperCase() : <Sparkles className="w-3 h-3" />}
+                    </div>
+                  );
+                })}
               </div>
-              <span className="ml-1.5 text-[9px] font-extrabold text-rose-600 dark:text-rose-400">
+              <span className="ml-1.5 text-[9px] sm:text-[10px] font-extrabold text-rose-600 dark:text-rose-400">
                 {tCard("comboItems", { count: product.comboProducts.length })}
               </span>
             </div>
@@ -386,7 +409,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
           className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-20 w-7 h-7 sm:w-8.5 sm:h-8.5 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-110 active:scale-95 cursor-pointer ${
             isWishlisted
               ? "bg-rose-50 dark:bg-rose-950/90 border-rose-200 dark:border-rose-900/50 text-rose-500"
-              : "bg-white/90 dark:bg-[#1e1215]/90 border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-rose-100 hover:text-rose-500"
+              : "bg-white/90 dark:bg-[#1f1317]/90 border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-rose-100 hover:text-rose-500"
           }`}
         >
           <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
@@ -397,7 +420,7 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
       <div className="flex flex-1 flex-col justify-between space-y-2.5">
         <div>
           <Link href={`/products/${productId}`} className="block">
-            <h3 className="font-semibold text-stone-900 dark:text-rose-50 text-xs sm:text-sm line-clamp-2 leading-snug hover:text-rose-600 dark:hover:text-rose-400 hover:underline transition cursor-pointer">
+            <h3 className="font-bold text-stone-900 dark:text-white text-xs sm:text-[13.5px] line-clamp-2 leading-[1.35] tracking-tight group-hover:text-rose-600 dark:group-hover:text-rose-400 transition cursor-pointer">
               {cleanProductName(name)}
             </h3>
           </Link>
@@ -437,14 +460,14 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
                 return (
                   <>
                     {formatted.originalText && (
-                      <span className="text-[10px] sm:text-xs line-through text-stone-400 dark:text-stone-500 font-mono">
+                      <span className="text-[11px] sm:text-xs line-through text-stone-400 dark:text-stone-400 font-mono">
                         {formatted.originalText}
                       </span>
                     )}
                     <span
-                      className={`text-xs sm:text-base font-black ${
+                      className={`text-sm sm:text-lg font-black tracking-tight ${
                         formatted.isFree
-                          ? "text-emerald-600 dark:text-emerald-400 tracking-wider uppercase"
+                          ? "text-emerald-600 dark:text-emerald-400 uppercase"
                           : "text-rose-600 dark:text-rose-400 font-mono"
                       }`}
                     >
@@ -481,15 +504,24 @@ export default function ProductCard({ product, onAddToCart = null, index = 0, vi
               <button
                 onClick={handleAddToCart}
                 disabled={!canAddToCart}
-                className={`w-1/2 rounded-xl py-1.5 sm:py-2 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shadow-2xs flex items-center justify-center truncate ${
+                className={`w-1/2 rounded-xl py-2 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shadow-sm flex items-center justify-center gap-1.5 truncate ${
                   inStock
-                    ? "bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
+                    ? "bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-700 text-white shadow-rose-500/20 active:scale-[0.98]"
                     : canPreOrder
-                    ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold"
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold active:scale-[0.98]"
                     : "bg-stone-200 dark:bg-white/10 text-stone-400 cursor-not-allowed"
                 }`}
               >
-                {inStock ? tCard("add") : canPreOrder ? tCard("preOrder") : tCard("out")}
+                {inStock ? (
+                  <>
+                    <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
+                    <span>{tCard("add")}</span>
+                  </>
+                ) : canPreOrder ? (
+                  <span>{tCard("preOrder")}</span>
+                ) : (
+                  <span>{tCard("out")}</span>
+                )}
               </button>
             </div>
 

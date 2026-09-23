@@ -115,11 +115,11 @@ export default function CategoriesSection({
                 <Link
                   key={cat.id || cat._id || index}
                   href={`/products?category=${encodeURIComponent(catName)}`}
-                  className="group flex flex-col items-center gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-white dark:bg-[#1e1215] border border-stone-200/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_20px_rgba(244,63,94,0.12)] hover:border-pink-500/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center shrink-0 w-[110px] sm:w-[130px]"
+                  className="group flex flex-col items-center gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-white dark:bg-[#1f1317] border border-stone-200/80 dark:border-white/12 shadow-[0_2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_24px_rgba(244,63,94,0.18)] hover:border-rose-500/60 hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center shrink-0 w-[115px] sm:w-[135px]"
                 >
                   {/* Category Image Avatar */}
-                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 overflow-hidden rounded-full p-0.5 bg-gradient-to-tr from-pink-500 to-rose-500 shadow-sm shrink-0">
-                    <div className="relative h-full w-full rounded-full overflow-hidden bg-stone-100 dark:bg-white/5">
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 overflow-hidden rounded-full p-0.5 bg-gradient-to-tr from-pink-500 via-rose-500 to-rose-600 shadow-sm shrink-0">
+                    <div className="relative h-full w-full rounded-full overflow-hidden bg-stone-50 dark:bg-[#25171d]">
                       <Image
                         src={catImg}
                         alt={catName}
@@ -131,8 +131,8 @@ export default function CategoriesSection({
                     </div>
                   </div>
 
-                  {/* Category Name */}
-                  <span className="text-[11px] sm:text-xs font-bold text-stone-800 dark:text-rose-100 group-hover:text-pink-600 transition truncate w-full px-0.5">
+                  {/* Category Name - Two-line wrap with comfortable line-height for 100% readability */}
+                  <span className="text-xs sm:text-[13px] font-bold text-stone-900 dark:text-rose-100 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition line-clamp-2 leading-tight w-full px-1 min-h-[32px] flex items-center justify-center">
                     {displayName}
                   </span>
                 </Link>

@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   ShieldCheck,
 } from "lucide-react";
+import { getProductDisplayImage, DEFAULT_FALLBACK_IMAGE } from "@/lib/imageUtils";
 
 export default function CampaignSection() {
   const locale = useLocale();
@@ -166,10 +167,10 @@ export default function CampaignSection() {
                       </span>
                     )}
 
-                    {/* Image Container */}
-                    <Link href={`/products/${p._id || p.id}`} className="block relative aspect-square rounded-xl overflow-hidden bg-stone-900/60">
+                    {/* Image Container with high contrast backdrop */}
+                    <Link href={`/products/${p._id || p.id}`} className="block relative aspect-square rounded-xl overflow-hidden bg-stone-50 dark:bg-[#25171d] border border-stone-100 dark:border-white/5">
                       <Image
-                        src={p.thumbnail || p.image || "/placeholder.png"}
+                        src={getProductDisplayImage(p, { width: 400 })}
                         alt={displayName}
                         fill
                         sizes="(max-width: 640px) 50vw, 250px"
@@ -206,7 +207,10 @@ export default function CampaignSection() {
 
                       {/* Instant Add To Cart CTA Button */}
                       <button
-                        onClick={() => addToCart(p)}
+                        onClick={() => addToCart({
+                          ...p,
+                          image: getProductDisplayImage(p, { optimize: false }),
+                        })}
                         className="w-full h-8 sm:h-9 mt-1 sm:mt-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold text-[11px] sm:text-xs shadow-sm transition active:scale-95 flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer"
                       >
                         <ShoppingBag size={13} />

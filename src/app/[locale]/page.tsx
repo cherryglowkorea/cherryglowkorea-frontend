@@ -27,27 +27,44 @@ async function getHomeData() {
     }
   };
 
-  const [featuredData, bestData, comboData, catData] = await Promise.all([
+  const [featuredData, comboData, catData] = await Promise.all([
     fetchWithISR(`${API_BASE}/products/featured?limit=8`),
-    fetchWithISR(`${API_BASE}/products/best?limit=12`),
     fetchWithISR(`${API_BASE}/combos`),
     fetchWithISR(`${API_BASE}/categories`),
   ]);
 
+  const featuredProducts = Array.isArray(featuredData?.data)
+    ? featuredData.data
+    : Array.isArray(featuredData)
+    ? featuredData
+    : [];
+
+  const featuredIds = new Set(featuredProducts.map((p: any) => p._id || p.id).filter(Boolean));
+
+  // Fetch best sellers excluding items already displayed in Featured Products
+  const excludeParam = Array.from(featuredIds).join(",");
+  const bestData = await fetchWithISR(
+    `${API_BASE}/products/best?limit=12${excludeParam ? `&exclude=${excludeParam}` : ""}`
+  );
+
   let bestProducts = bestData?.data || bestData || [];
-  if (!Array.isArray(bestProducts) || bestProducts.length < 6) {
-    const fallbackData = await fetchWithISR(`${API_BASE}/products/allProduct/public?limit=12`);
-    if (fallbackData?.products || Array.isArray(fallbackData)) {
-      bestProducts = fallbackData.products || fallbackData;
+  if (Array.isArray(bestProducts)) {
+    bestProducts = bestProducts.filter((p: any) => !featuredIds.has(p._id || p.id));
+  } else {
+    bestProducts = [];
+  }
+
+  if (bestProducts.length < 6) {
+    const fallbackData = await fetchWithISR(`${API_BASE}/products/allProduct/public?limit=16`);
+    const rawFallback = fallbackData?.products || fallbackData?.data || fallbackData || [];
+    if (Array.isArray(rawFallback)) {
+      const extra = rawFallback.filter((p: any) => !featuredIds.has(p._id || p.id));
+      bestProducts = Array.from(new Set([...bestProducts, ...extra])).slice(0, 12);
     }
   }
 
   return {
-    featuredProducts: Array.isArray(featuredData?.data)
-      ? featuredData.data
-      : Array.isArray(featuredData)
-      ? featuredData
-      : [],
+    featuredProducts,
     bestSoldProducts: Array.isArray(bestProducts) ? bestProducts : [],
     combos: Array.isArray(comboData) ? comboData : comboData?.data || [],
     categories: Array.isArray(catData) ? catData : catData?.data || [],

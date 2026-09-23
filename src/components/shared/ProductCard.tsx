@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,9 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Heart, ShoppingBag } from "lucide-react";
 import { getPriceInfo } from "@/lib/price";
+import { getProductDisplayImage, DEFAULT_FALLBACK_IMAGE } from "@/lib/imageUtils";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product }: { product: any }) {
   const router = useRouter();
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -17,14 +19,18 @@ export default function ProductCard({ product }) {
 
   const { name, images, variants, _id } = product;
 
-  // ✅ Safe image fallback
-  const image = product.image || product.thumbnail || images?.[0]?.url || "/placeholder.png";
+  // ✅ Safe, resilient image fallback
+  const resolvedImage = useMemo(
+    () => getProductDisplayImage(product, { width: 600, optimize: true }),
+    [product]
+  );
+  const [imageSrc, setImageSrc] = useState(resolvedImage);
 
   // ✅ Price
   const { original, final, hasDiscount } = getPriceInfo(product);
 
   // ✅ Stock calculation from variants
-  const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+  const totalStock = variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0;
 
   const inStock = totalStock > 0;
 
@@ -32,7 +38,7 @@ export default function ProductCard({ product }) {
     const productForCart = {
       _id,
       name,
-      image,
+      image: resolvedImage,
       variants,
     };
     addToCart(productForCart);
@@ -42,17 +48,18 @@ export default function ProductCard({ product }) {
     <div
       onClick={() => router.push(`/products/${_id}`)}
       className={cn(
-        "group relative overflow-hidden rounded-2xl cursor-pointer",
+        "group relative overflow-hidden rounded-2xl cursor-pointer bg-white dark:bg-[#1f1317] border border-stone-200/80 dark:border-white/10",
         "shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
       )}
     >
       {/* Image */}
-      <div className="relative h-[320px] w-full">
+      <div className="relative h-[320px] w-full bg-stone-50 dark:bg-[#25171d]">
         <Image
-          src={image}
+          src={imageSrc || DEFAULT_FALLBACK_IMAGE}
           alt={name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          onError={() => setImageSrc(DEFAULT_FALLBACK_IMAGE)}
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
 

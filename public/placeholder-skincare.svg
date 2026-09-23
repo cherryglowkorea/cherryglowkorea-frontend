@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5F7"/>
+      <stop offset="50%" stop-color="#FFEBF0"/>
+      <stop offset="100%" stop-color="#FFE0E6"/>
+    </linearGradient>
+
+    <!-- Glass Bottle Gradient -->
+    <linearGradient id="bottleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="35%" stop-color="#FFF0F3" stop-opacity="0.9"/>
+      <stop offset="70%" stop-color="#FCE4E8" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#FAD2DB" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Rose Gold / Cherry Accent Gradient -->
+    <linearGradient id="roseAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F43F5E"/>
+      <stop offset="50%" stop-color="#FB7185"/>
+      <stop offset="100%" stop-color="#FDA4AF"/>
+    </linearGradient>
+
+    <!-- Dropper Cap Metallic Gradient -->
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E2E8F0"/>
+      <stop offset="40%" stop-color="#FFFFFF"/>
+      <stop offset="70%" stop-color="#CBD5E1"/>
+      <stop offset="100%" stop-color="#94A3B8"/>
+    </linearGradient>
+
+    <!-- Soft Ambient Glow -->
+    <radialGradient id="ambientGlow" cx="50%" cy="42%" r="40%">
+      <stop offset="0%" stop-color="#FB7185" stop-opacity="0.25"/>
+      <stop offset="60%" stop-color="#FDA4AF" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#FDA4AF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#BE123C" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="600" height="600" fill="url(#bgGrad)"/>
+
+  <!-- Soft Ambient Glow Behind Bottle -->
+  <circle cx="300" cy="250" r="190" fill="url(#ambientGlow)"/>
+
+  <!-- Decorative Delicate Circles -->
+  <circle cx="300" cy="250" r="160" stroke="#FDA4AF" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="4 6"/>
+  <circle cx="300" cy="250" r="135" stroke="#F43F5E" stroke-opacity="0.2" stroke-width="1"/>
+
+  <!-- Blossom Sparkles -->
+  <g fill="#F43F5E" opacity="0.6">
+    <!-- Top-Right Sparkle -->
+    <path d="M420 160 C420 170, 426 176, 436 176 C426 176, 420 182, 420 192 C420 182, 414 176, 404 176 C414 176, 420 170, 420 160 Z"/>
+    <!-- Bottom-Left Small Sparkle -->
+    <path d="M185 300 C185 306, 189 310, 195 310 C189 310, 185 314, 185 320 C185 314, 181 310, 175 310 C181 310, 185 306, 185 300 Z" opacity="0.5"/>
+    <!-- Top-Left Mini Dot -->
+    <circle cx="210" cy="180" r="2.5" fill="#FB7185" opacity="0.5"/>
+    <circle cx="395" cy="310" r="3" fill="#FB7185" opacity="0.5"/>
+  </g>
+
+  <!-- Product Shadow Base -->
+  <ellipse cx="300" cy="385" rx="72" ry="14" fill="#9F1239" opacity="0.12"/>
+  <ellipse cx="300" cy="384" rx="55" ry="9" fill="#881337" opacity="0.08"/>
+
+  <!-- Skincare Serum Dropper Bottle Silhouette -->
+  <g filter="url(#softShadow)">
+    <!-- Main Bottle Body -->
+    <rect x="235" y="195" width="130" height="175" rx="26" fill="url(#bottleGrad)" stroke="#FFFFFF" stroke-width="2"/>
+
+    <!-- Inner Glass Highlight Reflection (Left Edge) -->
+    <path d="M246 220 C246 208, 252 205, 260 205 L260 355 C252 355, 246 350, 246 340 Z" fill="#FFFFFF" opacity="0.6"/>
+
+    <!-- Subtle Serum Level Liquid Fill Inside Bottle -->
+    <rect x="242" y="240" width="116" height="122" rx="18" fill="url(#roseAccent)" opacity="0.12"/>
+
+    <!-- Bottle Neck -->
+    <rect x="276" y="168" width="48" height="30" rx="3" fill="url(#capGrad)" stroke="#E2E8F0" stroke-width="1"/>
+
+    <!-- Metallic Collar Ring -->
+    <rect x="270" y="160" width="60" height="14" rx="4" fill="url(#capGrad)" stroke="#CBD5E1" stroke-width="1"/>
+
+    <!-- Dropper Pipette Rubber Top Bulb -->
+    <path d="M282 160 C282 135, 288 120, 300 120 C312 120, 318 135, 318 160 Z" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+
+    <!-- Dropper Bulb Top Round -->
+    <circle cx="300" cy="122" r="5" fill="#FCE7F3"/>
+
+    <!-- Elegant Label on Bottle -->
+    <rect x="254" y="250" width="92" height="75" rx="8" fill="#FFFFFF" fill-opacity="0.9" stroke="#FDA4AF" stroke-width="1"/>
+    
+    <!-- Mini Brand Emblem on Bottle Label -->
+    <circle cx="300" cy="272" r="9" fill="url(#roseAccent)"/>
+    <circle cx="300" cy="272" r="4" fill="#FFFFFF"/>
+    
+    <rect x="270" y="290" width="60" height="3" rx="1.5" fill="#F43F5E" opacity="0.7"/>
+    <rect x="278" y="297" width="44" height="2" rx="1" fill="#FDA4AF" opacity="0.7"/>
+    <rect x="283" y="303" width="34" height="2" rx="1" fill="#FDA4AF" opacity="0.5"/>
+  </g>
+
+  <!-- Typography & Brand Badging -->
+  <g text-anchor="middle" font-family="'Playfair Display', Georgia, serif">
+    <!-- Brand Title -->
+    <text x="300" y="445" font-size="21" font-weight="700" letter-spacing="3" fill="#1C1917">
+      CHERRY GLOW
+    </text>
+    <text x="300" y="472" font-size="14" font-weight="600" letter-spacing="4" fill="#E11D48" font-style="italic">
+      KOREA
+    </text>
+  </g>
+
+  <!-- Subtitle Tagline -->
+  <g text-anchor="middle" font-family="system-ui, -apple-system, sans-serif">
+    <text x="300" y="504" font-size="11" font-weight="600" letter-spacing="1.5" fill="#78716C">
+      AUTHENTIC K-BEAUTY
+    </text>
+
+    <!-- Subtle Verification Dot Badge -->
+    <circle cx="218" cy="501" r="2.5" fill="#F43F5E"/>
+    <circle cx="382" cy="501" r="2.5" fill="#F43F5E"/>
+  </g>
+</svg>

@@ -34,8 +34,13 @@ import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { trackViewContent } from "@/lib/metaPixel";
 import ProductCard from "@/components/products/ProductCard";
+import {
+  getProductDisplayImage,
+  isValidImageUrl,
+  DEFAULT_FALLBACK_IMAGE,
+} from "@/lib/imageUtils";
 
-const FALLBACK_IMAGE = "/placeholder.jpg";
+const FALLBACK_IMAGE = DEFAULT_FALLBACK_IMAGE;
 
 export default function ProductDetailsClient({
   initialProduct,
@@ -277,10 +282,17 @@ export default function ProductDetailsClient({
     const galleryUrls = product.gallery || [];
     const imageObjectUrls =
       product.images?.map((i: any) => (typeof i === "string" ? i : i?.url)).filter(Boolean) || [];
-    const all = [product.thumbnail, product.image, ...galleryUrls, ...imageObjectUrls].filter(
-      Boolean
+    const allRaw = [product.image, product.thumbnail, ...galleryUrls, ...imageObjectUrls].filter(
+      (u): u is string => typeof u === "string" && u.trim().length > 0
     );
-    return Array.from(new Set(all));
+    
+    // Prioritize genuine, non-placeholder images
+    const genuine = allRaw.filter((u) => isValidImageUrl(u));
+    if (genuine.length > 0) {
+      return Array.from(new Set(genuine));
+    }
+
+    return [DEFAULT_FALLBACK_IMAGE];
   }, [product]);
 
   /* ---------------- Default Image ---------------- */
@@ -538,15 +550,7 @@ export default function ProductDetailsClient({
               {/* Component Products Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {comboProducts.map((item: any, idx: number) => {
-                  const itemImg =
-                    item.image ||
-                    item.thumbnail ||
-                    (Array.isArray(item.images)
-                      ? typeof item.images[0] === "string"
-                        ? item.images[0]
-                        : item.images[0]?.url
-                      : null) ||
-                    "/placeholder.jpg";
+                  const itemImg = getProductDisplayImage(item, { width: 200 });
                   const itemPrice =
                     Number(item.price) ||
                     Number(item.salePrice) ||
@@ -564,9 +568,9 @@ export default function ProductDetailsClient({
                         src={itemImg}
                         alt={fullName}
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = "/placeholder.jpg";
+                          (e.target as HTMLImageElement).src = DEFAULT_FALLBACK_IMAGE;
                         }}
-                        className="w-14 h-14 object-cover rounded-xl border border-stone-200 dark:border-rose-900/40 shrink-0"
+                        className="w-14 h-14 object-cover rounded-xl border border-stone-200 dark:border-rose-900/40 shrink-0 bg-stone-50 dark:bg-[#25171d]"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">

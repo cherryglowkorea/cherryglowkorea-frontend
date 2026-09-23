@@ -117,7 +117,8 @@ export default function HeroSection() {
           </motion.div>
 
           {/* High-Contrast Gradient Overlay (Darker on left for 100% text readability) */}
-          <div className="absolute inset-0 bg-gradient-to-r from-stone-950/85 via-stone-950/60 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-950/95 via-stone-950/70 to-stone-950/20 sm:to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-black/30 pointer-events-none" />
 
           {/* Slide Text & Actions Content Container */}
           <div className="relative z-10 flex h-full items-center">
@@ -126,34 +127,34 @@ export default function HeroSection() {
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.15 }}
-                className="max-w-xl text-white space-y-4 sm:space-y-5"
+                className="max-w-xl text-white space-y-4 sm:space-y-6"
               >
                 {/* Badge */}
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-pink-300 bg-pink-500/20 border border-pink-400/30 backdrop-blur-md">
-                  <Sparkles className="w-3.5 h-3.5 text-pink-400" /> Authentic K-Beauty Korea
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider text-pink-200 bg-pink-500/25 border border-pink-400/40 backdrop-blur-md shadow-sm">
+                  <Sparkles className="w-3.5 h-3.5 text-pink-300" /> Authentic K-Beauty Korea
                 </span>
 
                 {/* Title */}
-                <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-extrabold leading-[1.15] drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] break-words text-white">
+                <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-extrabold leading-[1.12] tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] break-words text-white">
                   {currentSlide.title}
                 </h1>
 
                 {/* Description */}
                 {currentSlide.description && (
-                  <p className="text-xs sm:text-base md:text-lg text-stone-200 font-medium leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] max-w-md">
+                  <p className="text-sm sm:text-base md:text-lg text-stone-200/95 font-medium leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] max-w-lg">
                     {currentSlide.description}
                   </p>
                 )}
 
                 {/* Highly User-Friendly Brand Buttons (Full Rounded Pill Shape) */}
-                <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row gap-2.5 sm:gap-4">
+                <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <Button
                     size="lg"
                     asChild
-                    className="w-full sm:w-auto text-xs sm:text-sm md:text-base bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-600 text-white font-extrabold shadow-xl shadow-rose-500/25 hover:scale-105 transition-all h-10.5 sm:h-13 px-6 sm:px-8 rounded-full cursor-pointer flex items-center justify-center gap-2 border border-rose-300/30"
+                    className="w-full sm:w-auto text-sm sm:text-base bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-700 text-white font-black shadow-2xl shadow-rose-500/35 hover:scale-105 active:scale-95 transition-all h-11 sm:h-13 px-7 sm:px-9 rounded-full cursor-pointer flex items-center justify-center gap-2.5 border border-rose-300/40 ring-4 ring-rose-500/20"
                   >
                     <Link href={currentSlide.primaryBtnLink || "/products"}>
-                      <ShoppingBag className="w-4 h-4" />
+                      <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
                       <span>{currentSlide.primaryBtnText || currentSlide.primary || "Shop Now"}</span>
                     </Link>
                   </Button>
@@ -162,7 +163,7 @@ export default function HeroSection() {
                     size="lg"
                     variant="outline"
                     asChild
-                    className="w-full sm:w-auto text-xs sm:text-sm md:text-base bg-rose-950/40 hover:bg-rose-900/60 text-white border-2 border-rose-400/60 backdrop-blur-md font-extrabold shadow-lg hover:scale-105 transition-all h-10.5 sm:h-13 px-6 sm:px-8 rounded-full cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto text-sm sm:text-base bg-rose-950/50 hover:bg-rose-900/70 text-white border-2 border-rose-400/70 backdrop-blur-md font-bold shadow-lg hover:scale-105 active:scale-95 transition-all h-11 sm:h-13 px-6 sm:px-8 rounded-full cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Link href={currentSlide.secondaryBtnLink || "/about"}>
                       <span>{currentSlide.secondaryBtnText || currentSlide.secondary || "Explore"}</span>

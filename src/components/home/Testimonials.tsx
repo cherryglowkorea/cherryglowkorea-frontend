@@ -129,7 +129,7 @@ export default function Testimonials() {
 
               return (
                 <SwiperSlide key={item._id || idx} className="!h-auto flex flex-col">
-                  <div className="w-full h-full min-h-[240px] flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-[#201318] border border-stone-200/90 dark:border-rose-900/50 shadow-xs hover:shadow-md transition-all duration-300 relative group flex-1">
+                  <div className="w-full h-full min-h-[240px] flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-[#1f1317] border border-stone-200/80 dark:border-white/12 shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.25)] hover:shadow-md transition-all duration-300 relative group flex-1">
                     <Quote className="absolute top-5 right-5 h-7 w-7 text-rose-200/60 dark:text-rose-900/40 pointer-events-none group-hover:text-rose-400 transition-colors" />
 
                     <div className="space-y-3.5 flex-1 flex flex-col justify-start">
@@ -151,23 +151,23 @@ export default function Testimonials() {
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <h4 className="font-extrabold text-stone-900 dark:text-rose-50 text-xs sm:text-sm truncate">
+                            <h4 className="font-extrabold text-stone-900 dark:text-white text-xs sm:text-sm truncate">
                               {item.userName}
                             </h4>
                             <span title="Verified Customer" className="inline-flex items-center">
                               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                             </span>
                           </div>
-                          <p className="text-[10px] text-stone-400 dark:text-rose-200/50 font-medium truncate">
+                          <p className="text-[11px] text-stone-400 dark:text-rose-200/60 font-medium truncate">
                             {dateStr || tTest("verifiedBuyer")}{" "}
                             {item.productName ? `• ${item.productName}` : ""}
                           </p>
                         </div>
                       </div>
 
-                      {/* Comment */}
+                      {/* Comment with increased readability and line-height */}
                       <div className="flex-1 flex flex-col justify-start pt-1">
-                        <p className="text-xs text-stone-600 dark:text-rose-100/90 leading-relaxed font-sans line-clamp-3">
+                        <p className="text-[13px] sm:text-sm text-stone-700 dark:text-stone-200 leading-[1.65] font-sans line-clamp-4">
                           “{item.comment}”
                         </p>
                       </div>

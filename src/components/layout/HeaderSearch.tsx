@@ -13,6 +13,7 @@ import {
   TrendingUp,
   PackageCheck,
 } from "lucide-react";
+import { getProductDisplayImage, DEFAULT_FALLBACK_IMAGE } from "@/lib/imageUtils";
 
 const CATEGORIES_LIST = [
   "Cleanser",
@@ -245,8 +246,8 @@ export default function HeaderSearch({ isMobile = false, onCloseMobile }) {
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  {productResults.map((product) => {
-                    const img = product.thumbnail || product.image || product.images?.[0]?.url || "/placeholder.png";
+                  {productResults.map((product: any) => {
+                    const img = getProductDisplayImage(product, { width: 100 });
                     const price = product.salePrice || product.price || product.minPrice || 0;
 
                     return (
@@ -256,9 +257,16 @@ export default function HeaderSearch({ isMobile = false, onCloseMobile }) {
                         className="p-2 rounded-xl bg-stone-50/70 dark:bg-white/5 border border-stone-100 dark:border-white/5 flex items-center gap-3 hover:bg-rose-50/60 dark:hover:bg-rose-950/40 hover:border-rose-200 transition cursor-pointer group"
                       >
                         {/* Thumbnail */}
-                        <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-white border border-stone-200 shrink-0">
+                        <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-stone-50 dark:bg-[#25171d] border border-stone-200 dark:border-white/10 shrink-0">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          <img
+                            src={img}
+                            alt={product.name}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = DEFAULT_FALLBACK_IMAGE;
+                            }}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
                         </div>
 
                         {/* Text */}

@@ -12,6 +12,7 @@ import {
   TrendingUp,
   PackageCheck,
 } from "lucide-react";
+import { getProductDisplayImage, DEFAULT_FALLBACK_IMAGE } from "@/lib/imageUtils";
 
 const CATEGORIES_LIST = [
   "Cleanser",
@@ -266,8 +267,8 @@ export default function SearchModal({ isOpen, onClose }) {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {productResults.map((product) => {
-                    const img = product.thumbnail || product.image || product.images?.[0]?.url || "/placeholder.png";
+                  {productResults.map((product: any) => {
+                    const img = getProductDisplayImage(product, { width: 120 });
                     const price = product.salePrice || product.price || product.minPrice || 0;
 
                     return (
@@ -277,9 +278,16 @@ export default function SearchModal({ isOpen, onClose }) {
                         className="p-3 rounded-2xl bg-stone-50/80 dark:bg-white/5 border border-stone-200/80 dark:border-white/10 flex items-center gap-3.5 hover:bg-rose-50/70 dark:hover:bg-rose-950/40 hover:border-rose-300 transition cursor-pointer group shadow-2xs"
                       >
                         {/* Image Thumbnail */}
-                        <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-white border border-stone-200 shrink-0">
+                        <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-stone-50 dark:bg-[#25171d] border border-stone-200 dark:border-white/10 shrink-0">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          <img
+                            src={img}
+                            alt={product.name}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = DEFAULT_FALLBACK_IMAGE;
+                            }}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
                         </div>
 
                         {/* Title & Info */}

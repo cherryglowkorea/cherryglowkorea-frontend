@@ -159,23 +159,23 @@ export default function Footer() {
       {/* 2. Glow Club Newsletter Offer Section */}
       <div className="border-b border-stone-800/80 dark:border-white/10 py-10 bg-stone-900 dark:bg-[#140C0F]">
         <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 bg-gradient-to-br from-rose-500/15 via-pink-500/10 to-rose-400/15 dark:from-rose-950/50 dark:via-pink-950/40 dark:to-purple-950/40 p-6 sm:p-8 rounded-3xl border border-rose-300/30 dark:border-rose-800/30 shadow-lg relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 bg-gradient-to-br from-rose-950/40 via-[#1C0F14] to-[#140A0D] p-6 sm:p-9 rounded-3xl border border-rose-500/30 shadow-xl relative overflow-hidden">
             {/* Ambient Glow */}
             <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="space-y-1.5 text-center lg:text-left relative z-10">
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider text-rose-300 dark:text-pink-300 bg-rose-500/20 dark:bg-pink-500/20 border border-rose-400/30 dark:border-pink-500/30">
+            <div className="space-y-2 text-center lg:text-left relative z-10">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider text-rose-300 dark:text-pink-300 bg-rose-500/20 dark:bg-pink-500/20 border border-rose-400/30 dark:border-pink-500/30">
                 <Sparkles className="w-3.5 h-3.5 text-pink-300" /> {tNewsletter("exclusivePerks")}
               </span>
               <h3 className="text-xl sm:text-2xl font-serif font-bold text-white">
                 {tNewsletter("joinClubTitle")}
               </h3>
-              <p className="text-xs sm:text-sm text-stone-300 dark:text-rose-100/70 max-w-md font-medium">
+              <p className="text-xs sm:text-sm text-stone-200 dark:text-rose-100/80 max-w-md font-medium">
                 {tNewsletter("joinClubDesc")}
               </p>
             </div>
 
-            <form onSubmit={handleSubscribe} className="w-full lg:w-auto flex flex-col sm:flex-row gap-2.5 relative z-10">
+            <form onSubmit={handleSubscribe} className="w-full lg:w-auto flex flex-col sm:flex-row gap-3 relative z-10">
               <div className="relative w-full sm:w-80">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-400 pointer-events-none" />
                 <input
@@ -183,12 +183,12 @@ export default function Footer() {
                   placeholder={tNewsletter("placeholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-stone-950/80 dark:bg-[#1a0f13]/90 border border-stone-700/80 focus:border-rose-400 focus:ring-2 focus:ring-rose-500/30 text-xs sm:text-sm text-white placeholder-stone-400 rounded-2xl outline-none transition shadow-inner"
+                  className="w-full pl-11 pr-4 py-3.5 bg-stone-950/90 dark:bg-[#1a0f13] border border-stone-700/80 focus:border-rose-400 focus:ring-2 focus:ring-rose-500/30 text-xs sm:text-sm text-white placeholder-stone-400 rounded-2xl outline-none transition shadow-inner"
                 />
               </div>
               <button
                 type="submit"
-                className="px-6 py-3.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-rose-500/20 transition cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                className="px-7 py-3.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-xl shadow-rose-500/25 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 shrink-0 border border-rose-300/30"
               >
                 <Send className="w-3.5 h-3.5" /> {tNewsletter("subscribe")}
               </button>
@@ -210,7 +210,7 @@ export default function Footer() {
               </div>
             </Link>
 
-            <p className="text-xs leading-relaxed text-stone-400 dark:text-rose-100/70">
+            <p className="text-[13px] leading-relaxed text-stone-300 dark:text-rose-100/85">
               {tFooter("tagline")}
             </p>
 
@@ -221,7 +221,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook Page"
-                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-pink-500 text-stone-400 hover:text-white flex items-center justify-center border border-white/10 transition cursor-pointer"
+                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-pink-500 text-stone-300 hover:text-white flex items-center justify-center border border-white/10 transition cursor-pointer"
               >
                 <Facebook className="h-4 w-4" />
               </a>
@@ -229,7 +229,7 @@ export default function Footer() {
                 href="#"
                 target="_blank"
                 aria-label="Instagram Profile"
-                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-pink-500 text-stone-400 hover:text-white flex items-center justify-center border border-white/10 transition cursor-pointer"
+                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-pink-500 text-stone-300 hover:text-white flex items-center justify-center border border-white/10 transition cursor-pointer"
               >
                 <Instagram className="h-4 w-4" />
               </a>
@@ -238,10 +238,10 @@ export default function Footer() {
 
           {/* Col 2: Quick Links */}
           <div>
-            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-pink-400">
+            <h4 className="mb-4 text-[13px] font-bold uppercase tracking-wider text-rose-400 dark:text-rose-300">
               {tFooter("quickLinks")}
             </h4>
-            <ul className="space-y-2.5 text-xs text-stone-400 dark:text-rose-100/70">
+            <ul className="space-y-3 text-[13.5px] text-stone-300 dark:text-rose-100/90 font-medium">
               <li>
                 <Link href="/" className="transition-colors hover:text-pink-400 flex items-center gap-1.5">
                   <span className="text-pink-500 font-bold">•</span> {tNav("home")}
@@ -272,10 +272,10 @@ export default function Footer() {
 
           {/* Col 3: Support & Policies */}
           <div>
-            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-pink-400">
+            <h4 className="mb-4 text-[13px] font-bold uppercase tracking-wider text-rose-400 dark:text-rose-300">
               {tFooter("supportLegal")}
             </h4>
-            <ul className="space-y-2.5 text-xs text-stone-400 dark:text-rose-100/70">
+            <ul className="space-y-3 text-[13.5px] text-stone-300 dark:text-rose-100/90 font-medium">
               <li>
                 <Link href="/cart" className="transition-colors hover:text-pink-400">
                   {tFooter("cart")}
@@ -306,10 +306,10 @@ export default function Footer() {
 
           {/* Col 4: Contact & Hotline */}
           <div className="space-y-3">
-            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-pink-400">
+            <h4 className="mb-4 text-[13px] font-bold uppercase tracking-wider text-rose-400 dark:text-rose-300">
               {tFooter("contactHotline")}
             </h4>
-            <div className="space-y-2.5 text-xs text-stone-400 dark:text-rose-100/70">
+            <div className="space-y-3 text-[13.5px] text-stone-300 dark:text-rose-100/90 font-medium">
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-pink-400 shrink-0" />
                 <a href="tel:+8801234567890" className="hover:text-pink-400 font-semibold transition">

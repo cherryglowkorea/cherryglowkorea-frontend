@@ -16,6 +16,7 @@ import {
   Sparkles,
   Clock,
 } from "lucide-react";
+import { getProductDisplayImage, DEFAULT_FALLBACK_IMAGE } from "@/lib/imageUtils";
 
 const CATEGORIES_LIST = [
   "Cleanser",
@@ -302,8 +303,8 @@ export default function NavbarSearch({ isMobile = false }) {
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    {productResults.map((product) => {
-                      const img = product.thumbnail || product.image || product.images?.[0]?.url || "/placeholder.png";
+                    {productResults.map((product: any) => {
+                      const img = getProductDisplayImage(product, { width: 100 });
                       const price = product.salePrice || product.price || product.minPrice || 0;
 
                       return (
@@ -313,11 +314,14 @@ export default function NavbarSearch({ isMobile = false }) {
                           className="p-2.5 rounded-xl flex items-center gap-3 hover:bg-rose-50/70 dark:hover:bg-rose-950/30 transition-all cursor-pointer group"
                         >
                           {/* Thumbnail */}
-                          <div className="relative h-11 w-11 rounded-xl overflow-hidden bg-stone-100 dark:bg-white/5 border border-stone-200/80 dark:border-white/10 shrink-0">
+                          <div className="relative h-11 w-11 rounded-xl overflow-hidden bg-stone-50 dark:bg-[#25171d] border border-stone-200/80 dark:border-white/10 shrink-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={img}
                               alt={product.name}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = DEFAULT_FALLBACK_IMAGE;
+                              }}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             />
                           </div>

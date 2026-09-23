@@ -34,73 +34,73 @@ export default function BenefitsSection() {
       description: tWhy("dermaTestedDesc"),
       position: "top",
       icon: ShieldCheck,
-      originX: 340,
-      originY: 190,
-      targetX: 340,
-      targetY: 95,
+      originX: 380,
+      originY: 185,
+      targetX: 380,
+      targetY: 90,
     },
     {
       title: tWhy("naturalTitle"),
       description: tWhy("naturalDesc"),
       position: "right",
       icon: Leaf,
-      originX: 410,
-      originY: 260,
-      targetX: 460,
-      targetY: 260,
+      originX: 445,
+      originY: 245,
+      targetX: 510,
+      targetY: 245,
     },
     {
       title: tWhy("crueltyFreeTitle"),
       description: tWhy("crueltyFreeDesc"),
       position: "bottom",
       icon: Heart,
-      originX: 340,
-      originY: 330,
-      targetX: 340,
-      targetY: 425,
+      originX: 380,
+      originY: 305,
+      targetX: 380,
+      targetY: 400,
     },
     {
       title: tWhy("provenResultsTitle"),
       description: tWhy("provenResultsDesc"),
       position: "left",
       icon: CheckCircle2,
-      originX: 270,
-      originY: 260,
-      targetX: 220,
-      targetY: 260,
+      originX: 315,
+      originY: 245,
+      targetX: 250,
+      targetY: 245,
     },
   ];
 
   return (
-    <section className="relative py-20 overflow-hidden bg-gradient-to-b from-transparent via-rose-50/20 to-transparent dark:via-rose-950/20">
+    <section className="relative py-12 sm:py-16 overflow-hidden bg-gradient-to-b from-transparent via-rose-50/20 to-transparent dark:via-rose-950/20">
       {/* Background glow orb */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-200/20 blur-3xl dark:bg-rose-600/10" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[450px] w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-200/20 blur-3xl dark:bg-rose-600/10" />
 
       <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-xl mx-auto mb-12 sm:mb-16">
+        <div className="text-center max-w-xl mx-auto mb-8 sm:mb-10">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/80 text-xs font-semibold text-rose-600 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60 mb-3 shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/80 text-xs font-semibold text-rose-600 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60 mb-2.5 shadow-xs"
           >
             <Sparkles className="w-3.5 h-3.5 text-rose-500" />
             {tWhy("badge")}
           </motion.div>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">
             {tWhy("title")}{" "}
             <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent">
               {tWhy("brandName")}
             </span>
           </h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-rose-100/70">
+          <p className="mt-1.5 text-xs sm:text-sm text-slate-600 dark:text-rose-100/70">
             {tWhy("subtitle")}
           </p>
         </div>
 
         {/* Desktop Radial Layout */}
-        <div className="relative mx-auto hidden h-[520px] w-[680px] md:block">
+        <div className="relative mx-auto hidden h-[490px] w-[760px] md:block">
           {/* SVG Connector Lines */}
           <svg className="pointer-events-none absolute inset-0 h-full w-full">
             <defs>
@@ -204,10 +204,10 @@ export default function BenefitsSection() {
                 <motion.div
                   whileHover={{ y: -3, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                  className={`group relative flex w-56 cursor-pointer items-start gap-3.5 rounded-2xl border p-4 shadow-md backdrop-blur-xl transition-all duration-300 ${
+                  className={`group relative flex w-64 cursor-pointer items-start gap-3.5 rounded-2xl border p-4 shadow-sm backdrop-blur-xl transition-all duration-300 ${
                     isHovered
-                      ? "bg-white dark:bg-[#2a1a1f] border-rose-500/80 shadow-[0_10px_30px_-5px_rgba(244,63,94,0.25)] dark:border-rose-400/80"
-                      : "bg-white/95 dark:bg-[#24161a]/95 border-slate-200/90 dark:border-rose-900/50 hover:border-rose-400 dark:hover:border-rose-500/70"
+                      ? "bg-white dark:bg-[#25171d] border-rose-500/80 shadow-[0_10px_30px_-5px_rgba(244,63,94,0.25)] dark:border-rose-400/80"
+                      : "bg-white/95 dark:bg-[#1f1317]/95 border-slate-200/90 dark:border-white/12 hover:border-rose-400 dark:hover:border-rose-500/70"
                   }`}
                 >
                   <div className="flex-shrink-0">
@@ -216,10 +216,10 @@ export default function BenefitsSection() {
                     </div>
                   </div>
                   <div className="text-left">
-                    <h3 className="text-xs font-bold text-slate-800 transition-colors duration-300 group-hover:text-rose-600 dark:text-rose-50 dark:group-hover:text-rose-300">
+                    <h3 className="text-xs sm:text-[13px] font-bold text-slate-900 transition-colors duration-300 group-hover:text-rose-600 dark:text-white dark:group-hover:text-rose-300">
                       {reason.title}
                     </h3>
-                    <p className="mt-1 text-[11px] leading-relaxed text-slate-600 dark:text-rose-100/75">
+                    <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-rose-100/85">
                       {reason.description}
                     </p>
                   </div>
@@ -230,25 +230,25 @@ export default function BenefitsSection() {
         </div>
 
         {/* Mobile / Tablet Responsive Layout */}
-        <div className="mt-8 md:hidden">
+        <div className="mt-6 md:hidden">
           {/* Mobile Center Logo */}
-          <div className="relative mb-8 flex justify-center">
+          <div className="relative mb-6 flex justify-center">
             <div className="relative flex items-center justify-center">
               <div className="absolute -inset-2 rounded-full bg-rose-400/30 blur-md animate-pulse" />
-              <div className="relative z-10 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-rose-200 bg-white p-2.5 shadow-md dark:border-rose-500/40 dark:bg-[#221418]">
+              <div className="relative z-10 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-rose-200 bg-white p-2 shadow-md dark:border-rose-500/40 dark:bg-[#221418]">
                 <Image
                   src="/logo.png"
                   alt="Cherry Glow Logo"
-                  width={80}
-                  height={80}
-                  className="object-contain p-2"
+                  width={68}
+                  height={68}
+                  className="object-contain p-1.5"
                 />
               </div>
             </div>
           </div>
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {reasons.map((reason, index) => {
               const IconComp = reason.icon;
               return (
@@ -258,7 +258,7 @@ export default function BenefitsSection() {
                   whileInView={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="group flex items-start gap-3.5 rounded-2xl border border-slate-200/90 bg-white/95 p-4 shadow-sm backdrop-blur-xl transition-all duration-300 dark:border-rose-900/50 dark:bg-[#24161a]/95"
+                  className="group flex items-start gap-3.5 rounded-2xl border border-slate-200/90 bg-white/95 p-4 shadow-sm backdrop-blur-xl transition-all duration-300 dark:border-white/12 dark:bg-[#1f1317]"
                 >
                   <div className="flex-shrink-0">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50 text-rose-500 shadow-xs dark:border-rose-700/60 dark:bg-rose-950/80 dark:text-rose-300">
@@ -266,10 +266,10 @@ export default function BenefitsSection() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800 dark:text-rose-50">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                       {reason.title}
                     </h3>
-                    <p className="mt-0.5 text-xs text-slate-600 dark:text-rose-100/75">
+                    <p className="mt-0.5 text-xs text-slate-600 dark:text-rose-100/85 leading-relaxed">
                       {reason.description}
                     </p>
                   </div>
