@@ -53,7 +53,12 @@ export default function Navbar() {
         try {
           res = await axios.get(`${apiHost}/api/settings`);
         } catch {
-          res = await axios.get(`${apiHost}/settings`);
+          try {
+            res = await axios.get(`${apiHost}/settings`);
+          } catch {
+            // Backend offline or unreachable - gracefully use fallback default threshold
+            return;
+          }
         }
 
         const s = res?.data?.data || res?.data;
@@ -66,8 +71,8 @@ export default function Navbar() {
         if (threshold !== undefined && threshold !== null) {
           setFreeShippingThreshold(Number(threshold));
         }
-      } catch (err) {
-        console.error("Failed to load settings in Topbar:", err);
+      } catch {
+        // Fallback silently to default freeShippingThreshold
       }
     };
 

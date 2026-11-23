@@ -40,7 +40,11 @@ export default function Footer() {
         try {
           res = await axios.get(`${apiHost}/api/settings`);
         } catch {
-          res = await axios.get(`${apiHost}/settings`);
+          try {
+            res = await axios.get(`${apiHost}/settings`);
+          } catch {
+            return;
+          }
         }
 
         const s = res?.data?.data || res?.data;
