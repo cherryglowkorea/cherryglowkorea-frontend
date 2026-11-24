@@ -1,12 +1,47 @@
-import { Inter, Playfair_Display, Hind_Siliguri } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
-const hindSiliguri = Hind_Siliguri({
-  weight: ["300", "400", "500", "600", "700"],
-  subsets: ["bengali", "latin"],
+const inter = localFont({
+  src: "../fonts/inter-latin.woff2",
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const playfair = localFont({
+  src: "../fonts/playfair-latin.woff2",
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const hindSiliguri = localFont({
+  src: [
+    {
+      path: "../fonts/hind-siliguri-300-bengali.woff2",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../fonts/hind-siliguri-400-bengali.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/hind-siliguri-500-bengali.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../fonts/hind-siliguri-600-bengali.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../fonts/hind-siliguri-700-bengali.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-hind-siliguri",
   display: "swap",
 });

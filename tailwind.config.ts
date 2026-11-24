@@ -11,6 +11,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-inter)", "sans-serif"],
         serif: ["var(--font-playfair)", "serif"],
+        bangla: ["var(--font-hind-siliguri)", "sans-serif"],
       },
     },
   },
